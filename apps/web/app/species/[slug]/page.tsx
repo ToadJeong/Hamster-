@@ -42,12 +42,30 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
             )}
           </div>
           <div className="min-w-0">
-            <h1 className="font-display text-3xl font-bold text-cocoa-500 md:text-4xl">{s.name_ko}</h1>
+            <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl md:text-4xl">{s.name_ko}</h1>
             <p className="mt-1 text-cocoa-400">
               {s.name_en}
               {s.scientific_name && <span className="ml-2 italic">· {s.scientific_name}</span>}
             </p>
             <p className="mt-3 text-cocoa-500">{s.summary}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a
+                href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent('햄스터 ' + s.name_ko)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-sm"
+              >
+                📸 구글에서 사진 보기
+              </a>
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(s.name_ko + ' 햄스터 분양')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost text-sm"
+              >
+                🔍 정보 더 찾기
+              </a>
+            </div>
           </div>
         </div>
 

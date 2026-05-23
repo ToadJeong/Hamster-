@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { AnnouncementDeleteButton } from '@/components/AnnouncementDeleteButton';
 import type { Announcement } from '@hamster/shared';
 
 export const revalidate = 30;
@@ -61,8 +62,9 @@ export default async function AnnouncementsPage() {
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{a.body}</ReactMarkdown>
               </div>
               {isAdmin && (
-                <div className="mt-3 flex justify-end gap-2 border-t border-cream-100 pt-2 text-xs">
+                <div className="mt-3 flex justify-end gap-3 border-t border-cream-100 pt-2 text-xs">
                   <Link href={`/announcements/${a.id}/edit`} className="text-cocoa-400 hover:text-peach-500">수정</Link>
+                  <AnnouncementDeleteButton id={a.id} />
                 </div>
               )}
             </li>
