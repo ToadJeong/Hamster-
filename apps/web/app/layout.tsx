@@ -17,6 +17,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { data: { user } } = await supabase.auth.getUser();
 
   let profile = null;
+  let dmUnread = 0;
   if (user) {
     const { data } = await supabase
       .from('profiles')
@@ -24,6 +25,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .eq('id', user.id)
       .maybeSingle();
     profile = data;
+    const { data: cnt } = await supabase.rpc('dm_unread_count');
+    dmUnread = (cnt as number) ?? 0;
   }
 
   const settings = await getSiteSettings();
@@ -48,6 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           username={profile?.username ?? null}
           avatarUrl={profile?.avatar_url ?? null}
           isAdmin={!!profile?.is_admin}
+          dmUnread={dmUnread}
         />
         <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 md:px-6">
           {children}

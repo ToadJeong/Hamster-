@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { insertAnonymousGuide, validateAnonPassword } from '@/lib/anon-password';
+import { ImageUploader } from '@/components/ImageUploader';
 import type { Species } from '@hamster/shared';
 
 type Props = {
@@ -221,13 +222,24 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
         </select>
       </div>
 
-      <input
-        className="input"
-        type="url"
-        placeholder="커버 이미지 URL (선택)"
-        value={coverUrl}
-        onChange={(e) => setCoverUrl(e.target.value)}
-      />
+      {/* 회원이면 업로드, 익명이면 URL 입력 */}
+      {isAuthed ? (
+        <ImageUploader
+          bucket="guide-covers"
+          value={coverUrl || null}
+          onChange={(url) => setCoverUrl(url ?? '')}
+          label="커버 이미지 (선택)"
+          hint="JPG/PNG/WebP/GIF · 최대 5MB"
+        />
+      ) : (
+        <input
+          className="input"
+          type="url"
+          placeholder="커버 이미지 URL (선택, 이미지 업로드는 회원만 가능)"
+          value={coverUrl}
+          onChange={(e) => setCoverUrl(e.target.value)}
+        />
+      )}
 
       <div className="flex gap-1 rounded-full bg-cream-100 p-1 text-sm w-fit">
         <button

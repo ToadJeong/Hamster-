@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/format';
 import { CommunityActions } from '@/components/CommunityActions';
 import { CommunityCommentSection } from '@/components/CommunityCommentSection';
 import { CommunityAuthorActions } from '@/components/CommunityAuthorActions';
+import { ReportButton } from '@/components/ReportButton';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,6 @@ export default async function CommunityDetail({ params }: { params: { id: string
   const display = p.author_username ?? p.anonymous_nickname ?? '익명';
   const meta = COMMUNITY_CATEGORY_LABEL[p.category as CommunityCategory] ?? COMMUNITY_CATEGORY_LABEL.free;
 
-  // 좋아요/팔로우/댓글 병렬 조회
   const [likeRes, followRes, commentsRes] = await Promise.all([
     user
       ? supabase.from('community_likes').select('user_id').eq('post_id', p.id).eq('user_id', user.id).maybeSingle()
@@ -52,6 +52,11 @@ export default async function CommunityDetail({ params }: { params: { id: string
     <article className="mx-auto max-w-3xl space-y-6">
       <Link href="/community" className="text-sm text-cocoa-300 hover:text-peach-500">← 커뮤니티</Link>
 
+      {p.cover_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={p.cover_url} alt="" className="aspect-[16/9] w-full rounded-cute object-cover" />
+      )}
+
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="badge bg-cream-100 text-cocoa-500">{meta.emoji} {meta.label}</span>
@@ -71,7 +76,7 @@ export default async function CommunityDetail({ params }: { params: { id: string
             <span>{display}{!p.author_id && ' · 익명'}</span>
             <span className="text-xs text-cocoa-300">· {formatDate(p.created_at)}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {user && p.author_id && p.author_id !== user.id && (
               <CommunityActions
                 postId={p.id}
@@ -81,15 +86,13 @@ export default async function CommunityDetail({ params }: { params: { id: string
                 initialFollowing={following}
               />
             )}
-            {(isAuthor || isAnonymousPost) && (
-              <CommunityAuthorActions
-                postId={p.id}
-                canEdit={!!isAuthor}
-                isAnonymous={isAnonymousPost}
-              />
-            )}
+            {!isAuthor && <ReportButton targetType="community" targetId={p.id} />}
           </div>
         </div>
+
+        {(isAuthor || isAnonymousPost) && (
+          <CommunityAuthorActions postId={p.id} canEdit={!!isAuthor} isAnonymous={isAnonymousPost} />
+        )}
       </header>
 
       <div className="prose-soft whitespace-pre-line text-[15px]">{p.body}</div>

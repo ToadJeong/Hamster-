@@ -98,10 +98,37 @@
   96%           { transform: rotate(12deg); }
 }
 
-/* 눈 깜빡임 */
+/* 눈 깜빡임 (두 눈 동시) */
 @keyframes pet-blink {
-  0%, 90%, 100% { transform: scaleY(1); }
-  93%           { transform: scaleY(0.1); }
+  0%, 92%, 96%, 100% { transform: scaleY(1); }
+  94%                { transform: scaleY(0.1); }
+}
+
+/* 클릭 시 빙글 돌기 */
+@keyframes pet-spin {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(0.9); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* 클릭 시 옆구르기 */
+@keyframes pet-roll {
+  0%   { transform: rotate(0deg) translateX(0); }
+  100% { transform: rotate(360deg) translateX(0); }
+}
+
+/* 누워서 발 흔들기 */
+@keyframes pet-belly {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(80deg); }
+}
+
+/* 깜짝 놀라서 위로 점프 */
+@keyframes pet-startle {
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(-18px) rotate(8deg); }
+  60%  { transform: translateY(-12px) rotate(-6deg); }
+  100% { transform: translateY(0); }
 }
 
 /* 그루밍 — 앞발이 얼굴 쪽으로 올라옴 */
@@ -135,6 +162,10 @@
 .pet-walk            { animation: pet-body-walk 0.5s ease-in-out infinite; }
 .pet-breathe         { animation: pet-body-breathe 2.6s ease-in-out infinite; }
 .pet-hop             { animation: pet-body-hop 0.6s ease-out; }
+.pet-spin            { animation: pet-spin 0.8s ease-in-out; transform-origin: 50% 70%; }
+.pet-roll            { animation: pet-roll 0.7s ease-in-out; transform-origin: 50% 70%; }
+.pet-belly           { animation: pet-belly 1.4s ease-in-out forwards; transform-origin: 50% 90%; }
+.pet-startle         { animation: pet-startle 0.8s ease-out; }
 .pet-leg-left        { animation: pet-leg-l 0.5s ease-in-out infinite; transform-origin: 50% 0%; }
 .pet-leg-right       { animation: pet-leg-r 0.5s ease-in-out infinite; transform-origin: 50% 0%; }
 .pet-ear             { animation: pet-ear 4.5s ease-in-out infinite; transform-origin: 50% 100%; }

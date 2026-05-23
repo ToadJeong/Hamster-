@@ -16,7 +16,7 @@ export default async function EditAnnouncement({ params }: { params: { id: strin
 
   const { data: a } = await supabase
     .from('announcements')
-    .select('id, title, body, pinned')
+    .select('id, title, body, pinned, cover_url')
     .eq('id', params.id)
     .maybeSingle();
   if (!a) notFound();
@@ -30,6 +30,7 @@ export default async function EditAnnouncement({ params }: { params: { id: strin
           title: (a as any).title,
           body: (a as any).body,
           pinned: (a as any).pinned,
+          cover_url: (a as any).cover_url,
         }}
       />
     </div>
