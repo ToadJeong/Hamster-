@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { ImageUploader } from '@/components/ImageUploader';
 
 type Props = {
-  initial?: { id: string; title: string; body: string; pinned: boolean };
+  initial?: { id: string; title: string; body: string; pinned: boolean; cover_url?: string | null };
 };
 
 export function AnnouncementEditor({ initial }: Props) {
@@ -17,6 +18,7 @@ export function AnnouncementEditor({ initial }: Props) {
   const [title, setTitle] = useState(initial?.title ?? '');
   const [body, setBody] = useState(initial?.body ?? '');
   const [pinned, setPinned] = useState(initial?.pinned ?? false);
+  const [coverUrl, setCoverUrl] = useState<string | null>(initial?.cover_url ?? null);
   const [tab, setTab] = useState<'write' | 'preview'>('write');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function AnnouncementEditor({ initial }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('로그인이 필요해요.');
 
-      const payload = { title: title.trim(), body: body.trim(), pinned, created_by: user.id };
+      const payload = { title: title.trim(), body: body.trim(), pinned, cover_url: coverUrl, created_by: user.id };
 
       if (initial) {
         const { error } = await supabase.from('announcements').update(payload).eq('id', initial.id);
@@ -61,6 +63,14 @@ export function AnnouncementEditor({ initial }: Props) {
         <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
         📌 상단에 고정
       </label>
+
+      <ImageUploader
+        bucket="announcement-images"
+        value={coverUrl}
+        onChange={setCoverUrl}
+        label="대표 이미지 (선택)"
+        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+      />
 
       <div className="flex w-fit gap-1 rounded-full bg-cream-100 p-1 text-sm">
         <button type="button" onClick={() => setTab('write')}

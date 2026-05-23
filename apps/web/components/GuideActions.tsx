@@ -38,10 +38,18 @@ export function GuideActions({ guideId, isAnonymous, canEdit }: Props) {
   return (
     <div className="flex items-center gap-2">
       {canEdit && (
-        <Link href={`/guides/${guideId}/edit`} className="btn-ghost text-sm">수정</Link>
+        <Link
+          href={`/guides/${guideId}/edit`}
+          className="inline-flex items-center gap-1 rounded-full border border-cream-200 bg-white px-3 py-1.5 text-sm font-medium text-cocoa-500 shadow-softer hover:bg-cream-50"
+        >
+          ✏️ 수정
+        </Link>
       )}
-      <button onClick={handleDelete} className="btn-ghost text-sm text-red-400 hover:text-red-500">
-        삭제
+      <button
+        onClick={handleDelete}
+        className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-500 shadow-softer hover:bg-red-50"
+      >
+        🗑 삭제
       </button>
     </div>
   );

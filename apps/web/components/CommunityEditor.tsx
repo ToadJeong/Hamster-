@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { insertAnonymousCommunity } from '@/lib/anon-community';
+import { ImageUploader } from '@/components/ImageUploader';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 export function CommunityEditor({
@@ -17,6 +18,7 @@ export function CommunityEditor({
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<CommunityCategory>('free');
   const [tagsInput, setTagsInput] = useState('');
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -53,7 +55,10 @@ export function CommunityEditor({
         if (!user) throw new Error('로그인이 필요해요.');
         const { data, error } = await supabase
           .from('community_posts')
-          .insert({ author_id: user.id, title: title.trim(), body: body.trim(), category, tags: parsedTags })
+          .insert({
+            author_id: user.id, title: title.trim(), body: body.trim(),
+            category, tags: parsedTags, cover_url: coverUrl,
+          })
           .select('id').single();
         if (error) throw error;
         router.push(`/community/${(data as any).id}`);
@@ -86,6 +91,16 @@ export function CommunityEditor({
           ))}
         </select>
       </div>
+
+      {isAuthed && (
+        <ImageUploader
+          bucket="community-images"
+          value={coverUrl}
+          onChange={setCoverUrl}
+          label="대표 이미지 (선택)"
+          hint="JPG/PNG/WebP/GIF · 최대 5MB"
+        />
+      )}
 
       <textarea
         className="input min-h-[280px] text-[15px] leading-7"

@@ -5,8 +5,9 @@ import { GuideCard } from '@/components/GuideCard';
 import { HomeSearchBar } from '@/components/HomeSearchBar';
 import { formatDate } from '@/lib/format';
 import {
-  RESCUE_KIND_LABEL,
+  RESCUE_KIND_LABEL, COMMUNITY_CATEGORY_LABEL,
   type GuideWithCounts, type Species, type Announcement, type RescuePostWithAuthor,
+  type CommunityCategory,
 } from '@hamster/shared';
 
 export const revalidate = 30;
@@ -16,17 +17,19 @@ export default async function HomePage() {
   const settings = await getSiteSettings();
 
   // 병렬 조회 (테이블이 없는 경우 빈 배열로 처리)
-  const [speciesRes, guidesRes, announcementsRes, rescueRes] = await Promise.all([
+  const [speciesRes, guidesRes, announcementsRes, rescueRes, communityRes] = await Promise.all([
     supabase.from('species').select('id, slug, name_ko, summary, image_url').order('name_ko').limit(6),
     supabase.from('guides_with_counts').select('*').order('created_at', { ascending: false }).limit(4),
     supabase.from('announcements').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(3),
     supabase.from('rescue_posts_with_author').select('*').eq('status', 'open').order('created_at', { ascending: false }).limit(4),
+    supabase.from('community_posts_feed').select('*').order('created_at', { ascending: false }).limit(5),
   ]);
 
   const species = (speciesRes.data as Pick<Species,'id'|'slug'|'name_ko'|'summary'|'image_url'>[]) ?? [];
   const guides = (guidesRes.data as GuideWithCounts[]) ?? [];
   const announcements = (announcementsRes.data as Announcement[]) ?? [];
   const rescues = (rescueRes.data as RescuePostWithAuthor[]) ?? [];
+  const community = ((communityRes.data as any[]) ?? []);
 
   return (
     <div className="space-y-10">
@@ -115,6 +118,58 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+        )}
+      </section>
+
+      {/* 커뮤니티 최근 글 */}
+      <section>
+        <div className="mb-3 flex items-end justify-between">
+          <div>
+            <h2 className="font-display text-xl font-bold text-cocoa-500 sm:text-2xl">💬 커뮤니티</h2>
+            <p className="text-sm text-cocoa-300">햄집사들의 따끈한 글</p>
+          </div>
+          <Link href="/community" className="text-sm font-medium text-peach-500 hover:underline">전체 →</Link>
+        </div>
+        {community.length === 0 ? (
+          <div className="card text-center text-sm text-cocoa-300">아직 글이 없어요. 첫 글을 남겨보세요!</div>
+        ) : (
+          <ul className="space-y-2">
+            {community.map((p: any) => {
+              const display = p.author_username ?? p.anonymous_nickname ?? '익명';
+              const meta = COMMUNITY_CATEGORY_LABEL[p.category as CommunityCategory] ?? COMMUNITY_CATEGORY_LABEL.free;
+              return (
+                <li key={p.id}>
+                  <Link href={`/community/${p.id}`} className="card block transition hover:-translate-y-0.5 hover:shadow-soft">
+                    <div className="flex items-start gap-3">
+                      {p.cover_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.cover_url} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                      ) : (
+                        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-cream-100 text-2xl">
+                          {meta.emoji}
+                        </span>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                          <span className="badge bg-cream-100 text-cocoa-500">{meta.emoji} {meta.label}</span>
+                          {(p.tags as string[] ?? []).slice(0, 2).map((t) => (
+                            <span key={t} className="badge bg-lilac-50 text-lilac-400">#{t}</span>
+                          ))}
+                        </div>
+                        <h3 className="line-clamp-1 font-semibold text-cocoa-500">{p.title}</h3>
+                        <div className="mt-1 flex items-center gap-3 text-xs text-cocoa-300">
+                          <span>{display}{!p.author_id && ' · 익명'}</span>
+                          <span>{formatDate(p.created_at)}</span>
+                          <span>❤ {p.like_count ?? 0}</span>
+                          <span>💬 {p.comment_count ?? 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </section>
 

@@ -109,20 +109,26 @@ export default async function CommunityIndex({
             const meta = COMMUNITY_CATEGORY_LABEL[p.category as CommunityCategory] ?? COMMUNITY_CATEGORY_LABEL.free;
             return (
               <li key={p.id}>
-                <Link href={`/community/${p.id}`} className="card block transition hover:-translate-y-0.5 hover:shadow-soft">
-                  <div className="mb-1.5 flex items-center gap-1.5">
-                    <span className="badge bg-cream-100 text-cocoa-500">{meta.emoji} {meta.label}</span>
-                    {(p.tags as string[] ?? []).slice(0, 3).map((t) => (
-                      <span key={t} className="badge bg-lilac-50 text-lilac-400">#{t}</span>
-                    ))}
-                  </div>
-                  <h3 className="line-clamp-1 font-semibold text-cocoa-500">{p.title}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-cocoa-300">{p.body}</p>
-                  <div className="mt-1.5 flex items-center gap-3 text-xs text-cocoa-300">
-                    <span>{display}{!p.author_id && ' · 익명'}</span>
-                    <span>{formatDate(p.created_at)}</span>
-                    <span>❤ {p.like_count ?? 0}</span>
-                    <span>💬 {p.comment_count ?? 0}</span>
+                <Link href={`/community/${p.id}`} className="card flex gap-3 transition hover:-translate-y-0.5 hover:shadow-soft">
+                  {p.cover_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.cover_url} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                  ) : null}
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1.5 flex items-center gap-1.5">
+                      <span className="badge bg-cream-100 text-cocoa-500">{meta.emoji} {meta.label}</span>
+                      {(p.tags as string[] ?? []).slice(0, 3).map((t) => (
+                        <span key={t} className="badge bg-lilac-50 text-lilac-400">#{t}</span>
+                      ))}
+                    </div>
+                    <h3 className="line-clamp-1 font-semibold text-cocoa-500">{p.title}</h3>
+                    <p className="mt-1 line-clamp-2 text-sm text-cocoa-300">{p.body}</p>
+                    <div className="mt-1.5 flex items-center gap-3 text-xs text-cocoa-300">
+                      <span>{display}{!p.author_id && ' · 익명'}</span>
+                      <span>{formatDate(p.created_at)}</span>
+                      <span>❤ {p.like_count ?? 0}</span>
+                      <span>💬 {p.comment_count ?? 0}</span>
+                    </div>
                   </div>
                 </Link>
               </li>

@@ -11,7 +11,7 @@ export default async function EditCommunityPost({ params }: { params: { id: stri
 
   const { data: post } = await supabase
     .from('community_posts')
-    .select('id, author_id, title, body, category, tags')
+    .select('id, author_id, title, body, category, tags, cover_url')
     .eq('id', params.id)
     .maybeSingle();
 
@@ -30,6 +30,7 @@ export default async function EditCommunityPost({ params }: { params: { id: stri
           body: (post as any).body,
           category: (post as any).category,
           tags: (post as any).tags ?? [],
+          cover_url: (post as any).cover_url,
         }}
       />
     </div>

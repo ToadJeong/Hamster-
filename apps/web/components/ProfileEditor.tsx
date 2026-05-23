@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { ImageUploader } from '@/components/ImageUploader';
 import type { Profile } from '@hamster/shared';
 
 export function ProfileEditor({ profile }: { profile: Profile | null }) {
@@ -68,16 +69,13 @@ export function ProfileEditor({ profile }: { profile: Profile | null }) {
         />
       </label>
 
-      <label className="block">
-        <span className="text-sm text-cocoa-400">아바타 URL (선택)</span>
-        <input
-          className="input mt-1"
-          type="url"
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-          placeholder="https://..."
-        />
-      </label>
+      <ImageUploader
+        bucket="avatars"
+        value={avatarUrl || null}
+        onChange={(url) => setAvatarUrl(url ?? '')}
+        label="아바타 이미지 (선택)"
+        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+      />
 
       <label className="block">
         <span className="text-sm text-cocoa-400">소개</span>

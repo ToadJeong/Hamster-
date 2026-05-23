@@ -10,6 +10,7 @@ type Props = {
   username: string | null;
   avatarUrl: string | null;
   isAdmin: boolean;
+  dmUnread?: number;
 };
 
 const NAV: { href: string; label: string; emoji: string }[] = [
@@ -20,7 +21,7 @@ const NAV: { href: string; label: string; emoji: string }[] = [
   { href: '/announcements', label: '공지',     emoji: '📢' },
 ];
 
-export function Header({ user, username, avatarUrl, isAdmin }: Props) {
+export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const params = useSearchParams();
@@ -99,11 +100,16 @@ export function Header({ user, username, avatarUrl, isAdmin }: Props) {
           {user && (
             <Link
               href="/messages"
-              className="hidden shrink-0 rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
+              className="relative hidden shrink-0 rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
               aria-label="쪽지"
               title="쪽지"
             >
               ✉
+              {dmUnread > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {dmUnread > 9 ? '9+' : dmUnread}
+                </span>
+              )}
             </Link>
           )}
           {user ? (
@@ -188,7 +194,13 @@ export function Header({ user, username, avatarUrl, isAdmin }: Props) {
             </nav>
             {user && (
               <div className="flex flex-wrap gap-2">
-                <Link href="/messages" className="btn-secondary flex-1 text-sm">✉ 쪽지함</Link>
+                <Link href="/messages" className="btn-secondary flex-1 text-sm">
+                  ✉ 쪽지함{dmUnread > 0 && (
+                    <span className="ml-1 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] text-white">
+                      {dmUnread}
+                    </span>
+                  )}
+                </Link>
                 {isAdmin && (
                   <Link href="/admin" className="btn-secondary flex-1 text-sm">관리</Link>
                 )}

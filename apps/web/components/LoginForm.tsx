@@ -15,16 +15,35 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');  // 이메일 또는 아이디
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(errorMessage ?? null);
 
-  async function handleEmailLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    let emailToUse = identifier.trim();
+
+    // @가 없으면 아이디 → 이메일 조회
+    if (!emailToUse.includes('@')) {
+      const { data, error: rpcErr } = await supabase.rpc('get_email_by_username', {
+        p_username: emailToUse,
+      });
+      if (rpcErr || !data) {
+        setError('해당 아이디로 가입된 계정이 없어요.');
+        setLoading(false);
+        return;
+      }
+      emailToUse = data as string;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: emailToUse,
+      password,
+    });
     setLoading(false);
     if (error) {
       setError(translateAuthError(error.message));
@@ -47,17 +66,17 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleEmailLogin} className="card space-y-3">
+      <form onSubmit={handleLogin} className="card space-y-3">
         <label className="block">
-          <span className="text-sm text-cocoa-400">이메일</span>
+          <span className="text-sm text-cocoa-400">아이디 또는 이메일</span>
           <input
-            type="email"
+            type="text"
             className="input mt-1"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             required
-            autoComplete="email"
-            placeholder="hamster@example.com"
+            autoComplete="username"
+            placeholder="햄집사123  또는  hamster@example.com"
           />
         </label>
         <label className="block">
@@ -69,12 +88,11 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            minLength={6}
           />
         </label>
         {error && <p className="text-sm text-red-500">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={loading}>
-          {loading ? '로그인 중…' : '이메일로 로그인'}
+          {loading ? '로그인 중…' : '로그인'}
         </button>
       </form>
 
@@ -86,10 +104,7 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
           </div>
           <div className="space-y-2">
             {googleEnabled && (
-              <button
-                onClick={() => handleOAuth('google')}
-                className="btn-secondary w-full"
-              >
+              <button onClick={() => handleOAuth('google')} className="btn-secondary w-full">
                 <span>🇬</span> Google로 계속하기
               </button>
             )}
@@ -109,10 +124,10 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
 }
 
 function translateAuthError(message: string): string {
-  if (/invalid login credentials/i.test(message)) return '이메일 또는 비밀번호가 올바르지 않아요.';
+  if (/invalid login credentials/i.test(message)) return '아이디·이메일 또는 비밀번호가 올바르지 않아요.';
   if (/email not confirmed/i.test(message)) return '이메일 인증이 완료되지 않았어요. 메일함과 스팸함을 확인해 주세요.';
   if (/email rate limit|over_email_send_rate_limit/i.test(message)) {
-    return '메일 발송 한도에 도달했어요. 잠시 후 다시 시도하거나, 관리자에게 Custom SMTP 설정을 요청해 주세요.';
+    return '메일 발송 한도에 도달했어요. 잠시 후 다시 시도해 주세요.';
   }
   return message;
 }

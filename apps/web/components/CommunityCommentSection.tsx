@@ -92,6 +92,19 @@ export function CommunityCommentSection({
   }
 
   async function remove(c: Comment) {
+    if (!c.author_id) {
+      // 익명 댓글: 비번 입력 후 RPC 호출
+      const pw = prompt('익명 댓글 작성 시 입력한 비밀번호를 입력해 주세요');
+      if (!pw) return;
+      const { data, error } = await supabase.rpc('delete_anonymous_community_comment', {
+        p_id: c.id,
+        p_password: pw,
+      });
+      if (error || !data) { alert('비밀번호가 일치하지 않아요.'); return; }
+      setComments((prev) => prev.filter((x) => x.id !== c.id));
+      router.refresh();
+      return;
+    }
     if (!confirm('댓글을 삭제할까요?')) return;
     const { error } = await supabase.from('community_comments').delete().eq('id', c.id);
     if (!error) {
@@ -130,8 +143,10 @@ export function CommunityCommentSection({
                     <p className="mt-1 whitespace-pre-line text-cocoa-500">{c.body}</p>
                   </div>
                 </div>
-                {canRemove && (
-                  <button onClick={() => remove(c)} className="text-xs text-cocoa-300 hover:text-red-400">삭제</button>
+                {(canRemove || !c.author_id) && (
+                  <button onClick={() => remove(c)} className="text-xs text-cocoa-300 hover:text-red-400">
+                    삭제{!c.author_id ? '(비번)' : ''}
+                  </button>
                 )}
               </div>
             </li>

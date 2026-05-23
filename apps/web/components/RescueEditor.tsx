@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { ImageUploader } from '@/components/ImageUploader';
 import { RESCUE_KIND_LABEL, type RescueKind, type Species } from '@hamster/shared';
 
 type Props = {
@@ -118,7 +119,13 @@ export function RescueEditor({ species, initial }: Props) {
         <input className="input" type="number" min={0} max={48} placeholder="추정 나이(개월)" value={ageMonths} onChange={(e) => setAgeMonths(e.target.value)} />
       </div>
 
-      <input className="input" type="url" placeholder="사진 URL (선택)" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} />
+      <ImageUploader
+        bucket="rescue-images"
+        value={coverUrl || null}
+        onChange={(url) => setCoverUrl(url ?? '')}
+        label="햄찌 사진 (선택)"
+        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+      />
 
       <input
         className="input"

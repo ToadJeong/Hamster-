@@ -19,8 +19,11 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  // 실시간 구독
+  // 실시간 구독 + 진입 시 읽음 처리
   useEffect(() => {
+    // 진입 즉시 메시지 일괄 읽음 처리
+    void supabase.rpc('mark_dm_read', { p_thread_id: threadId });
+
     const ch = supabase
       .channel(`dm:${threadId}`)
       .on('postgres_changes',
@@ -28,10 +31,14 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
           (payload) => {
             const m = payload.new as DMMessage;
             setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+            // 내 메시지가 아니면 즉시 읽음 처리
+            if (m.sender_id !== meId) {
+              void supabase.rpc('mark_dm_read', { p_thread_id: threadId });
+            }
           })
       .subscribe();
     return () => { ch.unsubscribe(); };
-  }, [supabase, threadId]);
+  }, [supabase, threadId, meId]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { ImageUploader } from '@/components/ImageUploader';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
     body: string;
     category: CommunityCategory;
     tags: string[];
+    cover_url?: string | null;
   };
 };
 
@@ -23,6 +25,7 @@ export function CommunityEditPanel({ initial }: Props) {
   const [body, setBody] = useState(initial.body);
   const [category, setCategory] = useState<CommunityCategory>(initial.category);
   const [tagsInput, setTagsInput] = useState(initial.tags.join(' '));
+  const [coverUrl, setCoverUrl] = useState<string | null>(initial.cover_url ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +43,7 @@ export function CommunityEditPanel({ initial }: Props) {
         body: body.trim(),
         category,
         tags: parsedTags,
+        cover_url: coverUrl,
       })
       .eq('id', initial.id);
     setSaving(false);
@@ -58,6 +62,15 @@ export function CommunityEditPanel({ initial }: Props) {
           ))}
         </select>
       </div>
+
+      <ImageUploader
+        bucket="community-images"
+        value={coverUrl}
+        onChange={setCoverUrl}
+        label="대표 이미지 (선택)"
+        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+      />
+
       <textarea className="input min-h-[280px] text-[15px] leading-7" value={body} onChange={(e) => setBody(e.target.value)} required />
       <div>
         <input className="input" placeholder="태그 (쉼표·공백·# 구분, 최대 8개)" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />

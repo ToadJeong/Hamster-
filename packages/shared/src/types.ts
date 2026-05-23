@@ -101,7 +101,8 @@ export type ChatMessage = {
 };
 
 export type PetHamsterKind =
-  | 'golden' | 'winterwhite' | 'roborovski' | 'campbell' | 'chinese';
+  | 'golden' | 'black-bear' | 'banded' | 'teddy' | 'albino'
+  | 'winterwhite' | 'pearl' | 'roborovski' | 'campbell' | 'chinese';
 
 export type PetHamster = {
   id: string;
