@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useModal } from '@/components/Modal';
 import { formatDate } from '@/lib/format';
 
 type Comment = {
@@ -27,6 +28,7 @@ export function CommunityCommentSection({
 }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const modal = useModal();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [body, setBody] = useState('');
   const [nickname, setNickname] = useState('');
@@ -94,18 +96,24 @@ export function CommunityCommentSection({
   async function remove(c: Comment) {
     if (!c.author_id) {
       // 익명 댓글: 비번 입력 후 RPC 호출
-      const pw = prompt('익명 댓글 작성 시 입력한 비밀번호를 입력해 주세요');
+      const pw = await modal.prompt({
+        title: '익명 댓글 삭제',
+        message: '작성하실 때 입력한 비밀번호를 입력해 주세요.',
+        inputType: 'password',
+        confirmText: '삭제하기',
+      });
       if (!pw) return;
       const { data, error } = await supabase.rpc('delete_anonymous_community_comment', {
         p_id: c.id,
         p_password: pw,
       });
-      if (error || !data) { alert('비밀번호가 일치하지 않아요.'); return; }
+      if (error || !data) { await modal.alert({ title: '비밀번호가 일치하지 않아요', tone: 'error' }); return; }
       setComments((prev) => prev.filter((x) => x.id !== c.id));
       router.refresh();
       return;
     }
-    if (!confirm('댓글을 삭제할까요?')) return;
+    const ok = await modal.confirm({ title: '댓글을 삭제할까요?', confirmText: '삭제하기' });
+    if (!ok) return;
     const { error } = await supabase.from('community_comments').delete().eq('id', c.id);
     if (!error) {
       setComments((prev) => prev.filter((x) => x.id !== c.id));

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useModal } from '@/components/Modal';
 import { formatDate } from '@/lib/format';
 import type { DMMessage } from '@hamster/shared';
 
@@ -14,6 +15,7 @@ type Props = {
 
 export function DMConversation({ threadId, meId, other, initialMessages }: Props) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const modal = useModal();
   const [messages, setMessages] = useState<DMMessage[]>(initialMessages);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -54,7 +56,7 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
       .select('*')
       .single();
     setSending(false);
-    if (error) { alert('전송 실패: ' + error.message); return; }
+    if (error) { await modal.alert({ title: '전송 실패', message: error.message, tone: 'error' }); return; }
     setMessages((prev) => [...prev, data as DMMessage]);
     setDraft('');
   }

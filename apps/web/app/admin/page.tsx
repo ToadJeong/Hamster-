@@ -41,9 +41,17 @@ export default async function AdminPage() {
       <AdminSettingsForm initial={settings} />
 
       <div className="grid gap-3 md:grid-cols-2">
+        <Link href="/admin/reports" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
+          <h3 className="font-semibold text-cocoa-500">🚨 글 신고 처리</h3>
+          <p className="mt-1 text-sm text-cocoa-300">신고된 게시글·댓글을 확인하고 처리해요.</p>
+        </Link>
+        <Link href="/admin/corrections" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
+          <h3 className="font-semibold text-cocoa-500">🛠 정보 제보 처리</h3>
+          <p className="mt-1 text-sm text-cocoa-300">도감·가이드 정보 수정 제보를 검토해요.</p>
+        </Link>
         <Link href="/admin/chat-reports" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
           <h3 className="font-semibold text-cocoa-500">💬 채팅 신고 처리</h3>
-          <p className="mt-1 text-sm text-cocoa-300">사용자가 신고한 채팅 메시지를 검토하고 삭제 처리해요.</p>
+          <p className="mt-1 text-sm text-cocoa-300">신고된 채팅 메시지를 검토하고 삭제 처리해요.</p>
         </Link>
         <Link href="/admin/banned-words" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
           <h3 className="font-semibold text-cocoa-500">🚫 채팅 금지어</h3>

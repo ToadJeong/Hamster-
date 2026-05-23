@@ -18,7 +18,7 @@ export function HomeSearchBar() {
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="햄스터 종, 가이드, 작성자 검색"
+        placeholder="우리 햄찌가 어떤 종일까요? 키워드로 검색해 보세요"
         className="flex-1 bg-transparent px-4 py-2 outline-none placeholder:text-cocoa-300"
       />
       <button type="submit" className="btn-primary px-5 py-2">검색</button>

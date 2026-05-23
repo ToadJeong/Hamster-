@@ -7,6 +7,7 @@ import { CommunityActions } from '@/components/CommunityActions';
 import { CommunityCommentSection } from '@/components/CommunityCommentSection';
 import { CommunityAuthorActions } from '@/components/CommunityAuthorActions';
 import { ReportButton } from '@/components/ReportButton';
+import { ViewTracker } from '@/components/ViewTracker';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -75,6 +76,8 @@ export default async function CommunityDetail({ params }: { params: { id: string
             )}
             <span>{display}{!p.author_id && ' · 익명'}</span>
             <span className="text-xs text-cocoa-300">· {formatDate(p.created_at)}</span>
+            <span className="text-xs text-cocoa-300">·</span>
+            <ViewTracker type="community" id={p.id} initialCount={p.view_count ?? 0} showCount />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {user && p.author_id && p.author_id !== user.id && (

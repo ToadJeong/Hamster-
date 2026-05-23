@@ -17,6 +17,7 @@ import {
 } from '@hamster/shared';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { findBannedWords, maskBannedWords } from '@/lib/chat-filter';
+import { useModal } from '@/components/Modal';
 import { useRouter } from 'next/navigation';
 
 const NICKNAME_KEY = 'hamster.chat.nickname';   // localStorage (영구)
@@ -34,6 +35,7 @@ export function LiveChat({ enabled, currentUser }: Props) {
 
 function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
   const router = useRouter();
+  const modal = useModal();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -170,18 +172,23 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
   }
 
   async function report(m: ChatMessage) {
-    if (!confirm('이 메시지를 신고할까요? 운영자에게 전달됩니다.')) return;
-    const reason = prompt('신고 사유를 한 줄로 적어주세요 (선택)');
+    const reason = await modal.prompt({
+      title: '이 메시지를 신고할까요?',
+      message: '신고 사유를 적어주세요. 운영자에게 전달됩니다.',
+      placeholder: '예: 욕설, 광고',
+      confirmText: '신고하기',
+    });
+    if (reason === null) return;
     const { error } = await supabase.from('chat_reports').insert({
       reporter_id: currentUser?.id ?? null,
       reporter_label: currentUser?.username ?? (nickname || null),
       target_label: m.sender_label,
       target_session: m.sender_session,
       message_body: m.body,
-      reason: reason || null,
+      reason: reason.trim() || null,
     });
-    if (error) alert('신고 등록 실패: ' + error.message);
-    else alert('신고가 접수되었어요.');
+    if (error) await modal.alert({ title: '신고 등록 실패', message: error.message, tone: 'error' });
+    else await modal.alert({ title: '신고가 접수됐어요', tone: 'success' });
   }
 
   async function startDM(m: ChatMessage) {
@@ -190,11 +197,11 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
       return;
     }
     if (!m.sender_id) {
-      alert('비회원에게는 쪽지를 보낼 수 없어요.');
+      await modal.alert({ title: '비회원에게는 쪽지를 보낼 수 없어요', tone: 'info' });
       return;
     }
     const { data, error } = await supabase.rpc('open_dm_thread', { p_other: m.sender_id });
-    if (error || !data) { alert('대화방을 열 수 없어요: ' + error?.message); return; }
+    if (error || !data) { await modal.alert({ title: '대화방을 열 수 없어요', message: error?.message, tone: 'error' }); return; }
     router.push(`/messages/${data}`);
   }
 

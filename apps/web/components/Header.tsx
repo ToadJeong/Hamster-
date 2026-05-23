@@ -11,17 +11,21 @@ type Props = {
   avatarUrl: string | null;
   isAdmin: boolean;
   dmUnread?: number;
+  notifUnread?: number;
 };
 
+// 사용자가 요청한 메뉴 순서: 공지 → 도감 → 가이드 → 커뮤니티 → 구조대
 const NAV: { href: string; label: string; emoji: string }[] = [
-  { href: '/species',    label: '도감',         emoji: '🐹' },
-  { href: '/guides',     label: '가이드',       emoji: '📖' },
-  { href: '/community',  label: '커뮤니티',     emoji: '💬' },
-  { href: '/rescue',     label: '구조대',       emoji: '🆘' },
-  { href: '/announcements', label: '공지',     emoji: '📢' },
+  { href: '/announcements', label: '공지',   emoji: '📢' },
+  { href: '/species',       label: '도감',   emoji: '🐹' },
+  { href: '/guides',        label: '가이드', emoji: '📖' },
+  { href: '/community',     label: '커뮤니티', emoji: '💬' },
+  { href: '/rescue',        label: '구조대', emoji: '🆘' },
 ];
 
-export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Props) {
+export function Header({
+  user, username, avatarUrl, isAdmin, dmUnread = 0, notifUnread = 0,
+}: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const params = useSearchParams();
@@ -30,7 +34,6 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
   const [q, setQ] = useState(pathname.startsWith('/search') ? params.get('q') ?? '' : '');
   const [open, setOpen] = useState(false);
 
-  // 라우트 변경 시 모바일 메뉴 닫기
   useEffect(() => { setOpen(false); }, [pathname]);
 
   async function handleLogout() {
@@ -46,15 +49,14 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-cream-200 bg-[var(--bg)]/85 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-cream-200 bg-[var(--bg)]/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl items-center gap-2 px-3 py-2.5 md:gap-3 md:px-6 md:py-3">
-        {/* 로고 */}
         <Link href="/" className="flex shrink-0 items-center gap-1.5">
           <span aria-hidden className="text-2xl">🐹</span>
-          <span className="font-display text-lg font-bold text-cocoa-500 md:text-xl">햄랜드</span>
+          <span className="font-display text-lg font-extrabold text-cocoa-500 md:text-xl">햄랜드</span>
         </Link>
 
-        {/* 데스크톱 네비 */}
+        {/* 데스크톱 네비 — 볼드체 + 더 큰 글씨 */}
         <nav className="hidden flex-1 items-center gap-0.5 lg:flex">
           {NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -63,8 +65,8 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
                 key={item.href}
                 href={item.href}
                 className={
-                  'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition ' +
-                  (active ? 'bg-peach-100 text-peach-500' : 'text-cocoa-400 hover:bg-cream-100')
+                  'whitespace-nowrap rounded-full px-3.5 py-1.5 text-[15px] font-bold transition ' +
+                  (active ? 'bg-peach-100 text-peach-500' : 'text-cocoa-500 hover:bg-cream-100')
                 }
               >
                 {item.label}
@@ -73,13 +75,13 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
           })}
         </nav>
 
-        {/* 데스크톱 검색 */}
+        {/* 데스크톱 통합검색 */}
         <form onSubmit={submitSearch} className="ml-auto hidden flex-1 max-w-xs lg:block">
           <input
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="🔍 검색"
+            placeholder="🔍 통합검색"
             className="input py-1.5 text-sm"
           />
         </form>
@@ -90,7 +92,7 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
             <Link
               href="/admin"
               className={
-                'hidden whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-medium transition md:inline-flex ' +
+                'hidden whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-bold transition md:inline-flex ' +
                 (pathname.startsWith('/admin') ? 'bg-lilac-200 text-lilac-400' : 'text-lilac-400 hover:bg-lilac-50')
               }
             >
@@ -99,9 +101,22 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
           )}
           {user && (
             <Link
+              href="/notifications"
+              className="relative hidden shrink-0 rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
+              title="알림"
+            >
+              🔔
+              {notifUnread > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {notifUnread > 9 ? '9+' : notifUnread}
+                </span>
+              )}
+            </Link>
+          )}
+          {user && (
+            <Link
               href="/messages"
               className="relative hidden shrink-0 rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
-              aria-label="쪽지"
               title="쪽지"
             >
               ✉
@@ -116,7 +131,7 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
             <>
               <Link
                 href="/profile"
-                className="flex shrink-0 items-center gap-1.5 rounded-full bg-cream-100 px-2.5 py-1.5 text-sm text-cocoa-500 hover:bg-cream-200"
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-cream-100 px-2.5 py-1.5 text-sm font-medium text-cocoa-500 hover:bg-cream-200"
               >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -128,7 +143,7 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
               </Link>
               <button
                 onClick={handleLogout}
-                className="hidden whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm text-cocoa-400 hover:bg-cream-100 md:inline-flex"
+                className="hidden whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
               >
                 로그아웃
               </button>
@@ -137,20 +152,19 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
             <>
               <Link
                 href="/login"
-                className="whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm text-cocoa-400 hover:bg-cream-100"
+                className="whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-500 hover:bg-cream-100"
               >
                 로그인
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-peach-400 px-3 py-1.5 text-sm font-semibold text-white shadow-soft hover:bg-peach-500"
+                className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-peach-400 px-3 py-1.5 text-sm font-bold text-white shadow-soft hover:bg-peach-500"
               >
                 가입
               </Link>
             </>
           )}
 
-          {/* 모바일 햄버거 */}
           <button
             onClick={() => setOpen(!open)}
             className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-cocoa-500 hover:bg-cream-100 lg:hidden"
@@ -170,7 +184,7 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
                 type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="🔍 검색"
+                placeholder="🔍 통합검색"
                 className="input"
               />
             </form>
@@ -182,7 +196,7 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
                     key={item.href}
                     href={item.href}
                     className={
-                      'flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-medium transition ' +
+                      'flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-bold transition ' +
                       (active ? 'bg-peach-100 text-peach-500' : 'bg-cream-50 text-cocoa-500 hover:bg-cream-100')
                     }
                   >
@@ -194,8 +208,15 @@ export function Header({ user, username, avatarUrl, isAdmin, dmUnread = 0 }: Pro
             </nav>
             {user && (
               <div className="flex flex-wrap gap-2">
+                <Link href="/notifications" className="btn-secondary flex-1 text-sm">
+                  🔔 알림{notifUnread > 0 && (
+                    <span className="ml-1 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] text-white">
+                      {notifUnread}
+                    </span>
+                  )}
+                </Link>
                 <Link href="/messages" className="btn-secondary flex-1 text-sm">
-                  ✉ 쪽지함{dmUnread > 0 && (
+                  ✉ 쪽지{dmUnread > 0 && (
                     <span className="ml-1 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] text-white">
                       {dmUnread}
                     </span>
