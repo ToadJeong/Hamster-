@@ -67,6 +67,8 @@ export type SiteSettingKey =
   | 'chat.enabled'
   | 'site.notice'
   | 'site.contact_email'
+  | 'brand.site_name'
+  | 'brand.user_label'
   | 'legal.privacy_html'
   | 'legal.terms_html'
   | 'legal.deletion_html';
@@ -78,6 +80,8 @@ export type SiteSettings = {
   'chat.enabled': boolean;
   'site.notice': string;
   'site.contact_email': string;
+  'brand.site_name': string;
+  'brand.user_label': string;
   'legal.privacy_html': string;
   'legal.terms_html': string;
   'legal.deletion_html': string;
@@ -105,4 +109,56 @@ export type PetHamster = {
   x: number;
   y: number;
   born_at: number; // epoch ms
+};
+
+/* 공지사항 */
+export type Announcement = {
+  id: string;
+  title: string;
+  body: string;
+  pinned: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/* 커뮤니티 자유 게시판 */
+export type CommunityCategory = 'free' | 'question' | 'show-off';
+
+export type CommunityPost = {
+  id: string;
+  author_id: string | null;
+  anonymous_nickname: string | null;
+  title: string;
+  body: string;
+  category: CommunityCategory;
+  created_at: string;
+  updated_at: string;
+};
+
+/* 유기햄 구조대 */
+export type RescueKind = 'available' | 'needs-home' | 'lost' | 'found';
+export type RescueStatus = 'open' | 'in_progress' | 'completed' | 'closed';
+
+export type RescuePost = {
+  id: string;
+  author_id: string;
+  species_id: string | null;
+  kind: RescueKind;
+  status: RescueStatus;
+  title: string;
+  body: string;
+  region: string | null;
+  cover_url: string | null;
+  contact_hint: string | null;
+  age_months: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RescuePostWithAuthor = RescuePost & {
+  author_username: string | null;
+  author_avatar_url: string | null;
+  species_slug: string | null;
+  species_name_ko: string | null;
 };

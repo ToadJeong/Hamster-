@@ -8,8 +8,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 
 export const metadata: Metadata = {
-  title: '햄찌랜드 · 햄스터 도감과 사육 가이드 커뮤니티',
-  description: '한국에서 키우는 햄스터 종별 도감과 사육 가이드, 그리고 햄집사들의 이야기를 나누는 공간.',
+  title: '햄랜드 · 햄집사 커뮤니티',
+  description: '한국 햄집사를 위한 햄스터 도감·사육 가이드·커뮤니티·유기햄 구조대 플랫폼.',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
