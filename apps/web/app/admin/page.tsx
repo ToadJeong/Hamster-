@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { AdminSettingsForm } from '@/components/AdminSettingsForm';
@@ -38,6 +39,17 @@ export default async function AdminPage() {
       </header>
 
       <AdminSettingsForm initial={settings} />
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <Link href="/admin/chat-reports" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
+          <h3 className="font-semibold text-cocoa-500">💬 채팅 신고 처리</h3>
+          <p className="mt-1 text-sm text-cocoa-300">사용자가 신고한 채팅 메시지를 검토하고 삭제 처리해요.</p>
+        </Link>
+        <Link href="/admin/banned-words" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
+          <h3 className="font-semibold text-cocoa-500">🚫 채팅 금지어</h3>
+          <p className="mt-1 text-sm text-cocoa-300">실시간 채팅에서 차단할 단어를 추가·삭제해요.</p>
+        </Link>
+      </div>
 
       <section className="card text-sm text-cocoa-400">
         <h2 className="mb-1 font-semibold text-cocoa-500">햄스터 도감 관리</h2>

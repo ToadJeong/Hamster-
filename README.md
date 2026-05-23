@@ -38,7 +38,9 @@ docs/
 | **익명 게시** | 비로그인도 닉네임+비밀번호로 글/댓글 작성 가능, 본인 비번으로 수정·삭제 |
 | 통합 검색 | `/search` — 종/가이드/작성자를 한 번에 검색 |
 | 프로필 | 닉네임·아바타·소개, 내가 쓴 가이드 모음 (회원 한정) |
-| **관리자** | 소셜 로그인 ON/OFF, 홈 공지, 문의 이메일, 정책 본문을 **코드 배포 없이 관리** |
+| **펫 햄스터 레이어** | 화면을 자유롭게 돌아다니는 펫 햄스터. 클릭하면 애교, 마우스 가끔 추적. 우상단에서 종류/마릿수 조정. 위치·종류·수가 페이지 이동·새로고침에도 유지(localStorage) |
+| **실시간 채팅 라운지** | 우하단 플로팅(웹) · 별도 탭(앱) · 접속자 수 표시 · 비속어 필터 + 메시지 신고. broadcast 전용이라 DB에 메시지 미저장 (탭/앱 닫으면 사라짐) |
+| **관리자** | 소셜 로그인 ON/OFF, 채팅 ON/OFF, 익명 게시 ON/OFF, 홈 공지, 문의 이메일, 정책 본문 + 채팅 신고/금지어 관리 (모두 코드 배포 없이) |
 | 정책 페이지 | `/privacy`, `/terms`, `/account/delete` (관리자 페이지에서 본문 편집) |
 | 드래프트 보존 | 글 작성 중 새로고침·뒤로가기·앱 백그라운드 → 입력 내용 자동 복구 |
 
@@ -49,7 +51,9 @@ docs/
    - `supabase/migrations/0001_initial_schema.sql`
    - `supabase/migrations/0002_admin_and_settings.sql`
    - `supabase/migrations/0003_anonymous_posting.sql`
+   - `supabase/migrations/0004_chat_and_pets.sql`
    - `supabase/seed.sql` (햄스터 30종)
+3. **Realtime → Channels**에서 `hamster-lobby`, `hamster-presence` 채널의 broadcast/presence를 활성화 (Supabase Free tier 기본 ON)
 3. **Authentication → Providers**에서 사용할 제공자 활성화
    - Email/Password는 기본 활성화
    - Google, Kakao를 사용하려면 각 콘솔에서 OAuth 앱 생성 후 키 입력

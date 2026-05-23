@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { PetHamsterLayer } from '@/components/PetHamsterLayer';
+import { LiveChat } from '@/components/LiveChat';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { getSiteSettings } from '@/lib/site-settings';
 
 export const metadata: Metadata = {
   title: '햄찌랜드 · 햄스터 도감과 사육 가이드 커뮤니티',
@@ -22,6 +25,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .maybeSingle();
     profile = data;
   }
+
+  const settings = await getSiteSettings();
 
   return (
     <html lang="ko">
@@ -48,6 +53,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {children}
         </main>
         <Footer />
+
+        {/* 화면 위를 돌아다니는 펫 햄스터 */}
+        <PetHamsterLayer />
+
+        {/* 우하단 실시간 채팅 (관리자가 OFF 가능) */}
+        <LiveChat
+          enabled={settings['chat.enabled']}
+          currentUser={user ? {
+            id: user.id,
+            username: profile?.username ?? null,
+            isAdmin: !!profile?.is_admin,
+          } : null}
+        />
       </body>
     </html>
   );

@@ -64,6 +64,7 @@ export type SiteSettingKey =
   | 'auth.google_enabled'
   | 'auth.kakao_enabled'
   | 'app.allow_anonymous'
+  | 'chat.enabled'
   | 'site.notice'
   | 'site.contact_email'
   | 'legal.privacy_html'
@@ -74,9 +75,34 @@ export type SiteSettings = {
   'auth.google_enabled': boolean;
   'auth.kakao_enabled': boolean;
   'app.allow_anonymous': boolean;
+  'chat.enabled': boolean;
   'site.notice': string;
   'site.contact_email': string;
   'legal.privacy_html': string;
   'legal.terms_html': string;
   'legal.deletion_html': string;
+};
+
+/* 실시간 채팅 메시지 (DB 미저장, broadcast 전용) */
+export type ChatMessage = {
+  id: string;            // uuid 클라 생성
+  body: string;
+  sender_label: string;  // 회원이면 username, 익명이면 입력 닉네임
+  sender_id: string | null;     // auth user id
+  sender_session: string;       // presence key
+  is_admin?: boolean;
+  created_at: number;    // epoch ms
+};
+
+export type PetHamsterKind =
+  | 'golden' | 'winterwhite' | 'roborovski' | 'campbell' | 'chinese';
+
+export type PetHamster = {
+  id: string;
+  kind: PetHamsterKind;
+  nickname: string;
+  // 위치는 viewport 비율(0–1)로 저장해 화면 크기가 달라져도 자연스럽게 보임
+  x: number;
+  y: number;
+  born_at: number; // epoch ms
 };

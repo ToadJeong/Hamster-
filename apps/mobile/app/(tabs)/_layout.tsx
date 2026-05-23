@@ -15,24 +15,19 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{
-          title: '도감',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>🐹</Text>,
-        }}
+        options={{ title: '도감', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>🐹</Text> }}
       />
       <Tabs.Screen
         name="guides"
-        options={{
-          title: '가이드',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>📖</Text>,
-        }}
+        options={{ title: '가이드', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>📖</Text> }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{ title: '라운지', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>💬</Text> }}
       />
       <Tabs.Screen
         name="me"
-        options={{
-          title: '내정보',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>👤</Text>,
-        }}
+        options={{ title: '내정보', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>👤</Text> }}
       />
     </Tabs>
   );

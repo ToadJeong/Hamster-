@@ -40,6 +40,12 @@ export function AdminSettingsForm({ initial }: { initial: SiteSettings }) {
           onChange={(v) => update('app.allow_anonymous', v)}
         />
         <Toggle
+          label="실시간 채팅 라운지"
+          description="끄면 우하단 플로팅 채팅과 앱 라운지 탭이 비활성화돼요."
+          checked={settings['chat.enabled']}
+          onChange={(v) => update('chat.enabled', v)}
+        />
+        <Toggle
           label="Google 로그인"
           description="로그인·가입 화면에 Google 버튼 표시"
           checked={settings['auth.google_enabled']}
