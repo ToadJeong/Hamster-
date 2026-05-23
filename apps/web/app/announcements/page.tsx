@@ -40,9 +40,9 @@ export default async function AnnouncementsPage() {
         )}
       </header>
 
-      {error?.message?.includes('announcements') && (
-        <div className="card text-amber-500">
-          공지사항 테이블이 아직 없어요. Supabase에 `0005_announcements_community_rescue.sql` 마이그레이션을 적용해 주세요.
+      {error && (
+        <div className="card text-center text-sm text-cocoa-300">
+          📢 공지사항을 준비하고 있어요. 잠시 후 다시 와 주세요!
         </div>
       )}
 

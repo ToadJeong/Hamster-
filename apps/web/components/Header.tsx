@@ -16,7 +16,7 @@ const NAV: { href: string; label: string; emoji: string }[] = [
   { href: '/species',    label: '도감',         emoji: '🐹' },
   { href: '/guides',     label: '가이드',       emoji: '📖' },
   { href: '/community',  label: '커뮤니티',     emoji: '💬' },
-  { href: '/rescue',     label: '유기햄 구조대', emoji: '🆘' },
+  { href: '/rescue',     label: '구조대',       emoji: '🆘' },
   { href: '/announcements', label: '공지',     emoji: '📢' },
 ];
 
@@ -94,6 +94,16 @@ export function Header({ user, username, avatarUrl, isAdmin }: Props) {
               }
             >
               관리
+            </Link>
+          )}
+          {user && (
+            <Link
+              href="/messages"
+              className="hidden shrink-0 rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
+              aria-label="쪽지"
+              title="쪽지"
+            >
+              ✉
             </Link>
           )}
           {user ? (
@@ -177,7 +187,8 @@ export function Header({ user, username, avatarUrl, isAdmin }: Props) {
               })}
             </nav>
             {user && (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Link href="/messages" className="btn-secondary flex-1 text-sm">✉ 쪽지함</Link>
                 {isAdmin && (
                   <Link href="/admin" className="btn-secondary flex-1 text-sm">관리</Link>
                 )}

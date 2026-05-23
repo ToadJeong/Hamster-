@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * 우하단 플로팅 실시간 채팅.
+ * 우하단 플로팅 실시간 채팅 (v2).
  *
- * - Supabase Realtime broadcast로 메시지를 주고받음 (DB 미저장 = ephemeral)
- * - presence로 접속자 수 카운트
- * - 채팅 히스토리는 sessionStorage(`hamster.chat.history`)에 보관 → 페이지 이동에는 유지, 탭 닫으면 사라짐
- * - 금지어는 클라이언트에서 마스킹 + 본인이 차단당한 단어면 전송 자체 차단
- * - 메시지 우클릭/길게 누르기 대신 “⚠ 신고” 버튼으로 chat_reports에 INSERT
+ * 개선점:
+ *  - 신규 접속자도 최근 1시간 메시지를 RPC get_recent_lobby(1)로 받아 옴
+ *  - 닉네임은 localStorage('hamster.chat.nickname')로 영구 저장
+ *  - 보낼 때 broadcast + DB INSERT 동시 수행 (실시간 + 영구 기록)
+ *  - 회원이면 작성자 카드 ⓘ 옆에 "쪽지" 버튼이 보여 DM 시작 가능
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -17,9 +17,9 @@ import {
 } from '@hamster/shared';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { findBannedWords, maskBannedWords } from '@/lib/chat-filter';
+import { useRouter } from 'next/navigation';
 
-const HISTORY_KEY = 'hamster.chat.history';
-const NICKNAME_KEY = 'hamster.chat.nickname';
+const NICKNAME_KEY = 'hamster.chat.nickname';   // localStorage (영구)
 const MAX_KEEP = 200;
 
 type Props = {
@@ -33,6 +33,7 @@ export function LiveChat({ enabled, currentUser }: Props) {
 }
 
 function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
+  const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -46,23 +47,39 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const presenceRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // 초기 히스토리 복구
+  // 닉네임 영구 복원 (localStorage)
   useEffect(() => {
+    if (currentUser) return;
     try {
-      const raw = sessionStorage.getItem(HISTORY_KEY);
-      if (raw) setMessages(JSON.parse(raw));
-      const nm = sessionStorage.getItem(NICKNAME_KEY);
-      if (nm && !currentUser) setNickname(nm);
-    } catch { /* ignore */ }
+      const saved = localStorage.getItem(NICKNAME_KEY);
+      if (saved) setNickname(saved);
+    } catch {}
   }, [currentUser]);
 
-  // 메시지 변경 시 sessionStorage 동기화
+  // 닉네임 변경 → localStorage에 저장
   useEffect(() => {
-    try {
-      const tail = messages.slice(-MAX_KEEP);
-      sessionStorage.setItem(HISTORY_KEY, JSON.stringify(tail));
-    } catch { /* ignore */ }
-  }, [messages]);
+    if (currentUser) return;
+    try { localStorage.setItem(NICKNAME_KEY, nickname); } catch {}
+  }, [nickname, currentUser]);
+
+  // 최근 1시간 기록 로드
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.rpc('get_recent_lobby', { p_hours: 1 });
+      if (error || !data) return;
+      // DB row → ChatMessage 형태로 변환
+      const rows = (data as any[]).map((r) => ({
+        id: r.id,
+        body: r.body,
+        sender_label: r.sender_label,
+        sender_id: r.sender_id,
+        sender_session: r.sender_session,
+        is_admin: !!r.is_admin,
+        created_at: new Date(r.created_at).getTime(),
+      } satisfies ChatMessage));
+      setMessages(rows);
+    })();
+  }, [supabase]);
 
   // 금지어 로드
   useEffect(() => {
@@ -72,11 +89,9 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
     })();
   }, [supabase]);
 
-  // 메시지 채널 (broadcast)
+  // 메시지 broadcast 구독
   useEffect(() => {
-    const ch = supabase.channel(CHAT_CHANNEL, {
-      config: { broadcast: { self: false } },
-    });
+    const ch = supabase.channel(CHAT_CHANNEL, { config: { broadcast: { self: false } } });
     ch.on('broadcast', { event: 'message' }, ({ payload }) => {
       const msg = payload as ChatMessage;
       setMessages((prev) => [...prev, msg].slice(-MAX_KEEP));
@@ -86,14 +101,13 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
     return () => { ch.unsubscribe(); };
   }, [supabase]);
 
-  // 접속자 채널 (presence)
+  // 접속자 presence
   useEffect(() => {
     const ch = supabase.channel(PRESENCE_CHANNEL, {
       config: { presence: { key: sessionIdRef.current } },
     });
     ch.on('presence', { event: 'sync' }, () => {
-      const state = ch.presenceState();
-      setCount(Object.keys(state).length || 1);
+      setCount(Object.keys(ch.presenceState()).length || 1);
     });
     ch.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
@@ -108,17 +122,10 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
     return () => { ch.unsubscribe(); };
   }, [supabase, currentUser, nickname]);
 
-  // 스크롤 하단 유지
   useEffect(() => {
     if (!open) return;
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages, open]);
-
-  // 닉네임 변경 저장
-  useEffect(() => {
-    if (currentUser) return;
-    try { sessionStorage.setItem(NICKNAME_KEY, nickname); } catch { /* ignore */ }
-  }, [nickname, currentUser]);
 
   async function send() {
     const body = draft.trim();
@@ -129,7 +136,6 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
     }
     const label = currentUser?.username ?? (nickname.trim() || '게스트');
 
-    // 금지어 검사 → 발견되면 전송 차단
     const hits = findBannedWords(body, bannedWords);
     if (hits.length > 0) {
       setWarn(`사용할 수 없는 표현이 포함되어 있어요 (${hits[0].word}).`);
@@ -146,10 +152,18 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
       created_at: Date.now(),
     };
 
-    const ch = channelRef.current;
-    if (ch) {
-      await ch.send({ type: 'broadcast', event: 'message', payload: msg });
-    }
+    // 실시간 분배
+    await channelRef.current?.send({ type: 'broadcast', event: 'message', payload: msg });
+    // 영구 기록 (실패해도 채팅 자체는 진행)
+    void supabase.from('lobby_messages').insert({
+      id: msg.id,
+      sender_id: msg.sender_id,
+      sender_label: msg.sender_label,
+      sender_session: msg.sender_session,
+      is_admin: msg.is_admin ?? false,
+      body: msg.body,
+    });
+
     setMessages((prev) => [...prev, msg].slice(-MAX_KEEP));
     setDraft('');
     setWarn(null);
@@ -170,9 +184,22 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
     else alert('신고가 접수되었어요.');
   }
 
+  async function startDM(m: ChatMessage) {
+    if (!currentUser) {
+      router.push('/login?next=' + encodeURIComponent(window.location.pathname));
+      return;
+    }
+    if (!m.sender_id) {
+      alert('비회원에게는 쪽지를 보낼 수 없어요.');
+      return;
+    }
+    const { data, error } = await supabase.rpc('open_dm_thread', { p_other: m.sender_id });
+    if (error || !data) { alert('대화방을 열 수 없어요: ' + error?.message); return; }
+    router.push(`/messages/${data}`);
+  }
+
   return (
     <div className="fixed bottom-3 right-3 z-50 md:bottom-5 md:right-5">
-      {/* 채팅 토글 버튼 */}
       <button
         onClick={() => setOpen(!open)}
         className={
@@ -187,38 +214,29 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
 
       {open && (
         <div className="flex h-[520px] w-[320px] flex-col overflow-hidden rounded-cute border border-cream-200 bg-white shadow-soft md:h-[560px] md:w-[360px]">
-          {/* 헤더 */}
           <header className="flex items-center justify-between border-b border-cream-200 bg-cream-50 px-3 py-2">
             <div className="flex items-center gap-2 text-sm text-cocoa-500">
               <span>💬 햄찌 라운지</span>
               <span className="badge bg-mint-100 text-mint-400">🟢 {count}명</span>
             </div>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-cocoa-300 hover:text-cocoa-500"
-              aria-label="닫기"
-            >
-              ✕
-            </button>
+            <button onClick={() => setOpen(false)} className="text-cocoa-300 hover:text-cocoa-500" aria-label="닫기">✕</button>
           </header>
 
-          {/* 비로그인 시 닉네임 */}
           {!currentUser && (
             <div className="border-b border-cream-200 bg-cream-50/60 px-3 py-2">
               <input
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value.slice(0, 16))}
-                placeholder="라운지에서 쓸 닉네임 (탭 닫으면 초기화)"
+                placeholder="라운지 닉네임 (이 기기에 저장돼요)"
                 className="input py-1.5 text-xs"
               />
             </div>
           )}
 
-          {/* 메시지 리스트 */}
           <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto px-3 py-3">
             {messages.length === 0 && (
               <p className="py-8 text-center text-xs text-cocoa-300">
-                첫 인사를 남겨보세요! 메시지는 탭을 닫으면 사라집니다.
+                첫 인사를 남겨보세요! 최근 1시간 동안의 메시지가 모두에게 표시돼요.
               </p>
             )}
             {messages.map((m) => {
@@ -226,18 +244,19 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
               const display = maskBannedWords(m.body, bannedWords);
               return (
                 <div key={m.id} className={'group flex flex-col ' + (mine ? 'items-end' : 'items-start')}>
-                  <div className="mb-0.5 flex items-center gap-1 text-[10px] text-cocoa-300">
-                    <span className={mine ? 'order-2' : ''}>
-                      {m.sender_label}{m.is_admin && ' ⭐'}
-                    </span>
+                  <div className={'mb-0.5 flex items-center gap-1 text-[10px] text-cocoa-300 ' + (mine ? 'flex-row-reverse' : '')}>
+                    <span>{m.sender_label}{m.is_admin && ' ⭐'}</span>
                     {!mine && (
-                      <button
-                        onClick={() => report(m)}
-                        className="opacity-0 transition group-hover:opacity-100 hover:text-red-400"
-                        title="신고"
-                      >
-                        ⚠
-                      </button>
+                      <>
+                        {m.sender_id && currentUser && m.sender_id !== currentUser.id && (
+                          <button onClick={() => startDM(m)} className="text-cocoa-300 hover:text-peach-500" title="쪽지 보내기">
+                            ✉
+                          </button>
+                        )}
+                        <button onClick={() => report(m)} className="opacity-0 transition group-hover:opacity-100 hover:text-red-400" title="신고">
+                          ⚠
+                        </button>
+                      </>
                     )}
                   </div>
                   <div
@@ -259,11 +278,8 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
 
           {warn && <div className="border-t border-red-100 bg-red-50 px-3 py-1.5 text-xs text-red-500">{warn}</div>}
 
-          {/* 입력 */}
-          <form
-            onSubmit={(e) => { e.preventDefault(); send(); }}
-            className="flex items-center gap-2 border-t border-cream-200 bg-white px-2 py-2"
-          >
+          <form onSubmit={(e) => { e.preventDefault(); send(); }}
+                className="flex items-center gap-2 border-t border-cream-200 bg-white px-2 py-2">
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -276,7 +292,7 @@ function LiveChatInner({ currentUser }: { currentUser: Props['currentUser'] }) {
             </button>
           </form>
           <p className="border-t border-cream-200 bg-cream-50 px-3 py-1 text-[10px] text-cocoa-300">
-            🐹 신고된 메시지는 운영자가 검토합니다. 채팅은 저장되지 않아요.
+            🐹 메시지는 1시간 동안만 보존돼요. 회원끼리는 ✉로 쪽지 보내기 가능.
           </p>
         </div>
       )}

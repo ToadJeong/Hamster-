@@ -59,53 +59,96 @@
 }
 
 /* ─────────────────────────────────────────────
-   펫 햄스터 애니메이션
+   펫 햄스터 애니메이션 (귀여운 chibi 스타일)
    ───────────────────────────────────────────── */
-@keyframes hamster-hop {
-  0%, 100% { transform: translateY(0) scaleY(1); }
-  20%      { transform: translateY(-1px) scaleY(0.95); }
-  50%      { transform: translateY(-7px) scaleY(1.04); }
-  80%      { transform: translateY(-1px) scaleY(0.97); }
+
+/* 전체 몸 — 걸을 때 위아래로 통통 */
+@keyframes pet-body-walk {
+  0%, 100% { transform: translateY(0); }
+  25%      { transform: translateY(-1.5px); }
+  50%      { transform: translateY(0); }
+  75%      { transform: translateY(-1.5px); }
 }
-@keyframes hamster-walk {
-  0%, 100% { transform: translateY(0)   rotate(-1.5deg); }
-  25%      { transform: translateY(-1px) rotate(1deg); }
-  50%      { transform: translateY(0)   rotate(1.5deg); }
-  75%      { transform: translateY(-1px) rotate(-1deg); }
-}
-@keyframes hamster-breathe {
+/* 전체 몸 — 쉴 때 호흡 */
+@keyframes pet-body-breathe {
   0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.05); }
+  50%      { transform: scale(1.04); }
 }
-@keyframes hamster-ear-twitch {
-  0%, 92%, 100% { transform: rotate(0deg); }
-  94%           { transform: rotate(-15deg); }
-  96%           { transform: rotate(10deg); }
+/* 전체 몸 — 클릭 시 점프 */
+@keyframes pet-body-hop {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  35%      { transform: translateY(-9px) scaleY(1.05); }
+  70%      { transform: translateY(0) scaleY(0.95); }
 }
-@keyframes hamster-blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  95%           { transform: scaleY(0.1); }
+
+/* 다리 — 좌우 번갈아 굴리기 */
+@keyframes pet-leg-l {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px) rotate(-8deg); }
 }
-@keyframes hamster-tail {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(25deg); }
+@keyframes pet-leg-r {
+  0%, 100% { transform: translateY(-2px) rotate(8deg); }
+  50%      { transform: translateY(0); }
 }
-@keyframes hamster-cuddle-pop {
+
+/* 귀 까닥 */
+@keyframes pet-ear {
+  0%, 88%, 100% { transform: rotate(0deg); }
+  92%           { transform: rotate(-18deg); }
+  96%           { transform: rotate(12deg); }
+}
+
+/* 눈 깜빡임 */
+@keyframes pet-blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  93%           { transform: scaleY(0.1); }
+}
+
+/* 그루밍 — 앞발이 얼굴 쪽으로 올라옴 */
+@keyframes pet-groom {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25%      { transform: translate(2px, -8px) rotate(-25deg); }
+  50%      { transform: translate(0, -10px) rotate(-15deg); }
+  75%      { transform: translate(2px, -8px) rotate(-25deg); }
+}
+
+/* 손 흔들기 (애교) */
+@keyframes pet-wave {
+  0%, 100% { transform: translate(0, -2px) rotate(20deg); }
+  50%      { transform: translate(0, -6px) rotate(-20deg); }
+}
+
+/* 말풍선 등장 */
+@keyframes pet-cuddle-pop {
   0%   { transform: translate(-50%, 0)    scale(0.6); opacity: 0; }
   18%  { transform: translate(-50%, -6px) scale(1.08); opacity: 1; }
   85%  { transform: translate(-50%, -6px) scale(1);    opacity: 1; }
   100% { transform: translate(-50%, -14px) scale(0.95); opacity: 0; }
 }
 
-.pet-hop        { animation: hamster-hop 0.7s ease-in-out; }
-.pet-walk       { animation: hamster-walk 0.45s ease-in-out infinite; }
-.pet-breathe    { animation: hamster-breathe 2.4s ease-in-out infinite; }
-.pet-ear-twitch { animation: hamster-ear-twitch 4s ease-in-out infinite; transform-origin: 50% 80%; }
-.pet-blink      { animation: hamster-blink 3.5s ease-in-out infinite; transform-origin: center; }
-.pet-tail       { animation: hamster-tail 0.7s ease-in-out infinite; transform-origin: 0% 50%; }
-.pet-cuddle-pop { animation: hamster-cuddle-pop 2s ease-in-out forwards; }
+/* 볼이 동그랗게 부풀 때 (씨앗 물고 있는 느낌) */
+@keyframes pet-cheek {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
 
-/* 화면 가리는 글자 가독성 — 햄스터 그림자 */
-.pet-shadow {
-  filter: drop-shadow(0 3px 4px rgba(184, 150, 119, 0.45));
+.pet-walk            { animation: pet-body-walk 0.5s ease-in-out infinite; }
+.pet-breathe         { animation: pet-body-breathe 2.6s ease-in-out infinite; }
+.pet-hop             { animation: pet-body-hop 0.6s ease-out; }
+.pet-leg-left        { animation: pet-leg-l 0.5s ease-in-out infinite; transform-origin: 50% 0%; }
+.pet-leg-right       { animation: pet-leg-r 0.5s ease-in-out infinite; transform-origin: 50% 0%; }
+.pet-ear             { animation: pet-ear 4.5s ease-in-out infinite; transform-origin: 50% 100%; }
+.pet-blink           { animation: pet-blink 4.2s ease-in-out infinite; transform-origin: center; }
+.pet-groom-paw       { animation: pet-groom 1.2s ease-in-out infinite; transform-origin: 50% 100%; }
+.pet-wave-paw        { animation: pet-wave 0.5s ease-in-out infinite; transform-origin: 50% 100%; }
+.pet-cheek-puff      { animation: pet-cheek 2.5s ease-in-out infinite; transform-origin: center; }
+.pet-cuddle-pop      { animation: pet-cuddle-pop 2s ease-in-out forwards; }
+
+/* 햄스터 그림자 */
+.pet-shadow { filter: drop-shadow(0 2px 3px rgba(140, 106, 75, 0.35)); }
+
+/* 클릭/터치 가능한 작은 중심 영역만 활성, 나머지는 통과 */
+.pet-clickable-center {
+  pointer-events: auto;
+  cursor: pointer;
 }

@@ -16,12 +16,20 @@ export function CommunityEditor({
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<CommunityCategory>('free');
+  const [tagsInput, setTagsInput] = useState('');
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const canUseAnon = !isAuthed && allowAnonymous;
+
+  const parsedTags = Array.from(new Set(
+    tagsInput
+      .split(/[,\s#]+/)
+      .map((t) => t.trim().replace(/^#/, ''))
+      .filter((t) => t.length > 0 && t.length <= 20)
+  )).slice(0, 8);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,13 +44,16 @@ export function CommunityEditor({
           title: title.trim(), body: body.trim(), category,
         });
         if (error || !id) throw error ?? new Error('작성 실패');
+        if (parsedTags.length > 0) {
+          await supabase.from('community_posts').update({ tags: parsedTags }).eq('id', id);
+        }
         router.push(`/community/${id}`);
       } else {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('로그인이 필요해요.');
         const { data, error } = await supabase
           .from('community_posts')
-          .insert({ author_id: user.id, title: title.trim(), body: body.trim(), category })
+          .insert({ author_id: user.id, title: title.trim(), body: body.trim(), category, tags: parsedTags })
           .select('id').single();
         if (error) throw error;
         router.push(`/community/${(data as any).id}`);
@@ -83,6 +94,23 @@ export function CommunityEditor({
         onChange={(e) => setBody(e.target.value)}
         required
       />
+
+      <div>
+        <input
+          className="input"
+          placeholder="태그 (쉼표·공백·# 으로 구분, 최대 8개)"
+          value={tagsInput}
+          onChange={(e) => setTagsInput(e.target.value)}
+        />
+        {parsedTags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {parsedTags.map((t) => <span key={t} className="badge bg-lilac-50 text-lilac-400">#{t}</span>)}
+          </div>
+        )}
+        <p className="mt-1 text-xs text-cocoa-300">
+          예: 골든, 케이지, 사육꿀팁 — 같은 태그를 단 글끼리 모아 보여요.
+        </p>
+      </div>
 
       {error && <div className="card text-red-500">{error}</div>}
 

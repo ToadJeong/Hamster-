@@ -28,29 +28,8 @@ export default async function HomePage() {
   const announcements = (announcementsRes.data as Announcement[]) ?? [];
   const rescues = (rescueRes.data as RescuePostWithAuthor[]) ?? [];
 
-  // 마이그레이션 미적용 상태 감지
-  const missingMigrations: string[] = [];
-  if (guidesRes.error?.message?.includes('guides_with_counts')) missingMigrations.push('0001');
-  if (announcementsRes.error?.message?.includes('announcements')) missingMigrations.push('0005');
-  if (rescueRes.error?.message?.includes('rescue_posts')) missingMigrations.push('0005');
-
   return (
     <div className="space-y-10">
-      {/* 마이그레이션 미적용 경고 */}
-      {missingMigrations.length > 0 && (
-        <div className="card border-amber-300 bg-amber-50 text-sm text-amber-800">
-          ⚠ <strong>데이터베이스 초기 설정이 필요해요.</strong> Supabase SQL Editor에서 다음 파일을 순서대로 실행해 주세요:
-          <ul className="mt-1 list-disc pl-5">
-            <li>supabase/migrations/0001_initial_schema.sql</li>
-            <li>supabase/migrations/0002_admin_and_settings.sql</li>
-            <li>supabase/migrations/0003_anonymous_posting.sql</li>
-            <li>supabase/migrations/0004_chat_and_pets.sql</li>
-            <li>supabase/migrations/0005_announcements_community_rescue.sql</li>
-            <li>supabase/seed.sql (햄스터 30종)</li>
-          </ul>
-        </div>
-      )}
-
       {/* 사이트 공지 (단일 배너) */}
       {settings['site.notice'] && (
         <div className="rounded-cute border border-cream-200 bg-cream-50 px-4 py-3 text-sm text-cocoa-500">
@@ -73,6 +52,7 @@ export default async function HomePage() {
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/species" className="btn-primary">도감 보기</Link>
+            <Link href="/identify" className="btn-secondary">📷 사진으로 찾기</Link>
             <Link href="/guides" className="btn-secondary">가이드</Link>
           </div>
         </div>
@@ -116,8 +96,8 @@ export default async function HomePage() {
           <Link href="/species" className="text-sm font-medium text-peach-500 hover:underline">전체 →</Link>
         </div>
         {species.length === 0 ? (
-          <div className="card text-center text-cocoa-300 text-sm">
-            도감 데이터가 비어 있어요. Supabase에 <code>seed.sql</code>을 실행해 주세요.
+          <div className="card text-center text-sm text-cocoa-300">
+            🐹 도감을 준비하고 있어요. 곧 다양한 햄스터 친구들을 만나볼 수 있어요!
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
