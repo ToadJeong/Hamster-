@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideCard } from '@/components/GuideCard';
-import type { GuideWithCounts, Species } from '@hamster/shared';
+import {
+  RESCUE_KIND_LABEL,
+  type GuideWithCounts, type Species, type RescuePostWithAuthor,
+} from '@hamster/shared';
+import { formatDate } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,96 +19,157 @@ export default async function SearchPage({
 
   let speciesMatches: Pick<Species,'id'|'slug'|'name_ko'|'name_en'|'summary'|'image_url'>[] = [];
   let guideMatches: GuideWithCounts[] = [];
+  let communityMatches: any[] = [];
+  let rescueMatches: RescuePostWithAuthor[] = [];
+  let announcementMatches: any[] = [];
 
   if (q) {
-    const [s, g] = await Promise.all([
-      supabase
-        .from('species')
-        .select('id, slug, name_ko, name_en, summary, image_url')
+    const [s, g, c, r, a] = await Promise.all([
+      supabase.from('species').select('id, slug, name_ko, name_en, summary, image_url')
         .or(`name_ko.ilike.%${q}%,name_en.ilike.%${q}%,scientific_name.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%`)
         .order('name_ko'),
-      supabase
-        .from('guides_with_counts')
-        .select('*')
+      supabase.from('guides_with_counts').select('*')
         .or(`title.ilike.%${q}%,body.ilike.%${q}%,author_username.ilike.%${q}%`)
-        .order('created_at', { ascending: false })
-        .limit(30),
+        .order('created_at', { ascending: false }).limit(30),
+      supabase.from('community_posts').select('id, title, body, category, created_at, anonymous_nickname, author:profiles!community_posts_author_id_fkey(username)')
+        .or(`title.ilike.%${q}%,body.ilike.%${q}%`)
+        .order('created_at', { ascending: false }).limit(20),
+      supabase.from('rescue_posts_with_author').select('*')
+        .or(`title.ilike.%${q}%,body.ilike.%${q}%,region.ilike.%${q}%`)
+        .order('created_at', { ascending: false }).limit(20),
+      supabase.from('announcements').select('id, title, body, created_at, pinned')
+        .or(`title.ilike.%${q}%,body.ilike.%${q}%`)
+        .order('created_at', { ascending: false }).limit(10),
     ]);
     speciesMatches = (s.data as any) ?? [];
     guideMatches = (g.data as any) ?? [];
+    communityMatches = (c.data as any) ?? [];
+    rescueMatches = (r.data as any) ?? [];
+    announcementMatches = (a.data as any) ?? [];
   }
+
+  const total =
+    speciesMatches.length + guideMatches.length + communityMatches.length +
+    rescueMatches.length + announcementMatches.length;
 
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="font-display text-3xl font-bold text-cocoa-500">통합 검색</h1>
+        <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">🔍 통합 검색</h1>
         <form className="mt-3">
           <input
             name="q"
             defaultValue={q}
-            placeholder="햄스터 종, 가이드 제목·내용, 작성자로 검색"
+            placeholder="햄스터 종, 가이드, 커뮤니티, 구조대, 공지를 한 번에"
             className="input"
             autoFocus
           />
         </form>
-        {q && (
-          <p className="mt-2 text-sm text-cocoa-300">
-            “{q}” 검색 결과 · 도감 {speciesMatches.length}건 · 가이드 {guideMatches.length}건
-          </p>
-        )}
+        {q && <p className="mt-2 text-sm text-cocoa-300">“{q}” 검색 결과 · 총 {total}건</p>}
       </header>
 
       {!q ? (
-        <div className="card text-center text-cocoa-300">
-          검색어를 입력해 주세요. (예: 골든, 케이지, 사육)
-        </div>
+        <div className="card text-center text-cocoa-300">검색어를 입력해 주세요. (예: 골든, 케이지, 분당)</div>
       ) : (
         <>
-          <section>
-            <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">
-              도감 · {speciesMatches.length}건
-            </h2>
+          {announcementMatches.length > 0 && (
+            <SearchSection title="공지" emoji="📢" count={announcementMatches.length}>
+              <ul className="space-y-2">
+                {announcementMatches.map((a: any) => (
+                  <li key={a.id}>
+                    <Link href={`/announcements`} className="card flex items-center justify-between gap-3 transition hover:-translate-y-0.5 hover:shadow-soft">
+                      <div>
+                        <p className="font-semibold text-cocoa-500">{a.pinned && '📌 '}{a.title}</p>
+                        <p className="text-xs text-cocoa-300">{formatDate(a.created_at)}</p>
+                      </div>
+                      <span className="text-cocoa-300">→</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </SearchSection>
+          )}
+
+          <SearchSection title="도감" emoji="🐹" count={speciesMatches.length}>
             {speciesMatches.length === 0 ? (
-              <div className="card text-center text-cocoa-300">일치하는 종이 없어요.</div>
+              <div className="card text-center text-cocoa-300">일치하는 종 없음</div>
             ) : (
               <div className="grid gap-3 md:grid-cols-2">
                 {speciesMatches.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/species/${s.slug}`}
-                    className="card flex gap-4 transition hover:-translate-y-0.5 hover:shadow-soft"
-                  >
+                  <Link key={s.id} href={`/species/${s.slug}`} className="card flex gap-4 transition hover:-translate-y-0.5 hover:shadow-soft">
                     <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-cream-100 text-2xl">
-                      {s.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={s.image_url} alt="" className="h-full w-full rounded-2xl object-cover" />
-                      ) : '🐹'}
+                      {s.image_url ? <img src={s.image_url} alt="" className="h-full w-full rounded-2xl object-cover" /> : '🐹'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-cocoa-500">{s.name_ko}</h3>
-                      {s.name_en && <p className="text-xs text-cocoa-300">{s.name_en}</p>}
                       <p className="mt-1 line-clamp-2 text-sm text-cocoa-400">{s.summary}</p>
                     </div>
                   </Link>
                 ))}
               </div>
             )}
-          </section>
+          </SearchSection>
 
-          <section>
-            <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">
-              가이드 · {guideMatches.length}건
-            </h2>
+          <SearchSection title="가이드" emoji="📖" count={guideMatches.length}>
             {guideMatches.length === 0 ? (
-              <div className="card text-center text-cocoa-300">일치하는 가이드가 없어요.</div>
+              <div className="card text-center text-cocoa-300">일치하는 가이드 없음</div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 {guideMatches.map((g) => <GuideCard key={g.id} guide={g} />)}
               </div>
             )}
-          </section>
+          </SearchSection>
+
+          <SearchSection title="커뮤니티" emoji="💬" count={communityMatches.length}>
+            {communityMatches.length === 0 ? (
+              <div className="card text-center text-cocoa-300">일치하는 글 없음</div>
+            ) : (
+              <ul className="space-y-2">
+                {communityMatches.map((p: any) => (
+                  <li key={p.id}>
+                    <Link href={`/community/${p.id}`} className="card transition hover:-translate-y-0.5 hover:shadow-soft">
+                      <p className="line-clamp-1 font-semibold text-cocoa-500">{p.title}</p>
+                      <p className="mt-1 line-clamp-1 text-sm text-cocoa-300">{p.body}</p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SearchSection>
+
+          <SearchSection title="유기햄 구조대" emoji="🆘" count={rescueMatches.length}>
+            {rescueMatches.length === 0 ? (
+              <div className="card text-center text-cocoa-300">일치하는 글 없음</div>
+            ) : (
+              <ul className="space-y-2">
+                {rescueMatches.map((r) => {
+                  const meta = RESCUE_KIND_LABEL[r.kind];
+                  return (
+                    <li key={r.id}>
+                      <Link href={`/rescue/${r.id}`} className="card flex gap-3 transition hover:-translate-y-0.5 hover:shadow-soft">
+                        <span className="badge bg-peach-100 text-peach-500">{meta.emoji}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-1 font-semibold text-cocoa-500">{r.title}</p>
+                          {r.region && <p className="text-xs text-cocoa-300">📍 {r.region}</p>}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </SearchSection>
         </>
       )}
     </div>
+  );
+}
+
+function SearchSection({ title, emoji, count, children }: { title: string; emoji: string; count: number; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">{emoji} {title} · {count}건</h2>
+      {children}
+    </section>
   );
 }

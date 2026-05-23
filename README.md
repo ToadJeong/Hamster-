@@ -1,6 +1,6 @@
-# 햄찌랜드 🐹
+# 햄랜드 🐹
 
-한국에서 키우는 햄스터 종별 도감과 사육 가이드, 그리고 햄집사들의 이야기를 나누는 커뮤니티.
+한국 햄집사를 위한 햄스터 도감 + 사육 가이드 + 커뮤니티 + 유기햄 구조대 플랫폼.
 
 - **웹** (`apps/web`): Next.js 14 (App Router) + Tailwind + Supabase SSR
 - **모바일 — 패키징 우선**: 동일 웹앱을 [Capacitor](./docs/capacitor-packaging.md)로 iOS/Android 패키징

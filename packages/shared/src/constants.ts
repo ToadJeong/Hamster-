@@ -7,6 +7,8 @@ export const SITE_SETTING_KEYS: readonly SiteSettingKey[] = [
   'chat.enabled',
   'site.notice',
   'site.contact_email',
+  'brand.site_name',
+  'brand.user_label',
   'legal.privacy_html',
   'legal.terms_html',
   'legal.deletion_html',
@@ -19,9 +21,31 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   'chat.enabled': true,
   'site.notice': '',
   'site.contact_email': '',
+  'brand.site_name': '햄랜드',
+  'brand.user_label': '햄집사',
   'legal.privacy_html': '',
   'legal.terms_html': '',
   'legal.deletion_html': '',
+};
+
+export const RESCUE_KIND_LABEL: Record<import('./types').RescueKind, { label: string; emoji: string; color: string }> = {
+  'available':  { label: '분양 가능',      emoji: '🤝', color: 'mint'  },
+  'needs-home': { label: '긴급 입양처 필요', emoji: '🆘', color: 'peach' },
+  'lost':       { label: '잃어버렸어요',    emoji: '😢', color: 'lilac' },
+  'found':      { label: '발견했어요',      emoji: '👀', color: 'cream' },
+};
+
+export const RESCUE_STATUS_LABEL: Record<import('./types').RescueStatus, string> = {
+  'open':        '진행 중',
+  'in_progress': '대화 중',
+  'completed':   '완료',
+  'closed':      '마감',
+};
+
+export const COMMUNITY_CATEGORY_LABEL: Record<import('./types').CommunityCategory, { label: string; emoji: string }> = {
+  'free':      { label: '자유',   emoji: '💬' },
+  'question':  { label: '질문',   emoji: '❓' },
+  'show-off':  { label: '자랑',   emoji: '✨' },
 };
 
 export const CHAT_CHANNEL = 'hamster-lobby';

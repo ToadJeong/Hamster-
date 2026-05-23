@@ -34,13 +34,19 @@ export default async function GuidesIndex({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-cocoa-500">사육 가이드</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">📖 사육 가이드</h1>
           <p className="mt-1 text-sm text-cocoa-300">햄집사들이 직접 쓴 사육법, 팁, 경험담</p>
         </div>
-        <Link href="/guides/new" className="btn-primary">✏️ 가이드 쓰기</Link>
+        <Link href="/guides/new" className="btn-primary text-sm">✏️ 가이드 쓰기</Link>
       </div>
+
+      {error?.message?.includes('guides_with_counts') && (
+        <div className="card text-amber-500">
+          아직 데이터베이스가 초기화되지 않았어요. Supabase에서 0001~0005 마이그레이션을 적용해 주세요.
+        </div>
+      )}
 
       {/* 종 필터 */}
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
@@ -65,10 +71,6 @@ export default async function GuidesIndex({
           </Link>
         ))}
       </div>
-
-      {error && (
-        <div className="card text-red-500">불러오는 중 오류: {error.message}</div>
-      )}
 
       {guides.length === 0 ? (
         <div className="card text-center text-cocoa-300">

@@ -3,11 +3,11 @@
 /**
  * 화면을 자유롭게 돌아다니는 펫 햄스터 레이어.
  *
- * - 마릿수/종류/위치는 localStorage(`hamster.pets.v1`)에 저장 → 페이지 이동·새로고침에도 유지
- * - 마우스를 가끔(약 30% 확률) 추적, 평소엔 랜덤 산책
- * - 클릭하면 점프하며 애교 (말풍선)
- * - 우상단 컨트롤: 종류 표시, 마릿수, 추가/제거 버튼
- * - pointer-events: 햄스터 자체는 받지만, 화면을 가리지 않도록 옵션 제공
+ * - SVG 캐릭터 + CSS 키프레임으로 걸음·호흡·귀 까닥·눈 깜빡임·꼬리 흔들기 애니메이션
+ * - 마릿수/종류/위치는 localStorage에 저장 → 페이지 이동·새로고침에도 유지
+ * - 무드: wander(산책) / chase(마우스 추적) / rest(쉬기)
+ * - 클릭하면 점프 + 애교 말풍선
+ * - 우상단 컨트롤: 종류 표시, 마릿수, 추가/제거 버튼, 잠시 숨김
  */
 
 import { useEffect, useReducer, useRef, useState } from 'react';
@@ -63,11 +63,9 @@ export function PetHamsterLayer() {
   const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // 마운트 시 localStorage에서 로드
   useEffect(() => {
     const initial = loadInitial();
     if (initial.pets.length === 0) {
-      // 첫 방문: 골든 1마리 자동 입주
       initial.pets = [{
         id: crypto.randomUUID(),
         kind: 'golden',
@@ -79,7 +77,6 @@ export function PetHamsterLayer() {
     setHydrated(true);
   }, []);
 
-  // 변경 시 저장
   useEffect(() => {
     if (!hydrated) return;
     try {
@@ -92,34 +89,29 @@ export function PetHamsterLayer() {
 
   return (
     <>
-      {/* 펫 레이어 (전체 화면) */}
       {!state.hidden && (
         <div className="pointer-events-none fixed inset-0 z-40">
           {state.pets.map((p) => (
-            <PetSprite
-              key={p.id}
-              pet={p}
-              onMove={(x, y) => dispatch({ type: 'move', id: p.id, x, y })}
-            />
+            <PetSprite key={p.id} pet={p} onMove={(x, y) => dispatch({ type: 'move', id: p.id, x, y })} />
           ))}
         </div>
       )}
 
       {/* 우상단 컨트롤 */}
-      <div className="fixed right-3 top-16 z-50 md:right-5 md:top-20">
+      <div className="fixed right-2 top-14 z-50 md:right-5 md:top-20">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 rounded-full border border-cream-200 bg-white px-3 py-1.5 text-sm shadow-soft hover:shadow-softer"
+          className="flex items-center gap-1.5 rounded-full border border-cream-200 bg-white px-2.5 py-1.5 text-sm shadow-soft hover:shadow-softer"
           aria-label="펫 햄스터 관리"
         >
           <span className="text-base">🐹</span>
-          <span className="text-cocoa-500">{state.pets.length}마리</span>
-          {state.hidden && <span className="badge bg-cocoa-100 text-cocoa-400">숨김</span>}
+          <span className="text-cocoa-500">{state.pets.length}</span>
+          {state.hidden && <span className="text-xs text-cocoa-300">·숨김</span>}
         </button>
 
         {open && (
           <div className="mt-2 w-64 rounded-cute border border-cream-200 bg-white p-3 shadow-soft">
-            <p className="mb-2 text-xs font-semibold text-cocoa-500">우리집 햄스터들 ({state.pets.length}/{MAX_PETS})</p>
+            <p className="mb-2 text-xs font-semibold text-cocoa-500">우리집 햄스터 ({state.pets.length}/{MAX_PETS})</p>
             <ul className="max-h-40 space-y-1 overflow-auto">
               {state.pets.map((p) => {
                 const meta = PET_HAMSTER_KINDS.find((k) => k.kind === p.kind)!;
@@ -134,9 +126,7 @@ export function PetHamsterLayer() {
                       onClick={() => dispatch({ type: 'remove', id: p.id })}
                       className="text-xs text-cocoa-300 hover:text-red-400"
                       aria-label="이 햄스터 보내기"
-                    >
-                      ⌫
-                    </button>
+                    >⌫</button>
                   </li>
                 );
               })}
@@ -175,7 +165,9 @@ export function PetHamsterLayer() {
   );
 }
 
-/** 개별 햄스터 스프라이트: 이동 / 마우스 추적 / 클릭 애교 */
+/* ────────────────────────────────────────────
+   개별 햄스터 스프라이트
+   ──────────────────────────────────────────── */
 function PetSprite({
   pet,
   onMove,
@@ -184,16 +176,18 @@ function PetSprite({
   onMove: (x: number, y: number) => void;
 }) {
   const [pos, setPos] = useState({ x: pet.x, y: pet.y });
-  const [dir, setDir] = useState<1 | -1>(1); // 1: →, -1: ←
+  const [dir, setDir] = useState<1 | -1>(1);
+  const [mood, setMood] = useState<'wander' | 'chase' | 'rest'>('wander');
   const [cuddle, setCuddle] = useState<string | null>(null);
+  const [hopping, setHopping] = useState(false);
   const cuddleTimer = useRef<number | null>(null);
+  const hopTimer = useRef<number | null>(null);
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
-  const moodRef = useRef<'wander' | 'chase' | 'rest'>('wander');
   const lastSaveRef = useRef<number>(Date.now());
 
   const meta = PET_HAMSTER_KINDS.find((k) => k.kind === pet.kind)!;
 
-  // 마우스 위치 추적 (화면 비율로 정규화)
+  // 마우스 추적
   useEffect(() => {
     function onPointer(e: PointerEvent) {
       mouseRef.current = {
@@ -205,11 +199,11 @@ function PetSprite({
     return () => window.removeEventListener('pointermove', onPointer);
   }, []);
 
-  // 무드 변경 (랜덤): chase 30% / rest 15% / wander 55%
+  // 무드 변경
   useEffect(() => {
     const t = setInterval(() => {
       const r = Math.random();
-      moodRef.current = r < 0.3 ? 'chase' : r < 0.45 ? 'rest' : 'wander';
+      setMood(r < 0.3 ? 'chase' : r < 0.45 ? 'rest' : 'wander');
     }, 4000 + Math.random() * 3000);
     return () => clearInterval(t);
   }, []);
@@ -225,26 +219,22 @@ function PetSprite({
 
       setPos((prev) => {
         let { x, y } = prev;
-        const mood = moodRef.current;
         const mouse = mouseRef.current;
 
         if (mood === 'rest') {
-          // 쉬는 중: 살짝 흔들리기만
           x += (Math.random() - 0.5) * 0.0005;
           y += (Math.random() - 0.5) * 0.0005;
         } else if (mood === 'chase' && mouse) {
-          // 마우스 추적
           const dx = mouse.x - x;
           const dy = mouse.y - y;
           const dist = Math.hypot(dx, dy);
           if (dist > 0.005) {
-            const speed = 0.18 * dt; // 화면 비율/초
+            const speed = 0.18 * dt;
             x += (dx / dist) * speed;
             y += (dy / dist) * speed;
             setDir(dx >= 0 ? 1 : -1);
           }
         } else {
-          // 산책 (베지에 같은 랜덤 워크)
           const speed = 0.08 * dt;
           const angle = (((pet.born_at + now) / 700) % (Math.PI * 2));
           x += Math.cos(angle) * speed;
@@ -252,11 +242,9 @@ function PetSprite({
           setDir(Math.cos(angle) >= 0 ? 1 : -1);
         }
 
-        // 경계 (5%~95%)
         x = Math.max(0.03, Math.min(0.97, x));
         y = Math.max(0.1, Math.min(0.92, y));
 
-        // 매 2초마다 localStorage에 위치 저장 (state로 dispatch는 비싸니 주기적으로만)
         if (now - lastSaveRef.current > 2000) {
           onMove(x, y);
           lastSaveRef.current = now;
@@ -267,19 +255,27 @@ function PetSprite({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [pet.born_at, onMove]);
+  }, [pet.born_at, mood, onMove]);
 
-  // 클릭하면 애교
   function handleClick() {
-    const lines = ['🥰 안녕!', '😴 졸려요…', '🌻 좋아해요!', '🥕 당근…', '🐾 오늘은 어떤 글 쓸까?', '✨ 햄찌랜드 최고!'];
+    const lines = ['🥰 안녕!', '😴 졸려요…', '🌻 좋아해요!', '🥕 당근…', '🐾 오늘도 화이팅!', '✨ 햄랜드 최고!'];
     setCuddle(lines[Math.floor(Math.random() * lines.length)]);
+    setHopping(true);
     if (cuddleTimer.current) window.clearTimeout(cuddleTimer.current);
-    cuddleTimer.current = window.setTimeout(() => setCuddle(null), 2200);
+    if (hopTimer.current) window.clearTimeout(hopTimer.current);
+    cuddleTimer.current = window.setTimeout(() => setCuddle(null), 2000);
+    hopTimer.current = window.setTimeout(() => setHopping(false), 700);
   }
+
+  const bodyAnimation =
+    hopping ? 'pet-hop' :
+    mood === 'rest'   ? 'pet-breathe' :
+    mood === 'wander' ? 'pet-walk' :
+                        'pet-walk'; // chase도 걸음
 
   return (
     <div
-      className="pointer-events-auto absolute select-none transition-transform"
+      className="pointer-events-auto absolute select-none"
       style={{
         left: `${pos.x * 100}%`,
         top: `${pos.y * 100}%`,
@@ -291,19 +287,85 @@ function PetSprite({
     >
       {cuddle && (
         <div
-          className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs shadow-soft"
-          style={{ transform: `translate(-50%, 0) scaleX(${dir})` }}
+          className="pointer-events-none absolute left-1/2 top-0 whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs shadow-soft pet-cuddle-pop"
+          style={{ transform: `scaleX(${dir})` }}
         >
           {cuddle}
         </div>
       )}
-      <div
-        className="grid h-9 w-9 cursor-pointer place-items-center rounded-full shadow-soft transition-transform hover:scale-110"
-        style={{ background: meta.color }}
-        title={`${pet.nickname} (${meta.label})`}
-      >
-        <span className="text-xl leading-none">🐹</span>
-      </div>
+      <HamsterSvg color={meta.color} className={`pet-shadow ${bodyAnimation}`} />
     </div>
   );
+}
+
+/* ────────────────────────────────────────────
+   SVG 햄스터 캐릭터 (둥글둥글한 옆모습)
+   ──────────────────────────────────────────── */
+function HamsterSvg({ color, className }: { color: string; className?: string }) {
+  // ear/eye/tail은 sub-element로 분리해서 각자 애니메이션
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 56 44"
+      width="56"
+      height="44"
+      className={className}
+      aria-hidden
+    >
+      {/* 꼬리 */}
+      <g className="pet-tail" style={{ transformOrigin: '12px 28px' }}>
+        <path d="M11 28 q-3 1 -4 4" stroke={shade(color, -25)} strokeWidth="2" strokeLinecap="round" fill="none" />
+      </g>
+
+      {/* 발 */}
+      <ellipse cx="20" cy="40" rx="4" ry="2" fill={shade(color, -30)} opacity="0.65" />
+      <ellipse cx="36" cy="40" rx="4" ry="2" fill={shade(color, -30)} opacity="0.65" />
+
+      {/* 몸통 (둥근 알 모양) */}
+      <ellipse cx="30" cy="26" rx="20" ry="14" fill={color} />
+
+      {/* 배 (밝게) */}
+      <ellipse cx="30" cy="31" rx="13" ry="7" fill={shade(color, 12)} opacity="0.7" />
+
+      {/* 귀 */}
+      <g className="pet-ear-twitch">
+        <circle cx="40" cy="13" r="4" fill={shade(color, -15)} />
+        <circle cx="40" cy="13" r="2" fill={shade(color, 25)} />
+      </g>
+      <g className="pet-ear-twitch" style={{ animationDelay: '0.7s' }}>
+        <circle cx="48" cy="16" r="3.5" fill={shade(color, -15)} />
+        <circle cx="48" cy="16" r="1.7" fill={shade(color, 25)} />
+      </g>
+
+      {/* 눈 */}
+      <g className="pet-blink" style={{ transformOrigin: '46px 22px' }}>
+        <circle cx="46" cy="22" r="1.8" fill="#3B2A1C" />
+        <circle cx="46.5" cy="21.4" r="0.6" fill="#fff" />
+      </g>
+
+      {/* 볼터치 */}
+      <circle cx="50" cy="26" r="2" fill="#FFB7C7" opacity="0.6" />
+
+      {/* 코 + 입 */}
+      <circle cx="51.5" cy="24" r="0.8" fill="#3B2A1C" />
+      <path d="M51 25 q-0.5 1 -1.3 1.2" stroke="#3B2A1C" strokeWidth="0.6" fill="none" strokeLinecap="round" />
+
+      {/* 수염 */}
+      <path d="M50 25 l4 -0.5" stroke="#3B2A1C" strokeWidth="0.4" opacity="0.6" />
+      <path d="M50 25.5 l4 0" stroke="#3B2A1C" strokeWidth="0.4" opacity="0.6" />
+      <path d="M50 26 l4 0.5" stroke="#3B2A1C" strokeWidth="0.4" opacity="0.6" />
+    </svg>
+  );
+}
+
+/** 색상을 어둡게/밝게 조정 (단순 hex 처리) */
+function shade(hex: string, percent: number): string {
+  const c = hex.replace('#', '');
+  if (c.length !== 6) return hex;
+  const r = parseInt(c.slice(0, 2), 16);
+  const g = parseInt(c.slice(2, 4), 16);
+  const b = parseInt(c.slice(4, 6), 16);
+  const adjust = (v: number) =>
+    Math.max(0, Math.min(255, Math.round(v + (percent / 100) * (percent > 0 ? (255 - v) : v))));
+  return '#' + [adjust(r), adjust(g), adjust(b)].map((v) => v.toString(16).padStart(2, '0')).join('');
 }

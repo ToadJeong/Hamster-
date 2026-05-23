@@ -30,9 +30,9 @@ export default async function SpeciesIndex({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-cocoa-500">햄스터 도감</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">🐹 햄스터 도감</h1>
           <p className="mt-1 text-sm text-cocoa-300">
             한국에서 분양·사육되는 햄스터 {list.length}종을 가나다순으로 정리했어요.
           </p>
@@ -48,7 +48,12 @@ export default async function SpeciesIndex({
         </form>
       </div>
 
-      {error && <div className="card text-red-500">불러오는 중 오류가 발생했어요: {error.message}</div>}
+      {error?.message?.includes('species') && (
+        <div className="card text-amber-500">
+          도감 테이블이 비어있거나 마이그레이션이 적용되지 않았어요.
+          Supabase에서 0001~0005 마이그레이션과 seed.sql을 실행해 주세요.
+        </div>
+      )}
 
       {/* 초성 인덱스 점프 바 */}
       {!q && groups.length > 0 && (
