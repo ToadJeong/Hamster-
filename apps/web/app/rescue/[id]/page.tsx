@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { RescueAuthorActions } from '@/components/RescueAuthorActions';
 import {
   RESCUE_KIND_LABEL, RESCUE_STATUS_LABEL,
   type RescuePostWithAuthor,
@@ -11,6 +12,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function RescueDetail({ params }: { params: { id: string } }) {
   const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from('rescue_posts_with_author')
     .select('*')
@@ -20,6 +23,7 @@ export default async function RescueDetail({ params }: { params: { id: string } 
   if (error || !data) notFound();
   const r = data as RescuePostWithAuthor;
   const kindMeta = RESCUE_KIND_LABEL[r.kind];
+  const isAuthor = user && r.author_id === user.id;
 
   return (
     <article className="mx-auto max-w-3xl space-y-6">
@@ -57,6 +61,8 @@ export default async function RescueDetail({ params }: { params: { id: string } 
           </p>
         </div>
       )}
+
+      {isAuthor && <RescueAuthorActions postId={r.id} currentStatus={r.status} />}
     </article>
   );
 }
