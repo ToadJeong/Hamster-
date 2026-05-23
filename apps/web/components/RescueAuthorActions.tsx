@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useModal } from '@/components/Modal';
 import { RESCUE_STATUS_LABEL, type RescueStatus } from '@hamster/shared';
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
 export function RescueAuthorActions({ postId, currentStatus }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const modal = useModal();
   const [status, setStatus] = useState<RescueStatus>(currentStatus);
   const [busy, setBusy] = useState(false);
 
@@ -23,14 +25,26 @@ export function RescueAuthorActions({ postId, currentStatus }: Props) {
     setStatus(next);
     const { error } = await supabase.from('rescue_posts').update({ status: next }).eq('id', postId);
     setBusy(false);
-    if (error) { setStatus(prev); alert('상태 변경 실패: ' + error.message); return; }
+    if (error) {
+      setStatus(prev);
+      await modal.alert({ title: '상태 변경 실패', message: error.message, tone: 'error' });
+      return;
+    }
     router.refresh();
   }
 
   async function handleDelete() {
-    if (!confirm('이 글을 삭제할까요?')) return;
+    const ok = await modal.confirm({
+      title: '이 글을 삭제할까요?',
+      message: '한 번 삭제하면 되돌릴 수 없어요.',
+      confirmText: '삭제하기',
+    });
+    if (!ok) return;
     const { error } = await supabase.from('rescue_posts').delete().eq('id', postId);
-    if (error) { alert('삭제 실패: ' + error.message); return; }
+    if (error) {
+      await modal.alert({ title: '삭제 실패', message: error.message, tone: 'error' });
+      return;
+    }
     router.push('/rescue');
     router.refresh();
   }

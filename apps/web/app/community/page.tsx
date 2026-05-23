@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { ReadBadge } from '@/components/ReadBadge';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 export const revalidate = 15;
@@ -109,7 +110,7 @@ export default async function CommunityIndex({
             const meta = COMMUNITY_CATEGORY_LABEL[p.category as CommunityCategory] ?? COMMUNITY_CATEGORY_LABEL.free;
             return (
               <li key={p.id}>
-                <Link href={`/community/${p.id}`} className="card flex gap-3 transition hover:-translate-y-0.5 hover:shadow-soft">
+                <Link href={`/community/${p.id}`} className="card flex gap-3 transition hover:-translate-y-0.5 hover:shadow-soft has-[[data-read=true]]:opacity-60">
                   {p.cover_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={p.cover_url} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
@@ -120,6 +121,7 @@ export default async function CommunityIndex({
                       {(p.tags as string[] ?? []).slice(0, 3).map((t) => (
                         <span key={t} className="badge bg-lilac-50 text-lilac-400">#{t}</span>
                       ))}
+                      <ReadBadge type="community" id={p.id} />
                     </div>
                     <h3 className="line-clamp-1 font-semibold text-cocoa-500">{p.title}</h3>
                     <p className="mt-1 line-clamp-2 text-sm text-cocoa-300">{p.body}</p>
@@ -128,6 +130,7 @@ export default async function CommunityIndex({
                       <span>{formatDate(p.created_at)}</span>
                       <span>❤ {p.like_count ?? 0}</span>
                       <span>💬 {p.comment_count ?? 0}</span>
+                      <span>👁 {p.view_count ?? 0}</span>
                     </div>
                   </div>
                 </Link>

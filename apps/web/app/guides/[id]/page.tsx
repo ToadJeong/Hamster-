@@ -8,6 +8,7 @@ import { formatDate } from '@/lib/format';
 import { LikeButton } from '@/components/LikeButton';
 import { CommentSection } from '@/components/CommentSection';
 import { GuideActions } from '@/components/GuideActions';
+import { ViewTracker } from '@/components/ViewTracker';
 import type { GuideWithCounts, CommentWithAuthor } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -75,6 +76,8 @@ export default async function GuideDetail({ params }: { params: { id: string } }
           )}
           <span>{formatDate(g.created_at)}</span>
           {g.updated_at !== g.created_at && <span>· 수정됨</span>}
+          <span>·</span>
+          <ViewTracker type="guide" id={g.id} initialCount={(g as any).view_count ?? 0} showCount />
         </div>
         <h1 className="font-display text-3xl font-bold leading-tight text-cocoa-500 md:text-4xl">
           {g.title}

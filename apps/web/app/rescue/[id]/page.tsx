@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import { RescueAuthorActions } from '@/components/RescueAuthorActions';
+import { ViewTracker } from '@/components/ViewTracker';
 import {
   RESCUE_KIND_LABEL, RESCUE_STATUS_LABEL,
   type RescuePostWithAuthor,
@@ -47,7 +48,10 @@ export default async function RescueDetail({ params }: { params: { id: string } 
           {typeof r.age_months === 'number' && <span className="badge">{r.age_months}개월</span>}
         </div>
         <h1 className="font-display text-2xl font-bold leading-tight text-cocoa-500 sm:text-3xl">{r.title}</h1>
-        <div className="text-sm text-cocoa-300">{r.author_username ?? '익명'} · {formatDate(r.created_at)}</div>
+        <div className="flex items-center gap-1.5 text-sm text-cocoa-300">
+          <span>{r.author_username ?? '익명'} · {formatDate(r.created_at)} ·</span>
+          <ViewTracker type="rescue" id={r.id} initialCount={(r as any).view_count ?? 0} showCount />
+        </div>
       </header>
 
       <div className="prose-soft whitespace-pre-line text-[15px]">{r.body}</div>

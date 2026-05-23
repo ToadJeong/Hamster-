@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideCard } from '@/components/GuideCard';
+import { CorrectionButton } from '@/components/CorrectionButton';
 import type { Species, GuideWithCounts } from '@hamster/shared';
 
 export const revalidate = 60;
@@ -88,6 +89,12 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
           <div className="card whitespace-pre-line prose-soft bg-mint-50">{s.care_tips}</div>
         </section>
       )}
+
+      {/* 정보 제보 */}
+      <div className="flex items-center justify-between rounded-cute border border-cream-200 bg-cream-50 px-4 py-3">
+        <p className="text-sm text-cocoa-400">정보가 정확하지 않나요? 햄집사님의 제보로 더 정확해져요.</p>
+        <CorrectionButton targetType="species" targetId={s.id} targetSlug={s.slug} targetName={s.name_ko} />
+      </div>
 
       <section>
         <div className="mb-3 flex items-end justify-between">

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useModal } from '@/components/Modal';
 import { formatDate } from '@/lib/format';
 
 type Report = {
@@ -17,10 +18,12 @@ type Report = {
 export function ChatReportsList({ initial }: { initial: Report[] }) {
   const supabase = createSupabaseBrowserClient();
   const router = useRouter();
+  const modal = useModal();
   const [items, setItems] = useState(initial);
 
   async function resolve(id: string) {
-    if (!confirm('이 신고를 처리 완료로 표시하고 삭제할까요?')) return;
+    const ok = await modal.confirm({ title: '이 신고를 처리 완료로 표시할까요?', message: '목록에서 삭제됩니다.', confirmText: '처리 완료' });
+    if (!ok) return;
     const { error } = await supabase.from('chat_reports').delete().eq('id', id);
     if (!error) {
       setItems((prev) => prev.filter((r) => r.id !== id));
