@@ -3,6 +3,8 @@ export type Profile = {
   username: string;
   avatar_url: string | null;
   bio: string | null;
+  phone: string | null;
+  interest_tags: string[];
   is_admin: boolean;
   created_at: string;
 };
@@ -132,6 +134,7 @@ export type CommunityPost = {
   title: string;
   body: string;
   category: CommunityCategory;
+  tags: string[];
   created_at: string;
   updated_at: string;
 };
@@ -161,4 +164,42 @@ export type RescuePostWithAuthor = RescuePost & {
   author_avatar_url: string | null;
   species_slug: string | null;
   species_name_ko: string | null;
+};
+
+/* 라운지 채팅 영구 기록 (최근 1시간 조회용) */
+export type LobbyMessageRow = {
+  id: string;
+  sender_id: string | null;
+  sender_label: string;
+  sender_session: string;
+  is_admin: boolean;
+  body: string;
+  created_at: string;
+};
+
+/* DM */
+export type DMThread = {
+  id: string;
+  user_a: string;
+  user_b: string;
+  created_at: string;
+  last_message_at: string;
+};
+
+export type DMMessage = {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  body: string;
+  read_at: string | null;
+  created_at: string;
+};
+
+/* 커뮤니티 피드 */
+export type CommunityPostFeed = CommunityPost & {
+  author_username: string | null;
+  author_avatar_url: string | null;
+  tags: string[];
+  like_count: number;
+  comment_count: number;
 };

@@ -56,9 +56,9 @@ export default async function RescueIndex({
         })}
       </div>
 
-      {error?.message?.includes('rescue_posts') && (
-        <div className="card text-amber-500">
-          유기햄 구조대 테이블이 아직 없어요. Supabase에 `0005_announcements_community_rescue.sql`을 적용해 주세요.
+      {error && (
+        <div className="card text-center text-sm text-cocoa-300">
+          🆘 구조대 게시판을 준비하고 있어요. 잠시 후 다시 와 주세요!
         </div>
       )}
 

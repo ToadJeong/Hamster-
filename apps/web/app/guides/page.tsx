@@ -42,9 +42,9 @@ export default async function GuidesIndex({
         <Link href="/guides/new" className="btn-primary text-sm">✏️ 가이드 쓰기</Link>
       </div>
 
-      {error?.message?.includes('guides_with_counts') && (
-        <div className="card text-amber-500">
-          아직 데이터베이스가 초기화되지 않았어요. Supabase에서 0001~0005 마이그레이션을 적용해 주세요.
+      {error && (
+        <div className="card text-center text-sm text-cocoa-300">
+          📖 가이드를 준비하고 있어요. 잠시 후 다시 와 주세요!
         </div>
       )}
 

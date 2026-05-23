@@ -110,7 +110,9 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
 
 function translateAuthError(message: string): string {
   if (/invalid login credentials/i.test(message)) return '이메일 또는 비밀번호가 올바르지 않아요.';
-  if (/email not confirmed/i.test(message)) return '이메일 인증이 완료되지 않았어요. 메일함을 확인해 주세요.';
-  if (/over_email_send_rate_limit/i.test(message)) return '잠시 후 다시 시도해 주세요.';
+  if (/email not confirmed/i.test(message)) return '이메일 인증이 완료되지 않았어요. 메일함과 스팸함을 확인해 주세요.';
+  if (/email rate limit|over_email_send_rate_limit/i.test(message)) {
+    return '메일 발송 한도에 도달했어요. 잠시 후 다시 시도하거나, 관리자에게 Custom SMTP 설정을 요청해 주세요.';
+  }
   return message;
 }

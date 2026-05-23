@@ -48,10 +48,9 @@ export default async function SpeciesIndex({
         </form>
       </div>
 
-      {error?.message?.includes('species') && (
-        <div className="card text-amber-500">
-          도감 테이블이 비어있거나 마이그레이션이 적용되지 않았어요.
-          Supabase에서 0001~0005 마이그레이션과 seed.sql을 실행해 주세요.
+      {error && (
+        <div className="card text-center text-sm text-cocoa-300">
+          🐹 도감을 준비하고 있어요. 잠시 후 다시 와 주세요!
         </div>
       )}
 
