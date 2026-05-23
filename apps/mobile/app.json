@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "햄찌랜드",
+    "slug": "hamster-community",
+    "scheme": "hamster",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.hamster.community" },
+    "android": { "package": "com.hamster.community" },
+    "web": { "bundler": "metro" },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}

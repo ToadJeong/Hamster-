@@ -1,0 +1,121 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { getSiteSettings } from '@/lib/site-settings';
+import { formatDate } from '@/lib/format';
+import { LikeButton } from '@/components/LikeButton';
+import { CommentSection } from '@/components/CommentSection';
+import { GuideActions } from '@/components/GuideActions';
+import type { GuideWithCounts, CommentWithAuthor } from '@hamster/shared';
+
+export const dynamic = 'force-dynamic';
+
+export default async function GuideDetail({ params }: { params: { id: string } }) {
+  const supabase = createSupabaseServerClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const settings = await getSiteSettings();
+
+  const { data: guide } = await supabase
+    .from('guides_with_counts')
+    .select('*')
+    .eq('id', params.id)
+    .maybeSingle();
+
+  if (!guide) notFound();
+  const g = guide as GuideWithCounts;
+
+  // 좋아요 여부
+  let liked = false;
+  if (user) {
+    const { data: likeRow } = await supabase
+      .from('likes')
+      .select('user_id')
+      .eq('guide_id', g.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    liked = !!likeRow;
+  }
+
+  // 댓글
+  const { data: commentsData } = await supabase
+    .from('comments')
+    .select('id, guide_id, author_id, anonymous_nickname, body, created_at, author:profiles!comments_author_id_fkey(username, avatar_url)')
+    .eq('guide_id', g.id)
+    .order('created_at', { ascending: true });
+
+  const comments = (commentsData as unknown as CommentWithAuthor[]) ?? [];
+
+  const isAuthor = user?.id === g.author_id && g.author_id !== null;
+  const isAnonymousGuide = g.author_id === null;
+
+  return (
+    <article className="mx-auto max-w-3xl space-y-6">
+      <Link href="/guides" className="text-sm text-cocoa-300 hover:text-peach-500">
+        ← 가이드 목록
+      </Link>
+
+      {g.cover_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={g.cover_url}
+          alt=""
+          className="aspect-[16/9] w-full rounded-cute object-cover shadow-softer"
+        />
+      )}
+
+      <header className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-cocoa-300">
+          {g.species_name_ko && g.species_slug && (
+            <Link href={`/species/${g.species_slug}`} className="badge bg-mint-100 text-mint-400 hover:bg-mint-200">
+              #{g.species_name_ko}
+            </Link>
+          )}
+          <span>{formatDate(g.created_at)}</span>
+          {g.updated_at !== g.created_at && <span>· 수정됨</span>}
+        </div>
+        <h1 className="font-display text-3xl font-bold leading-tight text-cocoa-500 md:text-4xl">
+          {g.title}
+        </h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-cocoa-400">
+            {g.author_avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={g.author_avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+            ) : (
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-peach-200">🐹</span>
+            )}
+            <span>{g.author_username ?? '익명'}</span>
+            {isAnonymousGuide && <span className="badge bg-cocoa-100 text-cocoa-400">익명</span>}
+          </div>
+          {(isAuthor || isAnonymousGuide) && (
+            <GuideActions guideId={g.id} isAnonymous={isAnonymousGuide} canEdit={isAuthor} />
+          )}
+        </div>
+      </header>
+
+      <div className="prose-soft">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{g.body}</ReactMarkdown>
+      </div>
+
+      <div className="flex items-center justify-between border-y border-cream-200 py-4">
+        <LikeButton
+          guideId={g.id}
+          initialLiked={liked}
+          initialCount={g.like_count}
+          isAuthed={!!user}
+        />
+        <span className="text-sm text-cocoa-300">💬 {g.comment_count} · ❤ {g.like_count}</span>
+      </div>
+
+      <CommentSection
+        guideId={g.id}
+        initialComments={comments}
+        currentUserId={user?.id ?? null}
+        allowAnonymous={settings['app.allow_anonymous']}
+      />
+    </article>
+  );
+}

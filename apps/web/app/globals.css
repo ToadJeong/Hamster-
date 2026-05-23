@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #FFFBF6;
+    --fg: #4B3A2B;
+  }
+  html, body {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+  body {
+    font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: 'Gowun Dodum', 'Pretendard', system-ui, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-peach-400 px-5 py-2.5 font-semibold text-white shadow-soft transition hover:bg-peach-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border border-cocoa-200 bg-white px-5 py-2.5 font-semibold text-cocoa-500 shadow-softer transition hover:bg-cream-50 active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-cocoa-400 transition hover:bg-cream-100;
+  }
+  .card {
+    @apply rounded-cute border border-cream-200 bg-white p-5 shadow-softer;
+  }
+  .input {
+    @apply w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-cocoa-500 placeholder:text-cocoa-200 focus:border-peach-300 focus:outline-none focus:ring-2 focus:ring-peach-200;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full bg-cream-100 px-2.5 py-0.5 text-xs font-medium text-cocoa-400;
+  }
+  .prose-soft {
+    @apply text-cocoa-500 leading-7;
+  }
+  .prose-soft h1 { @apply mt-6 mb-3 text-3xl font-bold; }
+  .prose-soft h2 { @apply mt-6 mb-2 text-2xl font-bold; }
+  .prose-soft h3 { @apply mt-5 mb-2 text-xl font-bold; }
+  .prose-soft p  { @apply my-3; }
+  .prose-soft ul { @apply my-3 list-disc pl-6; }
+  .prose-soft ol { @apply my-3 list-decimal pl-6; }
+  .prose-soft li { @apply my-1; }
+  .prose-soft code { @apply rounded bg-cream-100 px-1.5 py-0.5 text-sm; }
+  .prose-soft pre  { @apply my-4 overflow-x-auto rounded-2xl bg-cocoa-500 p-4 text-cream-50; }
+  .prose-soft pre code { @apply bg-transparent p-0; }
+  .prose-soft blockquote { @apply my-4 border-l-4 border-peach-200 bg-peach-50 py-2 pl-4 italic; }
+  .prose-soft a { @apply text-peach-500 underline underline-offset-2; }
+  .prose-soft img { @apply my-4 rounded-2xl; }
+}
