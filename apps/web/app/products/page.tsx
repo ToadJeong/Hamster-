@@ -4,6 +4,8 @@ import { formatDate } from '@/lib/format';
 import { EmptyState } from '@/components/EmptyState';
 import { NaverPopular } from '@/components/NaverPopular';
 import { fetchNaverShopping } from '@/lib/naver';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import { PRODUCT_CATEGORY_LABEL, type ProductCategory } from '@hamster/shared';
 
 export const revalidate = 20;
@@ -14,6 +16,7 @@ export default async function ProductsIndex({
   searchParams: { c?: ProductCategory };
 }) {
   const supabase = createSupabaseServerClient();
+  const t = makeT(getLocale());
   const cat = searchParams.c;
 
   let q = supabase.from('product_posts_feed').select('*').order('created_at', { ascending: false }).limit(60);
@@ -30,16 +33,16 @@ export default async function ProductsIndex({
   ]);
   const items = (data as any[]) ?? [];
   const topPicks = ((topData as any[]) ?? []).filter((p) => (p.like_count ?? 0) > 0);
-  const naverLabel = cat ? PRODUCT_CATEGORY_LABEL[cat].label : '햄스터 용품';
+  const naverLabel = cat ? PRODUCT_CATEGORY_LABEL[cat].label : t('products.naverDefault');
 
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">🛍 상품 추천</h1>
-          <p className="mt-1 text-sm text-cocoa-300">햄집사들이 직접 써보고 추천하는 용품. 링크를 올리면 미리보기로 보여줘요.</p>
+          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('products.title')}</h1>
+          <p className="mt-1 text-sm text-cocoa-300">{t('products.subtitle')}</p>
         </div>
-        <Link href="/products/new" className="btn-primary text-sm">✏️ 상품 추천하기</Link>
+        <Link href="/products/new" className="btn-primary text-sm">{t('products.recommend')}</Link>
       </header>
 
       {/* 실시간 인기 상품 (네이버 쇼핑) — 키 미설정 시 자동으로 숨김 */}
@@ -48,7 +51,7 @@ export default async function ProductsIndex({
       {/* 햄집사 추천 TOP (우리 커뮤니티 추천수 상위) */}
       {topPicks.length > 0 && (
         <section className="space-y-2.5">
-          <h2 className="font-display text-base font-bold text-cocoa-500">⭐ 햄집사 추천 TOP</h2>
+          <h2 className="font-display text-base font-bold text-cocoa-500">{t('products.topPicks')}</h2>
           <div className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1.5">
             {topPicks.map((p, i) => {
               const m = PRODUCT_CATEGORY_LABEL[p.category as ProductCategory] ?? PRODUCT_CATEGORY_LABEL.etc;
@@ -76,7 +79,7 @@ export default async function ProductsIndex({
       )}
 
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
-        <Link href="/products" className={'badge ' + (!cat ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>전체</Link>
+        <Link href="/products" className={'badge ' + (!cat ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>{t('common.all')}</Link>
         {(Object.keys(PRODUCT_CATEGORY_LABEL) as ProductCategory[]).map((k) => {
           const m = PRODUCT_CATEGORY_LABEL[k];
           return (
@@ -89,14 +92,14 @@ export default async function ProductsIndex({
       </div>
 
       {error && (
-        <div className="card text-center text-sm text-cocoa-300">🛍 상품 게시판을 준비하고 있어요. 잠시 후 다시 와 주세요!</div>
+        <div className="card text-center text-sm text-cocoa-300">{t('products.preparing')}</div>
       )}
 
       {items.length === 0 ? (
         <EmptyState
-          title="아직 추천 상품이 없어요"
-          description="직접 써본 케이지·휠·사료 등 좋은 용품을 추천해 주세요!"
-          action={<Link href="/products/new" className="btn-primary text-sm">상품 추천하기</Link>}
+          title={t('products.emptyTitle')}
+          description={t('products.emptyDesc')}
+          action={<Link href="/products/new" className="btn-primary text-sm">{t('products.emptyAction')}</Link>}
           kind="campbell"
         />
       ) : (
@@ -120,7 +123,7 @@ export default async function ProductsIndex({
                     <h3 className="line-clamp-1 font-bold text-cocoa-500 group-hover:text-peach-500">{p.title}</h3>
                     <p className="mt-0.5 line-clamp-1 text-[13px] text-cocoa-400">{p.description}</p>
                     <div className="mt-1.5 text-[11px] text-cocoa-300">
-                      <span className="font-medium text-cocoa-400">{p.author_username ?? '익명'}</span> · {formatDate(p.created_at)} · 👍 {p.like_count ?? 0}
+                      <span className="font-medium text-cocoa-400">{p.author_username ?? t('common.anonymous')}</span> · {formatDate(p.created_at)} · 👍 {p.like_count ?? 0}
                     </div>
                   </div>
                 </Link>

@@ -1,6 +1,6 @@
 import { HospitalSearch } from '@/components/HospitalSearch';
-
-export const dynamic = 'force-static';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 
 const REGIONS = [
   '서울', '경기', '인천', '부산', '대구', '대전', '광주', '울산',
@@ -8,19 +8,20 @@ const REGIONS = [
 ];
 
 export default function HospitalsPage() {
+  const t = makeT(getLocale());
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">🏥 햄스터 병원 찾기</h1>
+        <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('hospitals.title')}</h1>
         <p className="mt-1 text-sm text-cocoa-300">
-          햄찌를 진료하는 동물병원은 흔하지 않아요. 지역을 고르면 네이버 지도에서 가까운 병원을 찾아드려요.
+          {t('hospitals.subtitle')}
         </p>
       </header>
 
       <HospitalSearch />
 
       <section className="space-y-3">
-        <h2 className="font-semibold text-cocoa-500">지역으로 바로 찾기</h2>
+        <h2 className="font-semibold text-cocoa-500">{t('hospitals.byRegion')}</h2>
         <div className="flex flex-wrap gap-2">
           {REGIONS.map((r) => (
             <a
@@ -34,11 +35,11 @@ export default function HospitalsPage() {
             </a>
           ))}
         </div>
-        <p className="text-xs text-cocoa-300">버튼을 누르면 네이버 지도 검색이 새 탭으로 열려요.</p>
+        <p className="text-xs text-cocoa-300">{t('hospitals.naverNote')}</p>
       </section>
 
       <section className="card bg-mint-50 text-sm text-cocoa-500">
-        <p className="font-semibold">🐹 병원 가기 전 팁</p>
+        <p className="font-semibold">{t('hospitals.tipsTitle')}</p>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 text-cocoa-400">
           <li><strong>‘소동물·이그조틱(exotic) 진료’ 가능 여부를 전화로 먼저 확인하세요.</strong> 개·고양이만 보는 곳이 대부분이라, 햄스터를 진료한 경험이 있는지까지 물어보면 좋아요.</li>
           <li><strong>이동 시 보온이 가장 중요해요.</strong> 작은 통에 평소 쓰던 베딩을 깔고(익숙한 냄새가 안정에 도움), 겨울엔 손난로를 수건으로 감싸 통 한쪽에 둬요. 한쪽만 따뜻하게 해 더우면 피할 수 있게 합니다.</li>

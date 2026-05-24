@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideCard } from '@/components/GuideCard';
 import { EmptyState } from '@/components/EmptyState';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import type { GuideWithCounts, Species } from '@hamster/shared';
 
 export const revalidate = 30;
@@ -12,6 +14,7 @@ export default async function GuidesIndex({
   searchParams: { species?: string };
 }) {
   const supabase = createSupabaseServerClient();
+  const t = makeT(getLocale());
   const speciesSlug = searchParams.species;
 
   // 종 필터 옵션
@@ -37,15 +40,15 @@ export default async function GuidesIndex({
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">📖 사육 가이드</h1>
-          <p className="mt-1 text-sm text-cocoa-300">햄집사들이 직접 쓴 사육법, 팁, 경험담</p>
+          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('guides.title')}</h1>
+          <p className="mt-1 text-sm text-cocoa-300">{t('guides.subtitle')}</p>
         </div>
-        <Link href="/guides/new" className="btn-primary text-sm">✏️ 가이드 쓰기</Link>
+        <Link href="/guides/new" className="btn-primary text-sm">{t('guides.write')}</Link>
       </div>
 
       {error && (
         <div className="card text-center text-sm text-cocoa-300">
-          📖 가이드를 준비하고 있어요. 잠시 후 다시 와 주세요!
+          {t('guides.preparing')}
         </div>
       )}
 
@@ -57,7 +60,7 @@ export default async function GuidesIndex({
             'badge ' + (!speciesSlug ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')
           }
         >
-          전체
+          {t('common.all')}
         </Link>
         {(speciesList as Pick<Species,'slug'|'name_ko'>[] ?? []).map((s) => (
           <Link
@@ -75,9 +78,9 @@ export default async function GuidesIndex({
 
       {guides.length === 0 ? (
         <EmptyState
-          title="아직 가이드가 없어요"
-          description="사육 노하우·꿀팁·경험담을 가장 먼저 나눠보세요!"
-          action={<Link href="/guides/new" className="btn-primary text-sm">가이드 쓰기</Link>}
+          title={t('guides.emptyTitle')}
+          description={t('guides.emptyDesc')}
+          action={<Link href="/guides/new" className="btn-primary text-sm">{t('guides.emptyAction')}</Link>}
           kind="teddy"
         />
       ) : (
