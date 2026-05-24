@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useT } from '@/components/I18nProvider';
 import { formatDate } from '@/lib/format';
 
 type Notif = {
@@ -28,6 +29,7 @@ const ICON: Record<string, string> = {
 export function NotificationList({ initial }: { initial: Notif[] }) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
   const [items, setItems] = useState<Notif[]>(initial);
 
   // 페이지 열면 전체 읽음 처리
@@ -39,7 +41,7 @@ export function NotificationList({ initial }: { initial: Notif[] }) {
   if (items.length === 0) {
     return (
       <div className="card text-center text-cocoa-300">
-        아직 알림이 없어요. 글을 쓰고 햄집사들과 소통해 보세요! 🐹
+        {t('nt.empty')}
       </div>
     );
   }

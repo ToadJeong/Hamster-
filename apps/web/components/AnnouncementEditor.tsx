@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
+import { useT } from '@/components/I18nProvider';
 
 type Props = {
   initial?: { id: string; title: string; body: string; pinned: boolean; cover_url?: string | null };
@@ -14,6 +15,7 @@ type Props = {
 export function AnnouncementEditor({ initial }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
 
   const [title, setTitle] = useState(initial?.title ?? '');
   const [body, setBody] = useState(initial?.body ?? '');
@@ -28,7 +30,7 @@ export function AnnouncementEditor({ initial }: Props) {
     setSaving(true); setError(null);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('로그인이 필요해요.');
+      if (!user) throw new Error(t('form.loginRequired'));
 
       const payload = { title: title.trim(), body: body.trim(), pinned, cover_url: coverUrl, created_by: user.id };
 
@@ -42,7 +44,7 @@ export function AnnouncementEditor({ initial }: Props) {
       router.push('/announcements');
       router.refresh();
     } catch (e: any) {
-      setError(e.message ?? '저장 실패');
+      setError(e.message ?? t('form.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -52,7 +54,7 @@ export function AnnouncementEditor({ initial }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <input
         className="input text-lg font-semibold"
-        placeholder="공지 제목"
+        placeholder={t('ae.titlePh')}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
@@ -61,32 +63,32 @@ export function AnnouncementEditor({ initial }: Props) {
 
       <label className="flex items-center gap-2 text-sm text-cocoa-500">
         <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
-        📌 상단에 고정
+        {t('ae.pin')}
       </label>
 
       <ImageUploader
         bucket="announcement-images"
         value={coverUrl}
         onChange={setCoverUrl}
-        label="대표 이미지 (선택)"
-        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+        label={t('ae.cover')}
+        hint={t('form.coverHintImg')}
       />
 
       <div className="flex w-fit gap-1 rounded-full bg-cream-100 p-1 text-sm">
         <button type="button" onClick={() => setTab('write')}
           className={'rounded-full px-4 py-1.5 ' + (tab === 'write' ? 'bg-white font-semibold shadow-softer' : 'text-cocoa-300')}>
-          작성
+          {t('form.write')}
         </button>
         <button type="button" onClick={() => setTab('preview')}
           className={'rounded-full px-4 py-1.5 ' + (tab === 'preview' ? 'bg-white font-semibold shadow-softer' : 'text-cocoa-300')}>
-          미리보기
+          {t('form.preview')}
         </button>
       </div>
 
       {tab === 'write' ? (
         <textarea
           className="input min-h-[300px] font-mono text-sm"
-          placeholder={`## 안내\n공지 본문을 마크다운으로 작성해 주세요.\n\n- 항목 1\n- 항목 2`}
+          placeholder={t('ae.bodyPh')}
           value={body}
           onChange={(e) => setBody(e.target.value)}
           required
@@ -96,7 +98,7 @@ export function AnnouncementEditor({ initial }: Props) {
           {body.trim() ? (
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
           ) : (
-            <p className="text-cocoa-300">미리보기 내용이 없어요.</p>
+            <p className="text-cocoa-300">{t('form.noPreview')}</p>
           )}
         </div>
       )}
@@ -104,9 +106,9 @@ export function AnnouncementEditor({ initial }: Props) {
       {error && <div className="card text-red-500">{error}</div>}
 
       <div className="flex justify-end gap-2">
-        <button type="button" className="btn-secondary" onClick={() => router.back()}>취소</button>
+        <button type="button" className="btn-secondary" onClick={() => router.back()}>{t('form.cancel')}</button>
         <button type="submit" className="btn-primary" disabled={saving || !title.trim() || !body.trim()}>
-          {saving ? '저장 중…' : initial ? '수정 완료' : '게시'}
+          {saving ? t('form.saving') : initial ? t('form.editDone') : t('form.post')}
         </button>
       </div>
     </form>

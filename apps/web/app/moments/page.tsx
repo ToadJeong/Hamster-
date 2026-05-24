@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { Media } from '@/components/Media';
 import { isVideoUrl } from '@/lib/media';
 import { EmptyState } from '@/components/EmptyState';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import type { MomentFeed } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +15,7 @@ export default async function MomentsPage({
   searchParams: { feed?: 'all' | 'following' };
 }) {
   const supabase = createSupabaseServerClient();
+  const t = makeT(getLocale());
   const { data: { user } } = await supabase.auth.getUser();
   const feed = searchParams.feed ?? 'all';
 
@@ -35,27 +38,27 @@ export default async function MomentsPage({
     <div className="mx-auto max-w-3xl space-y-4">
       <header className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">✨ 육아일기</h1>
-          <p className="mt-1 text-sm text-cocoa-300">우리집 햄찌의 귀여운 순간을 기록하고 나눠요</p>
+          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('moments.title')}</h1>
+          <p className="mt-1 text-sm text-cocoa-300">{t('moments.subtitle')}</p>
         </div>
-        <Link href="/moments/new" className="btn-primary text-sm">📸 기록하기</Link>
+        <Link href="/moments/new" className="btn-primary text-sm">{t('moments.record')}</Link>
       </header>
 
       <div className="flex gap-2 border-b border-cream-200">
-        <FeedTab href="/moments?feed=all" active={feed === 'all'}>🌎 전체</FeedTab>
-        {user && <FeedTab href="/moments?feed=following" active={feed === 'following'}>⭐ 팔로잉</FeedTab>}
+        <FeedTab href="/moments?feed=all" active={feed === 'all'}>{t('feed.all')}</FeedTab>
+        {user && <FeedTab href="/moments?feed=following" active={feed === 'following'}>{t('feed.following')}</FeedTab>}
       </div>
 
-      {error && <EmptyState title="육아일기를 준비하고 있어요" description="잠시 후 다시 와 주세요!" />}
+      {error && <EmptyState title={t('moments.preparingTitle')} description={t('moments.preparingDesc')} />}
 
       {moments.length === 0 ? (
         feed === 'following' ? (
-          <EmptyState title="팔로잉 육아일기가 없어요" description="마음에 드는 햄집사를 팔로우하면 여기에 모여요." kind="winterwhite" />
+          <EmptyState title={t('moments.emptyFollowTitle')} description={t('moments.emptyFollowDesc')} kind="winterwhite" />
         ) : (
           <EmptyState
-            title="첫 육아일기를 남겨보세요"
-            description="우리집 햄찌의 일상 사진을 올리고 햄집사들과 나눠요!"
-            action={<Link href="/moments/new" className="btn-primary text-sm">📸 기록하기</Link>}
+            title={t('moments.emptyTitle')}
+            description={t('moments.emptyDesc')}
+            action={<Link href="/moments/new" className="btn-primary text-sm">{t('moments.record')}</Link>}
             kind="golden"
           />
         )
@@ -83,7 +86,7 @@ export default async function MomentsPage({
 
 function FeedTab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link href={href}
+    <Link href={href} scroll={false}
       className={'border-b-2 px-3 py-2 text-sm font-bold transition ' +
         (active ? 'border-peach-400 text-peach-500' : 'border-transparent text-cocoa-300 hover:text-cocoa-500')}>
       {children}

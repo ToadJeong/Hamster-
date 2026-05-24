@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useModal } from '@/components/Modal';
+import { useT } from '@/components/I18nProvider';
 import { insertAnonymousComment, validateAnonPassword } from '@/lib/anon-password';
 import { formatDate } from '@/lib/format';
 import type { CommentWithAuthor } from '@hamster/shared';
@@ -19,6 +20,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const modal = useModal();
+  const t = useT();
   const [comments, setComments] = useState(initialComments);
   const [body, setBody] = useState('');
   const [anonNickname, setAnonNickname] = useState('');
@@ -42,7 +44,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
         }
         const pwErr = validateAnonPassword(anonPassword);
         if (pwErr) { setError(pwErr); setSending(false); return; }
-        if (anonNickname.trim().length < 1) { setError('닉네임을 입력해 주세요.'); setSending(false); return; }
+        if (anonNickname.trim().length < 1) { setError(t('form.enterNickname')); setSending(false); return; }
 
         const { id, error } = await insertAnonymousComment(supabase, {
           guide_id: guideId,
@@ -50,7 +52,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
           password: anonPassword,
           body: body.trim(),
         });
-        if (error || !id) throw error ?? new Error('등록 실패');
+        if (error || !id) throw error ?? new Error(t('cm.registerFailed'));
 
         // 신규 댓글을 다시 조회하여 author null + anonymous_nickname 표시
         const { data: newRow } = await supabase
@@ -82,7 +84,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
         router.refresh();
       }
     } catch (e: any) {
-      setError(e.message ?? '댓글 등록 중 오류가 발생했어요.');
+      setError(e.message ?? t('cm.submitError'));
     } finally {
       setSending(false);
     }
@@ -90,7 +92,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
 
   async function handleDelete(c: CommentWithAuthor) {
     if (c.author_id) {
-      const ok = await modal.confirm({ title: '댓글을 삭제할까요?', confirmText: '삭제하기' });
+      const ok = await modal.confirm({ title: t('cm.delConfirmTitle'), confirmText: t('cm.delConfirm') });
       if (!ok) return;
       const { error } = await supabase.from('comments').delete().eq('id', c.id);
       if (!error) {
@@ -99,10 +101,10 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
       }
     } else {
       const pw = await modal.prompt({
-        title: '익명 댓글 삭제',
-        message: '작성하실 때 입력한 비밀번호를 입력해 주세요.',
+        title: t('cm.delAnonTitle'),
+        message: t('cm.delAnonMsg'),
         inputType: 'password',
-        confirmText: '삭제하기',
+        confirmText: t('cm.delConfirm'),
       });
       if (!pw) return;
       const { data, error } = await supabase.rpc('delete_anonymous_comment', {
@@ -110,7 +112,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
         p_password: pw,
       });
       if (error || !data) {
-        await modal.alert({ title: '비밀번호가 일치하지 않아요', tone: 'error' });
+        await modal.alert({ title: t('cm.wrongPassword'), tone: 'error' });
         return;
       }
       setComments((prev) => prev.filter((x) => x.id !== c.id));
@@ -123,14 +125,14 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
 
   return (
     <section className="space-y-4">
-      <h2 className="font-display text-xl font-bold text-cocoa-500">댓글 {comments.length}</h2>
+      <h2 className="font-display text-xl font-bold text-cocoa-500">{t('cm.title')} {comments.length}</h2>
 
       <ul className="space-y-3">
         {comments.length === 0 && (
-          <li className="card text-center text-cocoa-300">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</li>
+          <li className="card text-center text-cocoa-300">{t('cm.empty')}</li>
         )}
         {comments.map((c) => {
-          const displayName = c.author?.username ?? c.anonymous_nickname ?? '익명';
+          const displayName = c.author?.username ?? c.anonymous_nickname ?? t('common.anonymous');
           return (
             <li key={c.id} className="card">
               <div className="flex items-start justify-between gap-3">
@@ -144,7 +146,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-sm">
                       <span className="font-semibold text-cocoa-500">{displayName}</span>
-                      {!c.author_id && <span className="badge bg-cocoa-100 text-cocoa-400">익명</span>}
+                      {!c.author_id && <span className="badge bg-cocoa-100 text-cocoa-400">{t('common.anonymous')}</span>}
                       <span className="text-xs text-cocoa-300">{formatDate(c.created_at)}</span>
                     </div>
                     <p className="mt-1 whitespace-pre-line text-cocoa-500">{c.body}</p>
@@ -152,7 +154,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
                 </div>
                 {canShowDelete(c) && (
                   <button onClick={() => handleDelete(c)} className="text-xs text-cocoa-300 hover:text-red-400">
-                    삭제
+                    {t('cm.delete')}
                   </button>
                 )}
               </div>
@@ -166,7 +168,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
           <div className="grid gap-2 md:grid-cols-2">
             <input
               className="input"
-              placeholder="닉네임 (예: 햄집사123)"
+              placeholder={t('ge.nicknamePh')}
               value={anonNickname}
               onChange={(e) => setAnonNickname(e.target.value)}
               maxLength={20}
@@ -174,7 +176,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
             <input
               className="input"
               type="password"
-              placeholder="비밀번호 (4자 이상, 삭제 시 사용)"
+              placeholder={t('cm.passwordHint')}
               value={anonPassword}
               onChange={(e) => setAnonPassword(e.target.value)}
               minLength={4}
@@ -186,10 +188,10 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
           className="input min-h-[100px]"
           placeholder={
             currentUserId
-              ? '햄집사로서 한 마디 남겨주세요'
+              ? t('cm.phUser')
               : canUseAnon
-                ? '익명으로 댓글을 남길 수 있어요'
-                : '댓글을 쓰려면 로그인해 주세요'
+                ? t('cm.phAnon')
+                : t('cm.phLogin')
           }
           value={body}
           onChange={(e) => setBody(e.target.value)}
@@ -203,7 +205,7 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
             className="btn-primary"
             disabled={(!currentUserId && !canUseAnon) || sending}
           >
-            {sending ? '등록 중…' : '댓글 등록'}
+            {sending ? t('cm.sending') : t('cm.submit')}
           </button>
         </div>
       </form>

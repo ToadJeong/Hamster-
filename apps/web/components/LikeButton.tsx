@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useT } from '@/components/I18nProvider';
 
 type Props = {
   guideId: string;
@@ -13,6 +14,7 @@ type Props = {
 
 export function LikeButton({ guideId, initialLiked, initialCount, isAuthed }: Props) {
   const router = useRouter();
+  const t = useT();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [_, startTransition] = useTransition();
@@ -62,7 +64,7 @@ export function LikeButton({ guideId, initialLiked, initialCount, isAuthed }: Pr
       aria-pressed={liked}
     >
       <span aria-hidden>{liked ? '❤' : '🤍'}</span>
-      <span>좋아요 {count}</span>
+      <span>{t('act.like')} {count}</span>
     </button>
   );
 }

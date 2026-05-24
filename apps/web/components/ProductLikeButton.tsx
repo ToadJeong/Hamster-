@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useT } from '@/components/I18nProvider';
 
 type Props = {
   productId: string;
@@ -14,6 +15,7 @@ type Props = {
 export function ProductLikeButton({ productId, initialLiked, initialCount, isAuthed }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
 
@@ -45,7 +47,7 @@ export function ProductLikeButton({ productId, initialLiked, initialCount, isAut
       aria-pressed={liked}
     >
       <span aria-hidden>{liked ? '👍' : '👍🏻'}</span>
-      <span>추천 {count}</span>
+      <span>{t('act.recommend')} {count}</span>
     </button>
   );
 }

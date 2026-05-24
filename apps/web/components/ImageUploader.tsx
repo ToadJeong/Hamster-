@@ -28,6 +28,52 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 30 * 1024 * 1024;
 const ALLOWED_IMAGE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const ALLOWED_VIDEO = ['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg'];
+const MAX_DIMENSION = 1600; // 긴 변 기준 리사이즈 한도
+
+/**
+ * 큰 사진을 캔버스로 축소·재인코딩해 용량 한도 안으로 줄인다.
+ * GIF(애니메이션)는 프레임 보존을 위해 그대로 둔다. 실패 시 원본을 반환.
+ */
+async function compressImage(file: File): Promise<File> {
+  if (file.type === 'image/gif') return file;
+  try {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = reject;
+      im.src = dataUrl;
+    });
+    let { width, height } = img;
+    if (Math.max(width, height) > MAX_DIMENSION) {
+      const scale = MAX_DIMENSION / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0, width, height);
+    const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    for (const quality of [0.82, 0.7, 0.6, 0.5]) {
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', quality));
+      if (blob && blob.size <= MAX_IMAGE_SIZE) {
+        return new File([blob], name, { type: 'image/jpeg' });
+      }
+    }
+    const finalBlob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', 0.5));
+    return finalBlob ? new File([finalBlob], name, { type: 'image/jpeg' }) : file;
+  } catch {
+    return file;
+  }
+}
 
 export function ImageUploader({
   bucket, value, onChange, label = '이미지', hint, allowVideo = false,
@@ -50,10 +96,20 @@ export function ImageUploader({
       setError(allowVideo ? '이미지(JPG/PNG/WebP/GIF) 또는 동영상(MP4/WebM/MOV)만 업로드 가능해요.' : 'JPG/PNG/WebP/GIF 만 업로드 가능해요.');
       return;
     }
-    const maxSize = fileIsVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
-    if (file.size > maxSize) {
-      setError(fileIsVideo ? '동영상은 30MB 이하만 업로드 가능해요.' : '이미지는 5MB 이하만 업로드 가능해요.');
-      return;
+
+    const mb = (bytes: number) => (bytes / 1024 / 1024).toFixed(1);
+
+    if (fileIsVideo) {
+      // 동영상은 브라우저에서 압축이 어려워 한도 초과 시 자세히 안내한다.
+      if (file.size > MAX_VIDEO_SIZE) {
+        const over = file.size - MAX_VIDEO_SIZE;
+        setError(
+          `이 동영상은 약 ${mb(file.size)}MB예요. 한도(30MB)보다 ${mb(over)}MB 초과했어요.\n` +
+          `· 영상 길이를 짧게 잘라서 올려보세요.\n` +
+          `· 휴대폰이라면 갤러리에서 ‘해상도 낮춰 저장(720p)’ 후 올리면 용량이 크게 줄어요.`
+        );
+        return;
+      }
     }
 
     setUploading(true);
@@ -63,12 +119,29 @@ export function ImageUploader({
         setError('로그인이 필요해요.');
         return;
       }
-      const ext = file.name.split('.').pop() ?? 'jpg';
+
+      // 사진이 한도를 넘으면 자동으로 축소·재인코딩해서 올린다.
+      let uploadFile = file;
+      if (!fileIsVideo && file.size > MAX_IMAGE_SIZE) {
+        uploadFile = await compressImage(file);
+        if (uploadFile.size > MAX_IMAGE_SIZE) {
+          const over = uploadFile.size - MAX_IMAGE_SIZE;
+          setError(
+            `이 사진은 자동 축소 후에도 약 ${mb(uploadFile.size)}MB로, 한도(5MB)보다 ${mb(over)}MB 큽니다.\n` +
+            `· 더 낮은 해상도로 저장한 사진을 올리거나\n` +
+            `· 화면 캡처본 대신 적당한 크기의 사진을 사용해 주세요.`
+          );
+          setUploading(false);
+          return;
+        }
+      }
+
+      const ext = uploadFile.name.split('.').pop() ?? 'jpg';
       const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
 
       const { error: uploadErr } = await supabase.storage
         .from(bucket)
-        .upload(path, file, { cacheControl: '3600', upsert: false });
+        .upload(path, uploadFile, { cacheControl: '3600', upsert: false });
       if (uploadErr) throw uploadErr;
 
       const { data } = supabase.storage.from(bucket).getPublicUrl(path);
@@ -114,7 +187,7 @@ export function ImageUploader({
           {hint && <p className="mt-1 text-xs text-cocoa-300">{hint}</p>}
         </label>
       )}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="whitespace-pre-line text-sm text-red-500">{error}</p>}
     </div>
   );
 }

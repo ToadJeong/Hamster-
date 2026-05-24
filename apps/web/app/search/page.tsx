@@ -6,6 +6,8 @@ import {
   type GuideWithCounts, type Species, type RescuePostWithAuthor,
 } from '@hamster/shared';
 import { formatDate } from '@/lib/format';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +18,7 @@ export default async function SearchPage({
 }) {
   const q = (searchParams.q ?? '').trim();
   const supabase = createSupabaseServerClient();
+  const t = makeT(getLocale());
 
   let speciesMatches: Pick<Species,'id'|'slug'|'name_ko'|'name_en'|'summary'|'image_url'>[] = [];
   let guideMatches: GuideWithCounts[] = [];
@@ -68,25 +71,25 @@ export default async function SearchPage({
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">🔍 통합 검색</h1>
+        <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('search.title')}</h1>
         <form className="mt-3">
           <input
             name="q"
             defaultValue={q}
-            placeholder="햄스터 종, 가이드, 커뮤니티, 구조대, 공지를 한 번에"
+            placeholder={t('search.placeholder')}
             className="input"
             autoFocus
           />
         </form>
-        {q && <p className="mt-2 text-sm text-cocoa-300">“{q}” 검색 결과 · 총 {total}건</p>}
+        {q && <p className="mt-2 text-sm text-cocoa-300">“{q}” {t('search.results').replace('{n}', String(total))}</p>}
       </header>
 
       {!q ? (
-        <div className="card text-center text-cocoa-300">검색어를 입력해 주세요. (예: 골든, 케이지, 분당)</div>
+        <div className="card text-center text-cocoa-300">{t('search.prompt')}</div>
       ) : (
         <>
           {announcementMatches.length > 0 && (
-            <SearchSection title="공지" emoji="📢" count={announcementMatches.length}>
+            <SearchSection title={t('nav.announcements')} emoji="📢" count={announcementMatches.length}>
               <ul className="space-y-2">
                 {announcementMatches.map((a: any) => (
                   <li key={a.id}>
@@ -103,9 +106,9 @@ export default async function SearchPage({
             </SearchSection>
           )}
 
-          <SearchSection title="도감" emoji="🐹" count={speciesMatches.length}>
+          <SearchSection title={t('nav.species')} emoji="🐹" count={speciesMatches.length}>
             {speciesMatches.length === 0 ? (
-              <div className="card text-center text-cocoa-300">일치하는 종 없음</div>
+              <div className="card text-center text-cocoa-300">{t('search.noneSpecies')}</div>
             ) : (
               <div className="grid gap-3 md:grid-cols-2">
                 {speciesMatches.map((s) => (
@@ -123,9 +126,9 @@ export default async function SearchPage({
             )}
           </SearchSection>
 
-          <SearchSection title="가이드" emoji="📖" count={guideMatches.length}>
+          <SearchSection title={t('nav.guides')} emoji="📖" count={guideMatches.length}>
             {guideMatches.length === 0 ? (
-              <div className="card text-center text-cocoa-300">일치하는 가이드 없음</div>
+              <div className="card text-center text-cocoa-300">{t('search.noneGuides')}</div>
             ) : (
               <div className="grid gap-3 md:grid-cols-2">
                 {guideMatches.map((g) => <GuideCard key={g.id} guide={g} />)}
@@ -133,9 +136,9 @@ export default async function SearchPage({
             )}
           </SearchSection>
 
-          <SearchSection title="커뮤니티" emoji="💬" count={communityMatches.length}>
+          <SearchSection title={t('nav.community')} emoji="💬" count={communityMatches.length}>
             {communityMatches.length === 0 ? (
-              <div className="card text-center text-cocoa-300">일치하는 글 없음</div>
+              <div className="card text-center text-cocoa-300">{t('search.nonePosts')}</div>
             ) : (
               <ul className="space-y-2">
                 {communityMatches.map((p: any) => (
@@ -150,9 +153,9 @@ export default async function SearchPage({
             )}
           </SearchSection>
 
-          <SearchSection title="유기햄 구조대" emoji="🆘" count={rescueMatches.length}>
+          <SearchSection title={t('nav.rescue')} emoji="🆘" count={rescueMatches.length}>
             {rescueMatches.length === 0 ? (
-              <div className="card text-center text-cocoa-300">일치하는 글 없음</div>
+              <div className="card text-center text-cocoa-300">{t('search.nonePosts')}</div>
             ) : (
               <ul className="space-y-2">
                 {rescueMatches.map((r) => {
@@ -173,19 +176,19 @@ export default async function SearchPage({
             )}
           </SearchSection>
 
-          <SearchSection title="댓글" emoji="🗨" count={commentMatches.length}>
+          <SearchSection title={t('common.comment')} emoji="🗨" count={commentMatches.length}>
             {commentMatches.length === 0 ? (
-              <div className="card text-center text-cocoa-300">일치하는 댓글 없음</div>
+              <div className="card text-center text-cocoa-300">{t('search.noneComments')}</div>
             ) : (
               <ul className="space-y-2">
                 {commentMatches.map((c: any) => {
-                  const who = c.author?.username ?? c.anonymous_nickname ?? '익명';
+                  const who = c.author?.username ?? c.anonymous_nickname ?? t('common.anonymous');
                   return (
                     <li key={c.id}>
                       <Link href={c._link} className="card block transition hover:-translate-y-0.5 hover:shadow-soft">
                         <p className="line-clamp-2 text-sm text-cocoa-500">“{c.body}”</p>
                         <p className="mt-1 text-xs text-cocoa-300">
-                          {who} · {c._kind === 'guide' ? '가이드' : '커뮤니티'} 댓글 · {formatDate(c.created_at)}
+                          {who} · {c._kind === 'guide' ? t('nav.guides') : t('nav.community')} {t('common.comment')} · {formatDate(c.created_at)}
                         </p>
                       </Link>
                     </li>
@@ -201,9 +204,10 @@ export default async function SearchPage({
 }
 
 function SearchSection({ title, emoji, count, children }: { title: string; emoji: string; count: number; children: React.ReactNode }) {
+  const t = makeT(getLocale());
   return (
     <section>
-      <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">{emoji} {title} · {count}건</h2>
+      <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">{emoji} {title} · {t('search.count').replace('{n}', String(count))}</h2>
       {children}
     </section>
   );

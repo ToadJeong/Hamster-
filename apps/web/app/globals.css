@@ -13,6 +13,8 @@
   body {
     font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
     -webkit-font-smoothing: antialiased;
+    /* 긴 URL·단어가 모바일에서 가로 스크롤을 만들지 않도록 (필요할 때만 줄바꿈) */
+    overflow-wrap: break-word;
     /* 따뜻한 그라데이션 + 아주 옅은 도트 패턴 배경 */
     background-color: var(--bg);
     background-image:
@@ -73,6 +75,10 @@
   .prose-soft blockquote { @apply my-4 border-l-4 border-peach-200 bg-peach-50 py-2 pl-4 italic; }
   .prose-soft a { @apply text-peach-500 underline underline-offset-2; }
   .prose-soft img { @apply my-4 rounded-2xl; }
+  /* 표는 좁은 화면에서 가로 스크롤 (레이아웃을 밀어내지 않도록) */
+  .prose-soft table { @apply my-4 block w-full max-w-full overflow-x-auto border-collapse text-sm; }
+  .prose-soft th, .prose-soft td { @apply border border-cream-200 px-3 py-1.5 text-left; }
+  .prose-soft th { @apply bg-cream-50 font-bold; }
 }
 
 /* ─────────────────────────────────────────────
@@ -177,6 +183,9 @@
   50%      { transform: scale(1.08); }
 }
 
+/* 움직이는 요소는 GPU 레이어로 승격해 프레임 드랍/지터를 줄인다 */
+.pet-walk, .pet-breathe, .pet-hop, .pet-spin, .pet-roll, .pet-startle,
+.pet-leg-left, .pet-leg-right { will-change: transform; backface-visibility: hidden; }
 .pet-walk            { animation: pet-body-walk 0.5s ease-in-out infinite; }
 .pet-breathe         { animation: pet-body-breathe 2.6s ease-in-out infinite; }
 .pet-hop             { animation: pet-body-hop 0.6s ease-out; }

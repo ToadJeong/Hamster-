@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { TipBar } from '@/components/TipBar';
 import { MobileTabBar } from '@/components/MobileTabBar';
 import { Footer } from '@/components/Footer';
 import { PetHamsterLayer } from '@/components/PetHamsterLayer';
-import { LiveChat } from '@/components/LiveChat';
+import { DeferredLiveChat } from '@/components/DeferredLiveChat';
 import { ModalProvider } from '@/components/Modal';
 import { ReadStateLoader } from '@/components/ReadStateLoader';
 import { NotificationToaster } from '@/components/NotificationToaster';
@@ -13,19 +13,30 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
+import { getLocale } from '@/lib/i18n-server';
+import { I18nProvider } from '@/components/I18nProvider';
 
 export const metadata: Metadata = {
   title: '햄랜드 · 햄집사들의 따뜻한 커뮤니티',
   description: '한국 햄집사를 위한 햄스터 도감, 사육 가이드, 자유 커뮤니티, 그리고 유기햄 구조대를 한 곳에서.',
 };
 
+export const viewport: Viewport = {
+  themeColor: '#FFF9F2',
+  width: 'device-width',
+  initialScale: 1,
+  // 접근성: 사용자 확대를 막지 않음 (maximumScale 설정 안 함)
+};
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // getUser 와 사이트 설정을 병렬로 (설정은 user 와 무관)
+  const [{ data: { user } }, settings] = await Promise.all([
+    supabase.auth.getUser(),
+    getSiteSettings(),
+  ]);
 
   let profile = null;
-  let dmUnread = 0;
-  let notifUnread = 0;
   if (user) {
     const { data } = await supabase
       .from('profiles')
@@ -33,15 +44,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .eq('id', user.id)
       .maybeSingle();
     profile = data;
-    const [dm, nf] = await Promise.all([
-      supabase.rpc('dm_unread_count'),
-      supabase.rpc('notif_unread_count'),
-    ]);
-    dmUnread = (dm.data as number) ?? 0;
-    notifUnread = (nf.data as number) ?? 0;
   }
-
-  const settings = await getSiteSettings();
+  // 정적 UI 다국어용 로케일(쿠키). 단, <html lang>은 항상 "ko"로 둔다 —
+  // 콘텐츠가 한국어이므로, 브라우저 내장 번역이 비한국어 방문자에게
+  // 페이지 전체 번역을 안정적으로 제안하도록 하기 위함.
+  const locale = getLocale();
 
   return (
     <html lang="ko">
@@ -58,17 +65,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className="min-h-screen bg-[var(--bg)]">
+        <I18nProvider locale={locale}>
         <ModalProvider>
           <Header
             user={user ? { email: user.email ?? '' } : null}
             username={profile?.username ?? null}
             avatarUrl={profile?.avatar_url ?? null}
             isAdmin={!!profile?.is_admin}
-            dmUnread={dmUnread}
-            notifUnread={notifUnread}
           />
           <TipBar />
-          <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 md:px-6 lg:pb-24">
+          <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:px-6">
             {children}
           </main>
           <Footer />
@@ -83,8 +89,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {/* 화면 위를 돌아다니는 펫 햄스터 */}
           <PetHamsterLayer />
 
-          {/* 우하단 실시간 채팅 (관리자가 OFF 가능) */}
-          <LiveChat
+          {/* 우하단 실시간 채팅 (관리자가 OFF 가능) — 첫 화면 이후 지연 마운트 */}
+          <DeferredLiveChat
             enabled={settings['chat.enabled']}
             currentUser={user ? {
               id: user.id,
@@ -93,6 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             } : null}
           />
         </ModalProvider>
+        </I18nProvider>
 
         {/* Vercel 방문자 분석 + 성능 측정 */}
         <Analytics />

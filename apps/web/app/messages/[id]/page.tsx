@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { DMConversation } from '@/components/DMConversation';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +11,7 @@ export default async function DMConversationPage({ params }: { params: { id: str
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/messages/' + params.id);
+  const t = makeT(getLocale());
 
   const { data: thread } = await supabase
     .from('dm_threads').select('id, user_a, user_b').eq('id', params.id).maybeSingle();
@@ -27,7 +30,7 @@ export default async function DMConversationPage({ params }: { params: { id: str
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Link href="/messages" className="text-sm text-cocoa-300 hover:text-peach-500">← 쪽지함</Link>
+      <Link href="/messages" className="text-sm text-cocoa-300 hover:text-peach-500">{t('dm.back')}</Link>
       <DMConversation
         threadId={params.id}
         meId={user.id}

@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
+import { useT } from '@/components/I18nProvider';
 import type { Profile } from '@hamster/shared';
 
 export function ProfileEditor({ profile }: { profile: Profile | null }) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
 
   const [username, setUsername] = useState(profile?.username ?? '');
   const [bio, setBio] = useState(profile?.bio ?? '');
@@ -38,7 +40,7 @@ export function ProfileEditor({ profile }: { profile: Profile | null }) {
       setError(error.message);
       return;
     }
-    setMessage('프로필이 업데이트됐어요.');
+    setMessage(t('pr.saved'));
     router.refresh();
   }
 
@@ -52,13 +54,13 @@ export function ProfileEditor({ profile }: { profile: Profile | null }) {
           <span className="grid h-16 w-16 place-items-center rounded-full bg-peach-200 text-3xl">🐹</span>
         )}
         <div className="text-sm text-cocoa-300">
-          아바타 URL을 입력하면 위 미리보기가 갱신돼요.
-          {profile?.is_admin && <p className="mt-1 text-lilac-400">★ 관리자 계정</p>}
+          {t('pr.avatarHint')}
+          {profile?.is_admin && <p className="mt-1 text-lilac-400">{t('pr.adminAccount')}</p>}
         </div>
       </div>
 
       <label className="block">
-        <span className="text-sm text-cocoa-400">닉네임</span>
+        <span className="text-sm text-cocoa-400">{t('form.nickname')}</span>
         <input
           className="input mt-1"
           value={username}
@@ -73,18 +75,18 @@ export function ProfileEditor({ profile }: { profile: Profile | null }) {
         bucket="avatars"
         value={avatarUrl || null}
         onChange={(url) => setAvatarUrl(url ?? '')}
-        label="아바타 이미지 (선택)"
-        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+        label={t('pr.avatarLabel')}
+        hint={t('form.coverHintImg')}
       />
 
       <label className="block">
-        <span className="text-sm text-cocoa-400">소개</span>
+        <span className="text-sm text-cocoa-400">{t('pr.bioLabel')}</span>
         <textarea
           className="input mt-1 min-h-[80px]"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           maxLength={200}
-          placeholder="우리집 햄찌 소개나 한 마디"
+          placeholder={t('pr.bioPh')}
         />
       </label>
 
@@ -93,7 +95,7 @@ export function ProfileEditor({ profile }: { profile: Profile | null }) {
 
       <div className="flex justify-end">
         <button className="btn-primary" disabled={saving}>
-          {saving ? '저장 중…' : '저장'}
+          {saving ? t('form.saving') : t('form.save')}
         </button>
       </div>
     </form>

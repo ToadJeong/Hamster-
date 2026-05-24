@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useModal } from '@/components/Modal';
+import { useT } from '@/components/I18nProvider';
 import { formatDate } from '@/lib/format';
 import type { DMMessage } from '@hamster/shared';
 
@@ -16,6 +17,7 @@ type Props = {
 export function DMConversation({ threadId, meId, other, initialMessages }: Props) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const modal = useModal();
+  const t = useT();
   const [messages, setMessages] = useState<DMMessage[]>(initialMessages);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -56,7 +58,7 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
       .select('*')
       .single();
     setSending(false);
-    if (error) { await modal.alert({ title: '전송 실패', message: error.message, tone: 'error' }); return; }
+    if (error) { await modal.alert({ title: t('dm.sendFail'), message: error.message, tone: 'error' }); return; }
     setMessages((prev) => [...prev, data as DMMessage]);
     setDraft('');
   }
@@ -70,12 +72,12 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
         ) : (
           <span className="grid h-9 w-9 place-items-center rounded-full bg-peach-200 text-lg">🐹</span>
         )}
-        <h2 className="font-semibold text-cocoa-500">{other?.username ?? '햄집사'}</h2>
+        <h2 className="font-semibold text-cocoa-500">{other?.username ?? t('cm.defaultName')}</h2>
       </header>
 
       <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <p className="py-12 text-center text-sm text-cocoa-300">인사를 보내며 대화를 시작해보세요.</p>
+          <p className="py-12 text-center text-sm text-cocoa-300">{t('dm.greet')}</p>
         )}
         {messages.map((m) => {
           const mine = m.sender_id === meId;
@@ -100,12 +102,12 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="메시지를 입력하세요"
+          placeholder={t('dm.inputPh')}
           className="input flex-1 py-1.5 text-sm"
           maxLength={1000}
         />
         <button type="submit" className="btn-primary px-4 py-1.5 text-sm" disabled={!draft.trim() || sending}>
-          전송
+          {t('dm.send')}
         </button>
       </form>
     </div>

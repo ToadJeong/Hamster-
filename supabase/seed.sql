@@ -166,10 +166,10 @@ on conflict (slug) do update set
   size_cm        = excluded.size_cm,
   lifespan_years = excluded.lifespan_years,
   temperament    = excluded.temperament,
-  origin         = excluded.origin,
-  summary        = excluded.summary,
-  description    = excluded.description,
-  care_tips      = excluded.care_tips;
+  origin         = excluded.origin;
+-- 주의: summary/description/care_tips 는 일부러 덮어쓰지 않는다.
+-- 이 필드들의 상세 본문은 마이그레이션(0015/0016/0020/0021)이 단일 소스로 관리하며,
+-- seed.sql 을 다시 실행해도 풍부한 도감 내용이 짧은 시드 텍스트로 되돌아가지 않게 한다.
 
 -- ========== 2) 운영진 기본 가이드 ==========
 -- 햄랜드 운영진(admin)이 작성한 기본 가이드.

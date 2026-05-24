@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useModal } from '@/components/Modal';
+import { useT } from '@/components/I18nProvider';
 import { formatDate } from '@/lib/format';
 
 type Comment = {
@@ -29,6 +30,7 @@ export function CommunityCommentSection({
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const modal = useModal();
+  const t = useT();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [body, setBody] = useState('');
   const [nickname, setNickname] = useState('');
@@ -53,9 +55,9 @@ export function CommunityCommentSection({
     setSending(true); setError(null);
     try {
       if (!currentUserId) {
-        if (!canUseAnon) { setError('로그인이 필요해요.'); return; }
-        if (nickname.trim().length < 1) { setError('닉네임을 입력해 주세요.'); return; }
-        if (password.length < 4) { setError('비밀번호는 4자 이상이어야 해요.'); return; }
+        if (!canUseAnon) { setError(t('form.loginRequired')); return; }
+        if (nickname.trim().length < 1) { setError(t('form.enterNickname')); return; }
+        if (password.length < 4) { setError(t('cm.password4')); return; }
 
         // 평문 비번을 sha256 해시 후 저장 (가이드의 익명 방식과 동일)
         const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
@@ -87,7 +89,7 @@ export function CommunityCommentSection({
       }
       router.refresh();
     } catch (e: any) {
-      setError(e.message ?? '댓글 작성 실패');
+      setError(e.message ?? t('cm.submitFailed'));
     } finally {
       setSending(false);
     }
@@ -97,22 +99,22 @@ export function CommunityCommentSection({
     if (!c.author_id) {
       // 익명 댓글: 비번 입력 후 RPC 호출
       const pw = await modal.prompt({
-        title: '익명 댓글 삭제',
-        message: '작성하실 때 입력한 비밀번호를 입력해 주세요.',
+        title: t('cm.delAnonTitle'),
+        message: t('cm.delAnonMsg'),
         inputType: 'password',
-        confirmText: '삭제하기',
+        confirmText: t('cm.delConfirm'),
       });
       if (!pw) return;
       const { data, error } = await supabase.rpc('delete_anonymous_community_comment', {
         p_id: c.id,
         p_password: pw,
       });
-      if (error || !data) { await modal.alert({ title: '비밀번호가 일치하지 않아요', tone: 'error' }); return; }
+      if (error || !data) { await modal.alert({ title: t('cm.wrongPassword'), tone: 'error' }); return; }
       setComments((prev) => prev.filter((x) => x.id !== c.id));
       router.refresh();
       return;
     }
-    const ok = await modal.confirm({ title: '댓글을 삭제할까요?', confirmText: '삭제하기' });
+    const ok = await modal.confirm({ title: t('cm.delConfirmTitle'), confirmText: t('cm.delConfirm') });
     if (!ok) return;
     const { error } = await supabase.from('community_comments').delete().eq('id', c.id);
     if (!error) {
@@ -123,14 +125,14 @@ export function CommunityCommentSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="font-display text-xl font-bold text-cocoa-500">💬 댓글 {comments.length}</h2>
+      <h2 className="font-display text-xl font-bold text-cocoa-500">💬 {t('cm.title')} {comments.length}</h2>
 
       <ul className="space-y-3">
         {comments.length === 0 && (
-          <li className="card text-center text-cocoa-300">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</li>
+          <li className="card text-center text-cocoa-300">{t('cm.empty')}</li>
         )}
         {comments.map((c) => {
-          const display = c.author?.username ?? c.anonymous_nickname ?? '익명';
+          const display = c.author?.username ?? c.anonymous_nickname ?? t('common.anonymous');
           const canRemove = c.author_id && currentUserId === c.author_id;
           return (
             <li key={c.id} className="card">
@@ -145,7 +147,7 @@ export function CommunityCommentSection({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-sm">
                       <span className="font-semibold text-cocoa-500">{display}</span>
-                      {!c.author_id && <span className="badge bg-cocoa-100 text-cocoa-400">익명</span>}
+                      {!c.author_id && <span className="badge bg-cocoa-100 text-cocoa-400">{t('common.anonymous')}</span>}
                       <span className="text-xs text-cocoa-300">{formatDate(c.created_at)}</span>
                     </div>
                     <p className="mt-1 whitespace-pre-line text-cocoa-500">{c.body}</p>
@@ -153,7 +155,7 @@ export function CommunityCommentSection({
                 </div>
                 {(canRemove || !c.author_id) && (
                   <button onClick={() => remove(c)} className="text-xs text-cocoa-300 hover:text-red-400">
-                    삭제{!c.author_id ? '(비번)' : ''}
+                    {t('cm.delete')}{!c.author_id ? t('cm.deleteAnonSuffix') : ''}
                   </button>
                 )}
               </div>
@@ -167,7 +169,7 @@ export function CommunityCommentSection({
           <div className="grid gap-2 md:grid-cols-2">
             <input
               className="input"
-              placeholder="닉네임"
+              placeholder={t('form.nickname')}
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               maxLength={20}
@@ -175,7 +177,7 @@ export function CommunityCommentSection({
             <input
               className="input"
               type="password"
-              placeholder="비밀번호 (4자 이상)"
+              placeholder={t('form.passwordMin')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={4}
@@ -186,9 +188,9 @@ export function CommunityCommentSection({
         <textarea
           className="input min-h-[90px]"
           placeholder={
-            currentUserId ? '햄집사로서 한마디 남겨주세요'
-              : canUseAnon ? '익명으로 댓글을 남길 수 있어요'
-              : '댓글을 쓰려면 로그인해 주세요'
+            currentUserId ? t('cm.phUser')
+              : canUseAnon ? t('cm.phAnon')
+              : t('cm.phLogin')
           }
           value={body}
           onChange={(e) => setBody(e.target.value)}
@@ -202,7 +204,7 @@ export function CommunityCommentSection({
             className="btn-primary"
             disabled={(!currentUserId && !canUseAnon) || sending || !body.trim()}
           >
-            {sending ? '등록 중…' : '댓글 등록'}
+            {sending ? t('cm.sending') : t('cm.submit')}
           </button>
         </div>
       </form>

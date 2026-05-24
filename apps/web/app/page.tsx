@@ -3,14 +3,18 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 import { GuideCard } from '@/components/GuideCard';
 import { HomeSearchBar } from '@/components/HomeSearchBar';
-import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { Hamster } from '@/components/Hamster';
+import { GENUS_ORDER, GENUS_INFO } from '@/lib/genus';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
+import { CategoryIcon } from '@/components/HamlandAssets';
 import { Media } from '@/components/Media';
 import { isVideoUrl } from '@/lib/media';
 import { SectionHeader } from '@/components/SectionHeader';
 import { formatDate } from '@/lib/format';
 import {
   RESCUE_KIND_LABEL, COMMUNITY_CATEGORY_LABEL,
-  type GuideWithCounts, type Species, type Announcement, type RescuePostWithAuthor,
+  type GuideWithCounts, type Announcement, type RescuePostWithAuthor,
   type CommunityCategory,
 } from '@hamster/shared';
 
@@ -19,10 +23,10 @@ export const revalidate = 30;
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
   const settings = await getSiteSettings();
+  const t = makeT(getLocale());
 
   // 병렬 조회 (테이블이 없는 경우 빈 배열로 처리)
-  const [speciesRes, guidesRes, announcementsRes, rescueRes, communityRes, momentsRes] = await Promise.all([
-    supabase.from('species').select('id, slug, name_ko, summary, image_url').order('name_ko').limit(12),
+  const [guidesRes, announcementsRes, rescueRes, communityRes, momentsRes] = await Promise.all([
     supabase.from('guides_with_counts').select('*').order('created_at', { ascending: false }).limit(4),
     supabase.from('announcements').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(3),
     supabase.from('rescue_posts_with_author').select('*').eq('status', 'open').order('created_at', { ascending: false }).limit(4),
@@ -30,7 +34,6 @@ export default async function HomePage() {
     supabase.from('moments_feed').select('id, image_url, like_count').order('created_at', { ascending: false }).limit(8),
   ]);
 
-  const species = (speciesRes.data as Pick<Species,'id'|'slug'|'name_ko'|'summary'|'image_url'>[]) ?? [];
   const guides = (guidesRes.data as GuideWithCounts[]) ?? [];
   const announcements = (announcementsRes.data as Announcement[]) ?? [];
   const rescues = (rescueRes.data as RescuePostWithAuthor[]) ?? [];
@@ -71,10 +74,33 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* 카테고리 바로가기 */}
+      <nav aria-label="카테고리 바로가기">
+        <ul className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+          {([
+            { href: '/announcements', kind: 'announcements', label: '공지' },
+            { href: '/species', kind: 'species', label: '도감' },
+            { href: '/guides', kind: 'guides', label: '가이드' },
+            { href: '/community', kind: 'community', label: '커뮤니티' },
+            { href: '/products', kind: 'products', label: '상품' },
+            { href: '/rescue', kind: 'rescue', label: '구조대' },
+            { href: '/hospitals', kind: 'hospitals', label: '병원' },
+            { href: '/identify', kind: 'identify', label: '사진찾기' },
+          ] as const).map((c) => (
+            <li key={c.href}>
+              <Link href={c.href} className="flex flex-col items-center gap-1 rounded-2xl p-1.5 transition hover:-translate-y-0.5 hover:bg-white/70">
+                <CategoryIcon kind={c.kind} className="h-12 w-12 sm:h-14 sm:w-14" />
+                <span className="text-[11px] font-semibold text-cocoa-500">{t('nav.' + c.kind)}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
       {/* 최근 공지 */}
       {announcements.length > 0 && (
         <section>
-          <SectionHeader title="📢 공지사항" moreHref="/announcements" />
+          <SectionHeader title={t('home.section.notices')} moreHref="/announcements" moreLabel={t('home.more')} />
           <ul className="space-y-2">
             {announcements.map((a) => (
               <li key={a.id}>
@@ -93,37 +119,29 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 도감 미리보기 */}
+      {/* 도감 미리보기 — 5종 */}
       <section>
-        <SectionHeader title="🐹 햄스터 도감" subtitle="우리나라에서 키우는 햄스터를 가나다순으로" moreHref="/species" />
-        {species.length === 0 ? (
-          <div className="card text-center text-sm text-cocoa-300">
-            🐹 도감을 준비하고 있어요. 곧 다양한 햄스터 친구들을 만나볼 수 있어요!
-          </div>
-        ) : (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {species.map((s) => (
-              <Link key={s.id} href={`/species/${s.slug}`}
+        <SectionHeader title={t('home.section.species')} subtitle={t('home.section.species.sub')} moreHref="/species" moreLabel={t('home.more')} />
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {GENUS_ORDER.map((g) => {
+            const info = GENUS_INFO[g];
+            return (
+              <Link key={g} href={`/species/${info.baseSlug}`}
                 className="group flex flex-col items-center gap-1.5 rounded-2xl border border-transparent p-1.5 transition hover:border-cream-200 hover:bg-white/70">
                 <div className="aspect-square w-full overflow-hidden rounded-xl bg-cream-100 ring-1 ring-cream-200">
-                  {s.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={s.image_url} alt={s.name_ko} className="h-full w-full object-cover" />
-                  ) : (
-                    <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
-                  )}
+                  <Hamster palette={info.palette} className="h-full w-full" />
                 </div>
-                <h3 className="line-clamp-1 w-full text-center text-[11px] font-semibold text-cocoa-500 group-hover:text-peach-500">{s.name_ko}</h3>
+                <h3 className="line-clamp-1 w-full text-center text-[11px] font-semibold text-cocoa-500 group-hover:text-peach-500">{info.name_ko.replace(' 햄스터', '')}</h3>
               </Link>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </section>
 
       {/* 육아일기 */}
       {moments.length > 0 && (
         <section>
-          <SectionHeader title="📸 육아일기" subtitle="우리집 햄찌들의 귀여운 순간" moreHref="/moments" />
+          <SectionHeader title={t('home.section.moments')} subtitle={t('home.section.moments.sub')} moreHref="/moments" moreLabel={t('home.more')} />
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
             {moments.map((m) => (
               <Link key={m.id} href={`/moments/${m.id}`}
@@ -143,7 +161,7 @@ export default async function HomePage() {
 
       {/* 커뮤니티 최근 글 */}
       <section>
-        <SectionHeader title="💬 커뮤니티" subtitle="햄집사들의 따끈한 글" moreHref="/community" />
+        <SectionHeader title={t('home.section.community')} subtitle={t('home.section.community.sub')} moreHref="/community" moreLabel={t('home.more')} />
         {community.length === 0 ? (
           <div className="card text-center text-sm text-cocoa-300">아직 글이 없어요. 첫 글을 남겨보세요!</div>
         ) : (
@@ -193,7 +211,7 @@ export default async function HomePage() {
 
       {/* 유기햄 구조대 */}
       <section>
-        <SectionHeader title="🆘 유기햄 구조대" subtitle="새 가족이 필요한 햄찌들" moreHref="/rescue" />
+        <SectionHeader title={t('home.section.rescue')} subtitle={t('home.section.rescue.sub')} moreHref="/rescue" moreLabel={t('home.more')} />
         {rescues.length === 0 ? (
           <div className="card text-center text-cocoa-300 text-sm">현재 진행 중인 글이 없어요.</div>
         ) : (
@@ -225,7 +243,7 @@ export default async function HomePage() {
 
       {/* 최신 가이드 */}
       <section>
-        <SectionHeader title="📖 최신 가이드" subtitle="햄집사들이 직접 쓴 사육 노하우" moreHref="/guides" />
+        <SectionHeader title={t('home.section.guides')} subtitle={t('home.section.guides.sub')} moreHref="/guides" moreLabel={t('home.more')} />
         {guides.length === 0 ? (
           <div className="card text-center text-cocoa-300 text-sm">
             아직 가이드가 없어요. 첫 가이드를 작성해 보세요!

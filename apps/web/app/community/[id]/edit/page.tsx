@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { CommunityEditPanel } from '@/components/CommunityEditPanel';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +10,7 @@ export default async function EditCommunityPost({ params }: { params: { id: stri
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/community/' + params.id + '/edit');
+  const t = makeT(getLocale());
 
   const { data: post } = await supabase
     .from('community_posts')
@@ -22,7 +25,7 @@ export default async function EditCommunityPost({ params }: { params: { id: stri
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">글 수정</h1>
+      <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('ce.editTitle')}</h1>
       <CommunityEditPanel
         initial={{
           id: (post as any).id,

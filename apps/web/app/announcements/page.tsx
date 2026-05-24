@@ -4,12 +4,15 @@ import remarkGfm from 'remark-gfm';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import { AnnouncementDeleteButton } from '@/components/AnnouncementDeleteButton';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import type { Announcement } from '@hamster/shared';
 
 export const revalidate = 30;
 
 export default async function AnnouncementsPage() {
   const supabase = createSupabaseServerClient();
+  const t = makeT(getLocale());
 
   const { data, error } = await supabase
     .from('announcements')
@@ -31,30 +34,30 @@ export default async function AnnouncementsPage() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">📢 공지사항</h1>
-          <p className="mt-1 text-sm text-cocoa-300">햄랜드 운영 안내와 업데이트 소식</p>
+          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('ann.title')}</h1>
+          <p className="mt-1 text-sm text-cocoa-300">{t('ann.subtitle')}</p>
         </div>
         {isAdmin && (
           <Link href="/announcements/new" className="btn-primary text-sm">
-            ✏️ 공지 작성
+            {t('ann.write')}
           </Link>
         )}
       </header>
 
       {error && (
         <div className="card text-center text-sm text-cocoa-300">
-          📢 공지사항을 준비하고 있어요. 잠시 후 다시 와 주세요!
+          {t('ann.preparing')}
         </div>
       )}
 
       {items.length === 0 ? (
-        <div className="card text-center text-cocoa-300">아직 공지사항이 없어요.</div>
+        <div className="card text-center text-cocoa-300">{t('ann.empty')}</div>
       ) : (
         <ul className="space-y-3">
           {items.map((a) => (
             <li key={a.id} className="card">
               <div className="mb-2 flex items-center gap-2 text-xs text-cocoa-300">
-                {a.pinned && <span className="badge bg-peach-100 text-peach-500">📌 고정</span>}
+                {a.pinned && <span className="badge bg-peach-100 text-peach-500">{t('ann.pinned')}</span>}
                 <span>{formatDate(a.created_at)}</span>
               </div>
               <h2 className="mb-2 font-display text-lg font-bold text-cocoa-500 sm:text-xl">{a.title}</h2>
@@ -63,7 +66,7 @@ export default async function AnnouncementsPage() {
               </div>
               {isAdmin && (
                 <div className="mt-3 flex justify-end gap-3 border-t border-cream-100 pt-2 text-xs">
-                  <Link href={`/announcements/${a.id}/edit`} className="text-cocoa-400 hover:text-peach-500">수정</Link>
+                  <Link href={`/announcements/${a.id}/edit`} className="text-cocoa-400 hover:text-peach-500">{t('common.edit')}</Link>
                   <AnnouncementDeleteButton id={a.id} />
                 </div>
               )}

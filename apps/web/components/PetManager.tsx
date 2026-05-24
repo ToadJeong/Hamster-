@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useModal } from '@/components/Modal';
-import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { useT } from '@/components/I18nProvider';
+import { Hamster, paletteForSpecies } from '@/components/Hamster';
 import { formatDate } from '@/lib/format';
 import type { Pet } from '@hamster/shared';
 
@@ -20,6 +21,7 @@ export function PetManager({
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const modal = useModal();
+  const t = useT();
 
   const [pets, setPets] = useState<Pet[]>(initialPets);
   const [adding, setAdding] = useState(false);
@@ -38,7 +40,7 @@ export function PetManager({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) { await modal.alert({ title: '이름을 입력해주세요', tone: 'info' }); return; }
+    if (!name.trim()) { await modal.alert({ title: t('pm.needName'), tone: 'info' }); return; }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/login'); return; }
@@ -53,17 +55,17 @@ export function PetManager({
       bio: bio.trim() || null,
     }).select('*').single();
     setSaving(false);
-    if (error) { await modal.alert({ title: '등록 실패', message: error.message, tone: 'error' }); return; }
+    if (error) { await modal.alert({ title: t('mc.insertFailTitle'), message: error.message, tone: 'error' }); return; }
     setPets((prev) => [...prev, data as Pet]);
     reset();
     router.refresh();
   }
 
   async function remove(pet: Pet) {
-    const ok = await modal.confirm({ title: `${pet.name} 햄찌를 삭제할까요?`, message: '연결된 육아일기의 태그도 사라져요.', confirmText: '삭제' });
+    const ok = await modal.confirm({ title: t('pm.deleteConfirm').replace('{name}', pet.name), message: t('pm.deleteConfirmMsg'), confirmText: t('cm.delete') });
     if (!ok) return;
     const { error } = await supabase.from('pets').delete().eq('id', pet.id);
-    if (error) { await modal.alert({ title: '삭제 실패', message: error.message, tone: 'error' }); return; }
+    if (error) { await modal.alert({ title: t('form.deleteFailed'), message: error.message, tone: 'error' }); return; }
     setPets((prev) => prev.filter((p) => p.id !== pet.id));
     router.refresh();
   }
@@ -72,10 +74,10 @@ export function PetManager({
     <section>
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-display text-lg font-bold text-cocoa-500">
-          <span className="h-4 w-1.5 rounded-full bg-mint-400" aria-hidden />내 햄찌 {pets.length}
+          <span className="h-4 w-1.5 rounded-full bg-mint-400" aria-hidden />{t('pm.title')} {pets.length}
         </h2>
         {!adding && (
-          <button onClick={() => setAdding(true)} className="btn-secondary text-sm">+ 햄찌 등록</button>
+          <button onClick={() => setAdding(true)} className="btn-secondary text-sm">{t('pm.add')}</button>
         )}
       </div>
 
@@ -83,37 +85,37 @@ export function PetManager({
         <form onSubmit={submit} className="card mb-3 space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="text-sm text-cocoa-400">이름 *</label>
-              <input className="input mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder="햄찌 이름" maxLength={20} />
+              <label className="text-sm text-cocoa-400">{t('pm.nameLabel')}</label>
+              <input className="input mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('pm.namePh')} maxLength={20} />
             </div>
             <div>
-              <label className="text-sm text-cocoa-400">종류</label>
+              <label className="text-sm text-cocoa-400">{t('pm.speciesLabel')}</label>
               <select className="input mt-1" value={speciesId} onChange={(e) => setSpeciesId(e.target.value)}>
-                <option value="">선택 안 함</option>
+                <option value="">{t('form.selectNone')}</option>
                 {species.map((s) => <option key={s.id} value={s.id}>{s.name_ko}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-sm text-cocoa-400">생일</label>
+              <label className="text-sm text-cocoa-400">{t('pm.birthday')}</label>
               <input type="date" className="input mt-1" value={birthday} onChange={(e) => setBirthday(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm text-cocoa-400">한 줄 소개</label>
-              <input className="input mt-1" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="예: 해바라기씨를 제일 좋아해요" maxLength={60} />
+              <label className="text-sm text-cocoa-400">{t('pm.bioLabel')}</label>
+              <input className="input mt-1" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('pm.bioPh')} maxLength={60} />
             </div>
           </div>
-          <ImageUploader bucket="community-images" value={photoUrl} onChange={setPhotoUrl} label="사진 (선택)" hint="JPG/PNG/WebP/GIF · 최대 5MB" />
+          <ImageUploader bucket="community-images" value={photoUrl} onChange={setPhotoUrl} label={t('pm.photoLabel')} hint={t('form.coverHintImg')} />
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn-secondary text-sm" onClick={reset}>취소</button>
+            <button type="button" className="btn-secondary text-sm" onClick={reset}>{t('form.cancel')}</button>
             <button type="submit" className="btn-primary text-sm" disabled={saving || !name.trim()}>
-              {saving ? '등록 중…' : '등록'}
+              {saving ? t('form.registering') : t('form.register')}
             </button>
           </div>
         </form>
       )}
 
       {pets.length === 0 ? (
-        !adding && <p className="card text-center text-sm text-cocoa-300">아직 등록한 햄찌가 없어요. 우리집 햄찌를 소개해 주세요!</p>
+        !adding && <p className="card text-center text-sm text-cocoa-300">{t('pm.empty')}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {pets.map((pet) => (
@@ -123,7 +125,7 @@ export function PetManager({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={pet.photo_url} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <HamsterIllustration visual={visualForSpecies(pet.species_label ?? 'golden')} className="h-full w-full" bg={false} />
+                  <Hamster palette={paletteForSpecies(pet.species_label ?? 'golden')} className="h-full w-full" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -134,7 +136,7 @@ export function PetManager({
                 </p>
                 {pet.bio && <p className="mt-0.5 truncate text-[13px] text-cocoa-400">{pet.bio}</p>}
               </div>
-              <button onClick={() => remove(pet)} className="shrink-0 text-[11px] text-cocoa-300 hover:text-red-400">삭제</button>
+              <button onClick={() => remove(pet)} className="shrink-0 text-[11px] text-cocoa-300 hover:text-red-400">{t('cm.delete')}</button>
             </li>
           ))}
         </ul>

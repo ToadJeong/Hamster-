@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useT } from '@/components/I18nProvider';
 
 type Props = {
   postId: string;
@@ -17,6 +18,7 @@ export function CommunityActions({
 }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialLikeCount);
   const [following, setFollowing] = useState(initialFollowing);
@@ -66,7 +68,7 @@ export function CommunityActions({
         className={'rounded-full px-3 py-1 text-sm font-medium transition ' +
           (following ? 'bg-cocoa-100 text-cocoa-500' : 'bg-lilac-100 text-lilac-400 hover:bg-lilac-200')}
       >
-        {following ? '팔로잉 ✓' : '+ 팔로우'}
+        {following ? t('act.following') : t('act.follow')}
       </button>
     </div>
   );

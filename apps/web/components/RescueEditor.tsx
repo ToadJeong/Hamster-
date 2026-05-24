@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
+import { useT } from '@/components/I18nProvider';
 import { RESCUE_KIND_LABEL, type RescueKind, type Species } from '@hamster/shared';
 
 type Props = {
@@ -24,6 +25,7 @@ type Props = {
 export function RescueEditor({ species, initial }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
 
   const [kind, setKind] = useState<RescueKind>(initial?.kind ?? 'available');
   const [title, setTitle] = useState(initial?.title ?? '');
@@ -41,7 +43,7 @@ export function RescueEditor({ species, initial }: Props) {
     setSaving(true); setError(null);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('로그인이 필요해요.');
+      if (!user) throw new Error(t('form.loginRequired'));
 
       const payload = {
         author_id: user.id,
@@ -66,7 +68,7 @@ export function RescueEditor({ species, initial }: Props) {
       }
       router.refresh();
     } catch (e: any) {
-      setError(e.message ?? '저장 실패');
+      setError(e.message ?? t('form.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -76,7 +78,7 @@ export function RescueEditor({ species, initial }: Props) {
     <form onSubmit={submit} className="space-y-4">
       {/* kind 선택 */}
       <div>
-        <p className="mb-2 text-sm text-cocoa-500">어떤 종류의 글인가요?</p>
+        <p className="mb-2 text-sm text-cocoa-500">{t('re.kindPrompt')}</p>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
           {(Object.keys(RESCUE_KIND_LABEL) as RescueKind[]).map((k) => {
             const meta = RESCUE_KIND_LABEL[k];
@@ -103,7 +105,7 @@ export function RescueEditor({ species, initial }: Props) {
 
       <input
         className="input text-lg font-semibold"
-        placeholder="제목 (간결하게)"
+        placeholder={t('re.titlePh')}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
@@ -112,24 +114,24 @@ export function RescueEditor({ species, initial }: Props) {
 
       <div className="grid gap-2 md:grid-cols-3">
         <select className="input" value={speciesId} onChange={(e) => setSpeciesId(e.target.value)}>
-          <option value="">종 선택 (선택)</option>
+          <option value="">{t('re.speciesNone')}</option>
           {species.map((s) => <option key={s.id} value={s.id}>{s.name_ko}</option>)}
         </select>
-        <input className="input" placeholder="지역 (예: 서울 강남)" value={region} onChange={(e) => setRegion(e.target.value)} maxLength={40} />
-        <input className="input" type="number" min={0} max={48} placeholder="추정 나이(개월)" value={ageMonths} onChange={(e) => setAgeMonths(e.target.value)} />
+        <input className="input" placeholder={t('re.regionPh')} value={region} onChange={(e) => setRegion(e.target.value)} maxLength={40} />
+        <input className="input" type="number" min={0} max={48} placeholder={t('re.agePh')} value={ageMonths} onChange={(e) => setAgeMonths(e.target.value)} />
       </div>
 
       <ImageUploader
         bucket="rescue-images"
         value={coverUrl || null}
         onChange={(url) => setCoverUrl(url ?? '')}
-        label="햄찌 사진 (선택)"
-        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+        label={t('re.cover')}
+        hint={t('form.coverHintImg')}
       />
 
       <input
         className="input"
-        placeholder="연락 방법 힌트 (예: 오픈채팅 https://… / 인스타 @abc)"
+        placeholder={t('re.contactPh')}
         value={contactHint}
         onChange={(e) => setContactHint(e.target.value)}
         maxLength={200}
@@ -137,7 +139,7 @@ export function RescueEditor({ species, initial }: Props) {
 
       <textarea
         className="input min-h-[200px] text-[15px] leading-7"
-        placeholder={`상황과 햄찌의 상태를 적어주세요.\n\n- 발견 일시 / 발견 장소\n- 건강 상태 / 특이사항\n- 입양 조건 (선호하는 보호자, 케이지 크기 등)`}
+        placeholder={t('re.bodyPh')}
         value={body}
         onChange={(e) => setBody(e.target.value)}
         required
@@ -146,9 +148,9 @@ export function RescueEditor({ species, initial }: Props) {
       {error && <div className="card text-red-500">{error}</div>}
 
       <div className="flex justify-end gap-2">
-        <button type="button" className="btn-secondary" onClick={() => router.back()}>취소</button>
+        <button type="button" className="btn-secondary" onClick={() => router.back()}>{t('form.cancel')}</button>
         <button type="submit" className="btn-primary" disabled={saving || !title.trim() || !body.trim()}>
-          {saving ? '저장 중…' : initial ? '수정' : '게시'}
+          {saving ? t('form.saving') : initial ? t('form.edit') : t('form.post')}
         </button>
       </div>
     </form>

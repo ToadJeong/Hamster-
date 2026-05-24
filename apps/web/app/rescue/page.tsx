@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import { EmptyState } from '@/components/EmptyState';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import {
   RESCUE_KIND_LABEL, RESCUE_STATUS_LABEL,
   type RescueKind, type RescueStatus, type RescuePostWithAuthor,
@@ -15,6 +17,7 @@ export default async function RescueIndex({
   searchParams: { kind?: RescueKind; status?: RescueStatus };
 }) {
   const supabase = createSupabaseServerClient();
+  const t = makeT(getLocale());
   let q = supabase
     .from('rescue_posts_with_author')
     .select('*')
@@ -32,24 +35,23 @@ export default async function RescueIndex({
       <header className="space-y-2">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">🆘 유기햄 구조대</h1>
-            <p className="mt-1 text-sm text-cocoa-300">버려진 햄찌에게 새 가족을, 잃어버린 햄찌에게 새 단서를</p>
+            <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('rescue.title')}</h1>
+            <p className="mt-1 text-sm text-cocoa-300">{t('rescue.subtitle')}</p>
           </div>
-          <Link href="/rescue/new" className="btn-primary text-sm">📮 글 올리기</Link>
+          <Link href="/rescue/new" className="btn-primary text-sm">{t('rescue.post')}</Link>
         </div>
         <div className="card bg-peach-50 text-sm text-cocoa-500">
-          ⚠️ <strong>주의:</strong> 입양·구조는 직접 만남 대신 공식 동물보호단체와 함께 진행해 주세요.
-          가짜 분양·금전 거래는 운영자에게 신고해 주시면 즉시 차단 처리합니다.
+          ⚠️ <strong>{t('rescue.noticeLabel')}</strong> {t('rescue.noticeBody')}
         </div>
       </header>
 
       {/* 필터 */}
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
-        <Link href="/rescue" className={'badge ' + (!searchParams.kind ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>전체</Link>
+        <Link href="/rescue" scroll={false} className={'badge ' + (!searchParams.kind ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>{t('common.all')}</Link>
         {(Object.keys(RESCUE_KIND_LABEL) as RescueKind[]).map((k) => {
           const meta = RESCUE_KIND_LABEL[k];
           return (
-            <Link key={k} href={`/rescue?kind=${k}`}
+            <Link key={k} href={`/rescue?kind=${k}`} scroll={false}
               className={'badge ' + (searchParams.kind === k ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>
               {meta.emoji} {meta.label}
             </Link>
@@ -59,15 +61,15 @@ export default async function RescueIndex({
 
       {error && (
         <div className="card text-center text-sm text-cocoa-300">
-          🆘 구조대 게시판을 준비하고 있어요. 잠시 후 다시 와 주세요!
+          {t('rescue.preparing')}
         </div>
       )}
 
       {items.length === 0 ? (
         <EmptyState
-          title="아직 등록된 글이 없어요"
-          description="새 가족이 필요한 햄찌, 잃어버린 햄찌 소식을 올려보세요."
-          action={<Link href="/rescue/new" className="btn-primary text-sm">글 올리기</Link>}
+          title={t('rescue.emptyTitle')}
+          description={t('rescue.emptyDesc')}
+          action={<Link href="/rescue/new" className="btn-primary text-sm">{t('rescue.emptyAction')}</Link>}
           kind="roborovski"
         />
       ) : (
@@ -95,7 +97,7 @@ export default async function RescueIndex({
                     <p className="mt-0.5 line-clamp-1 text-[13px] text-cocoa-400">{r.body}</p>
                     <div className="mt-1.5 text-[11px] text-cocoa-300">
                       {r.species_name_ko && <span className="text-mint-400">#{r.species_name_ko} · </span>}
-                      <span className="font-medium text-cocoa-400">{r.author_username ?? '익명'}</span> · {formatDate(r.created_at)}
+                      <span className="font-medium text-cocoa-400">{r.author_username ?? t('common.anonymous')}</span> · {formatDate(r.created_at)}
                     </div>
                   </div>
                 </Link>
