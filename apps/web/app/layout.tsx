@@ -38,11 +38,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .maybeSingle();
     profile = data;
   }
-  // 안읽은 쪽지/알림 배지는 서버 렌더를 막지 않도록 헤더에서 클라이언트로 조회한다.
+  // 정적 UI 다국어용 로케일(쿠키). 단, <html lang>은 항상 "ko"로 둔다 —
+  // 콘텐츠가 한국어이므로, 브라우저 내장 번역이 비한국어 방문자에게
+  // 페이지 전체 번역을 안정적으로 제안하도록 하기 위함.
   const locale = getLocale();
 
   return (
-    <html lang={locale}>
+    <html lang="ko">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
