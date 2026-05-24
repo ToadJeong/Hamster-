@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { TipBar } from '@/components/TipBar';
@@ -19,6 +19,13 @@ import { I18nProvider } from '@/components/I18nProvider';
 export const metadata: Metadata = {
   title: '햄랜드 · 햄집사들의 따뜻한 커뮤니티',
   description: '한국 햄집사를 위한 햄스터 도감, 사육 가이드, 자유 커뮤니티, 그리고 유기햄 구조대를 한 곳에서.',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#FFF9F2',
+  width: 'device-width',
+  initialScale: 1,
+  // 접근성: 사용자 확대를 막지 않음 (maximumScale 설정 안 함)
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
