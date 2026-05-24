@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LoginForm } from '@/components/LoginForm';
+import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
 import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
@@ -12,11 +13,11 @@ export default async function LoginPage({
   const settings = await getSiteSettings();
 
   return (
-    <div className="mx-auto max-w-md space-y-6">
-      <div className="text-center">
-        <p className="text-3xl">🐹</p>
-        <h1 className="mt-2 font-display text-2xl font-bold text-cocoa-500">햄찌랜드에 로그인</h1>
-        <p className="mt-1 text-sm text-cocoa-300">햄집사들의 작은 커뮤니티에 오신 걸 환영해요</p>
+    <div className="mx-auto max-w-md space-y-6 pt-4">
+      <div className="flex flex-col items-center text-center">
+        <div className="h-20 w-24"><HamsterIllustration visual={visualForSpecies('golden')} className="h-full w-full" bg={false} /></div>
+        <h1 className="mt-1 font-display text-2xl font-bold text-cocoa-500">햄랜드에 로그인</h1>
+        <p className="mt-1 text-sm text-cocoa-300">햄집사들의 따뜻한 커뮤니티에 오신 걸 환영해요</p>
       </div>
 
       <LoginForm
