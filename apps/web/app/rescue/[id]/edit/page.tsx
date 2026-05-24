@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { RescueEditor } from '@/components/RescueEditor';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import type { Species, RescueKind } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +11,7 @@ export default async function EditRescuePost({ params }: { params: { id: string 
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/rescue/' + params.id + '/edit');
+  const t = makeT(getLocale());
 
   const { data: post } = await supabase
     .from('rescue_posts')
@@ -22,7 +25,7 @@ export default async function EditRescuePost({ params }: { params: { id: string 
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">🆘 글 수정</h1>
+      <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('re.editTitle')}</h1>
       <RescueEditor
         species={(speciesList as Pick<Species,'id'|'slug'|'name_ko'>[]) ?? []}
         initial={{

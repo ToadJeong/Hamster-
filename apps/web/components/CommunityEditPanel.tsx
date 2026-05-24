@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
+import { useT } from '@/components/I18nProvider';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 type Props = {
@@ -20,6 +21,7 @@ type Props = {
 export function CommunityEditPanel({ initial }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
 
   const [title, setTitle] = useState(initial.title);
   const [body, setBody] = useState(initial.body);
@@ -30,7 +32,7 @@ export function CommunityEditPanel({ initial }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const parsedTags = Array.from(new Set(
-    tagsInput.split(/[,\s#]+/).map((t) => t.trim().replace(/^#/, '')).filter((t) => t.length > 0 && t.length <= 20)
+    tagsInput.split(/[,\s#]+/).map((s) => s.trim().replace(/^#/, '')).filter((s) => s.length > 0 && s.length <= 20)
   )).slice(0, 8);
 
   async function submit(e: React.FormEvent) {
@@ -68,24 +70,24 @@ export function CommunityEditPanel({ initial }: Props) {
         value={coverUrl}
         onChange={setCoverUrl}
         allowVideo
-        label="대표 사진/동영상 (선택)"
-        hint="사진 5MB · 동영상 30MB 이하"
+        label={t('ce.cover')}
+        hint={t('ce.coverHint')}
       />
 
       <textarea className="input min-h-[280px] text-[15px] leading-7" value={body} onChange={(e) => setBody(e.target.value)} required />
       <div>
-        <input className="input" placeholder="태그 (쉼표·공백·# 구분, 최대 8개)" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
+        <input className="input" placeholder={t('ce.tagsPh')} value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
         {parsedTags.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {parsedTags.map((t) => <span key={t} className="badge bg-lilac-50 text-lilac-400">#{t}</span>)}
+            {parsedTags.map((tg) => <span key={tg} className="badge bg-lilac-50 text-lilac-400">#{tg}</span>)}
           </div>
         )}
       </div>
       {error && <div className="card text-red-500">{error}</div>}
       <div className="flex justify-end gap-2">
-        <button type="button" className="btn-secondary" onClick={() => router.back()}>취소</button>
+        <button type="button" className="btn-secondary" onClick={() => router.back()}>{t('form.cancel')}</button>
         <button type="submit" className="btn-primary" disabled={saving || !title.trim() || !body.trim()}>
-          {saving ? '저장 중…' : '수정 완료'}
+          {saving ? t('form.saving') : t('form.editDone')}
         </button>
       </div>
     </form>
