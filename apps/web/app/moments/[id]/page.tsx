@@ -38,7 +38,7 @@ export default async function MomentDetail({ params }: { params: { id: string } 
 
   return (
     <article className="mx-auto max-w-xl space-y-4">
-      <Link href="/moments" className="text-sm text-cocoa-300 hover:text-peach-500">← 모먼트</Link>
+      <Link href="/moments" className="text-sm text-cocoa-300 hover:text-peach-500">← 육아일기</Link>
 
       <div className="overflow-hidden rounded-cute border border-cream-200/80 bg-white shadow-softer">
         <div className="flex items-center justify-between gap-2 px-4 py-3">

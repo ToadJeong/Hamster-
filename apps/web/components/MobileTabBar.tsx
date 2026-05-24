@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 const TABS = [
   { href: '/',          label: '홈',     icon: '🏠' },
   { href: '/species',   label: '도감',   icon: '🐹' },
-  { href: '/moments',   label: '모먼트', icon: '📸' },
+  { href: '/moments',   label: '육아일기', icon: '📸' },
   { href: '/community', label: '커뮤니티', icon: '💬' },
   { href: '/profile',   label: '내정보', icon: '👤' },
 ];

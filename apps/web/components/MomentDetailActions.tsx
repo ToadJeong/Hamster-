@@ -12,7 +12,7 @@ export function MomentDetailActions({ momentId, canStaff }: { momentId: string; 
   async function handleDelete() {
     // RLS "moments delete by author or staff" 가 작성자/운영자 모두 허용
     const ok = await modal.confirm({
-      title: canStaff ? '운영자 권한으로 이 모먼트를 삭제할까요?' : '이 모먼트를 삭제할까요?',
+      title: canStaff ? '운영자 권한으로 이 육아일기를 삭제할까요?' : '이 육아일기를 삭제할까요?',
       message: '되돌릴 수 없어요.',
       confirmText: '삭제',
     });

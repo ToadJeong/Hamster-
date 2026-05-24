@@ -60,7 +60,7 @@ export function PetManager({
   }
 
   async function remove(pet: Pet) {
-    const ok = await modal.confirm({ title: `${pet.name} 햄찌를 삭제할까요?`, message: '연결된 모먼트의 태그도 사라져요.', confirmText: '삭제' });
+    const ok = await modal.confirm({ title: `${pet.name} 햄찌를 삭제할까요?`, message: '연결된 육아일기의 태그도 사라져요.', confirmText: '삭제' });
     if (!ok) return;
     const { error } = await supabase.from('pets').delete().eq('id', pet.id);
     if (error) { await modal.alert({ title: '삭제 실패', message: error.message, tone: 'error' }); return; }
