@@ -7,6 +7,8 @@ import { LiveChat } from '@/components/LiveChat';
 import { ModalProvider } from '@/components/Modal';
 import { ReadStateLoader } from '@/components/ReadStateLoader';
 import { NotificationToaster } from '@/components/NotificationToaster';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 
@@ -85,6 +87,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             } : null}
           />
         </ModalProvider>
+
+        {/* Vercel 방문자 분석 + 성능 측정 */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
