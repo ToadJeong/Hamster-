@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import { EmptyState } from '@/components/EmptyState';
+import { NaverPopular } from '@/components/NaverPopular';
+import { fetchNaverShopping } from '@/lib/naver';
 import { PRODUCT_CATEGORY_LABEL, type ProductCategory } from '@hamster/shared';
 
 export const revalidate = 20;
@@ -16,8 +18,19 @@ export default async function ProductsIndex({
 
   let q = supabase.from('product_posts_feed').select('*').order('created_at', { ascending: false }).limit(60);
   if (cat) q = q.eq('category', cat);
-  const { data, error } = await q;
+
+  // 우리 커뮤니티 인기(추천수 상위) + 네이버 쇼핑 실시간 인기를 병렬 조회
+  let topQ = supabase.from('product_posts_feed').select('*').order('like_count', { ascending: false }).limit(6);
+  if (cat) topQ = topQ.eq('category', cat);
+
+  const [{ data, error }, { data: topData }, naverItems] = await Promise.all([
+    q,
+    topQ,
+    fetchNaverShopping(cat ?? 'etc'),
+  ]);
   const items = (data as any[]) ?? [];
+  const topPicks = ((topData as any[]) ?? []).filter((p) => (p.like_count ?? 0) > 0);
+  const naverLabel = cat ? PRODUCT_CATEGORY_LABEL[cat].label : '햄스터 용품';
 
   return (
     <div className="space-y-6">
@@ -28,6 +41,39 @@ export default async function ProductsIndex({
         </div>
         <Link href="/products/new" className="btn-primary text-sm">✏️ 상품 추천하기</Link>
       </header>
+
+      {/* 실시간 인기 상품 (네이버 쇼핑) — 키 미설정 시 자동으로 숨김 */}
+      <NaverPopular items={naverItems} label={naverLabel} />
+
+      {/* 햄집사 추천 TOP (우리 커뮤니티 추천수 상위) */}
+      {topPicks.length > 0 && (
+        <section className="space-y-2.5">
+          <h2 className="font-display text-base font-bold text-cocoa-500">⭐ 햄집사 추천 TOP</h2>
+          <div className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1.5">
+            {topPicks.map((p, i) => {
+              const m = PRODUCT_CATEGORY_LABEL[p.category as ProductCategory] ?? PRODUCT_CATEGORY_LABEL.etc;
+              return (
+                <Link key={p.id} href={`/products/${p.id}`}
+                  className="group relative w-36 shrink-0 snap-start overflow-hidden rounded-2xl border border-cream-200/80 bg-white shadow-softer transition hover:-translate-y-0.5 hover:border-peach-200 hover:shadow-soft">
+                  <div className="relative grid aspect-square place-items-center bg-cream-100 text-3xl">
+                    {p.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.image_url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                    ) : m.emoji}
+                    {i < 3 && (
+                      <span className="absolute left-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-lilac-400 text-[11px] font-bold text-white shadow-soft">{i + 1}</span>
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <p className="line-clamp-2 min-h-[32px] text-[12px] font-medium leading-4 text-cocoa-500 group-hover:text-peach-500">{p.title}</p>
+                    <p className="mt-1 text-[11px] text-cocoa-300">👍 {p.like_count}{p.price && <span className="ml-1 font-bold text-peach-500">{p.price}</span>}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
         <Link href="/products" className={'badge ' + (!cat ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>전체</Link>
