@@ -14,7 +14,9 @@ import { useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type Props = {
-  bucket: 'guide-covers' | 'avatars' | 'community-images' | 'rescue-images' | 'announcement-images';
+  bucket:
+    | 'guide-covers' | 'avatars' | 'community-images' | 'rescue-images'
+    | 'announcement-images' | 'species-images' | 'product-images';
   value: string | null;
   onChange: (url: string | null) => void;
   label?: string;
