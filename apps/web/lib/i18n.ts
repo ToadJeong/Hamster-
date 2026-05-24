@@ -365,6 +365,10 @@ const ko: Dict = {
   'ad.sectionTitle': '삭제 요청 보내기', 'ad.adminEmail': '운영자 이메일',
   'ad.noContact': '관리자가 아직 운영자 이메일을 설정하지 않았어요. 운영자에게 직접 문의해 주세요.',
   'ad.memberHint': '회원이신가요? {login}하면 신청이 더 빠르게 처리돼요.',
+  // 오류 화면
+  'eb.title': '앗, 문제가 생겼어요',
+  'eb.desc': '잠깐 문제가 발생했어요. 다시 시도하면 대부분 해결돼요.',
+  'eb.retry': '다시 시도', 'eb.home': '홈으로',
 };
 
 const en: Dict = {
@@ -658,6 +662,9 @@ const en: Dict = {
   'ad.sectionTitle': 'Send a deletion request', 'ad.adminEmail': 'Admin email',
   'ad.noContact': 'The admin hasn’t set a contact email yet. Please contact the admin directly.',
   'ad.memberHint': 'Are you a member? Logging in via {login} speeds up your request.',
+  'eb.title': 'Oops, something went wrong',
+  'eb.desc': 'A temporary problem occurred. Trying again usually fixes it.',
+  'eb.retry': 'Try again', 'eb.home': 'Go home',
 };
 
 const ja: Dict = {
@@ -951,6 +958,9 @@ const ja: Dict = {
   'ad.sectionTitle': '削除リクエストを送る', 'ad.adminEmail': '運営のメール',
   'ad.noContact': '管理者がまだ運営のメールを設定していません。運営に直接お問い合わせください。',
   'ad.memberHint': '会員ですか？{login}するとリクエストがより早く処理されます。',
+  'eb.title': 'おっと、問題が発生しました',
+  'eb.desc': '一時的な問題が発生しました。もう一度試すとほとんど解決します。',
+  'eb.retry': '再試行', 'eb.home': 'ホームへ',
 };
 
 const zh: Dict = {
@@ -1244,6 +1254,9 @@ const zh: Dict = {
   'ad.sectionTitle': '发送删除请求', 'ad.adminEmail': '管理员邮箱',
   'ad.noContact': '管理员尚未设置联系邮箱。请直接联系管理员。',
   'ad.memberHint': '你是会员吗？通过{login}登录可更快处理你的请求。',
+  'eb.title': '哎呀，出错了',
+  'eb.desc': '发生了临时问题，重试一般就能解决。',
+  'eb.retry': '重试', 'eb.home': '返回首页',
 };
 
 export const DICT: Record<Locale, Dict> = { ko, en, ja, zh };

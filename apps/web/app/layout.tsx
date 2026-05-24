@@ -67,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             isAdmin={!!profile?.is_admin}
           />
           <TipBar />
-          <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 md:px-6 lg:pb-24">
+          <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:px-6">
             {children}
           </main>
           <Footer />

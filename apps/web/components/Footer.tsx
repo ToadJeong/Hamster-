@@ -8,7 +8,7 @@ export async function Footer() {
   const t = makeT(getLocale());
   return (
     <footer className="border-t border-cream-200 bg-cream-50/60">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-6 text-sm text-cocoa-300 md:px-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pt-6 pb-28 text-sm text-cocoa-300 md:px-6 lg:pb-6">
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <Link href="/privacy" className="hover:text-peach-500">{t('footer.privacy')}</Link>
           <Link href="/terms" className="hover:text-peach-500">{t('footer.terms')}</Link>
