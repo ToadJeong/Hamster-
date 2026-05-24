@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useModal } from '@/components/Modal';
+import { useT } from '@/components/I18nProvider';
 
 type Found = { id: string; username: string | null; avatar_url: string | null };
 
@@ -11,6 +12,7 @@ export function NewMessageButton({ currentUserId }: { currentUserId: string }) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const modal = useModal();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [results, setResults] = useState<Found[]>([]);
@@ -38,7 +40,7 @@ export function NewMessageButton({ currentUserId }: { currentUserId: string }) {
     const { data, error } = await supabase.rpc('open_dm_thread', { p_other: otherId });
     setBusy(false);
     if (error || !data) {
-      await modal.alert({ title: '대화방을 열 수 없어요', message: error?.message, tone: 'error' });
+      await modal.alert({ title: t('dm.cantOpen'), message: error?.message, tone: 'error' });
       return;
     }
     router.push(`/messages/${data}`);
@@ -48,7 +50,7 @@ export function NewMessageButton({ currentUserId }: { currentUserId: string }) {
   return (
     <div>
       <button onClick={() => setOpen((v) => !v)} className="btn-primary text-sm">
-        {open ? '닫기' : '✏️ 새 쪽지 쓰기'}
+        {open ? t('dm.close') : t('dm.newMessage')}
       </button>
 
       {open && (
@@ -56,17 +58,17 @@ export function NewMessageButton({ currentUserId }: { currentUserId: string }) {
           <form onSubmit={search} className="flex gap-2">
             <input
               className="input flex-1 py-2 text-sm"
-              placeholder="햄집사 닉네임으로 검색"
+              placeholder={t('dm.searchPh')}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               autoFocus
             />
-            <button type="submit" className="btn-secondary text-sm" disabled={busy || !q.trim()}>검색</button>
+            <button type="submit" className="btn-secondary text-sm" disabled={busy || !q.trim()}>{t('dm.searchBtn')}</button>
           </form>
 
           {searched && results.length === 0 && (
             <p className="text-center text-sm text-cocoa-300">
-              검색 결과가 없어요. 닉네임을 정확히 입력했는지 확인해 주세요.
+              {t('dm.noResults')}
             </p>
           )}
 
@@ -85,8 +87,8 @@ export function NewMessageButton({ currentUserId }: { currentUserId: string }) {
                     ) : (
                       <span className="grid h-8 w-8 place-items-center rounded-full bg-peach-200 text-sm">🐹</span>
                     )}
-                    <span className="font-medium text-cocoa-500">{p.username ?? '햄집사'}</span>
-                    <span className="ml-auto text-xs font-semibold text-peach-500">대화 시작 →</span>
+                    <span className="font-medium text-cocoa-500">{p.username ?? t('cm.defaultName')}</span>
+                    <span className="ml-auto text-xs font-semibold text-peach-500">{t('dm.startWith')}</span>
                   </button>
                 </li>
               ))}

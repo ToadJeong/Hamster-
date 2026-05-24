@@ -314,6 +314,20 @@ const ko: Dict = {
   'pm.deleteConfirm': '{name} 햄찌를 삭제할까요?',
   'pm.deleteConfirmMsg': '연결된 육아일기의 태그도 사라져요.',
   'pm.empty': '아직 등록한 햄찌가 없어요. 우리집 햄찌를 소개해 주세요!',
+  // 알림
+  'nt.subtitle': '내 글에 달린 댓글·좋아요, 새 팔로워, 조회수 소식이 모여요.',
+  'nt.empty': '아직 알림이 없어요. 글을 쓰고 햄집사들과 소통해 보세요! 🐹',
+  // 쪽지
+  'dm.subtitle': '햄집사 간 1:1 대화. 닉네임으로 검색해 새 쪽지를 보내거나, 라운지의 ✉ 버튼으로도 시작할 수 있어요.',
+  'dm.migrationNeeded': '쪽지 기능을 사용하려면 마이그레이션 0006을 적용해 주세요.',
+  'dm.emptyThreads': '아직 주고받은 쪽지가 없어요.',
+  'dm.mePrefix': '나: ', 'dm.startConvo': '대화를 시작해 보세요',
+  'dm.back': '← 쪽지함', 'dm.greet': '인사를 보내며 대화를 시작해보세요.',
+  'dm.inputPh': '메시지를 입력하세요', 'dm.send': '전송', 'dm.sendFail': '전송 실패',
+  'dm.close': '닫기', 'dm.newMessage': '✏️ 새 쪽지 쓰기',
+  'dm.searchPh': '햄집사 닉네임으로 검색', 'dm.searchBtn': '검색',
+  'dm.noResults': '검색 결과가 없어요. 닉네임을 정확히 입력했는지 확인해 주세요.',
+  'dm.startWith': '대화 시작 →', 'dm.cantOpen': '대화방을 열 수 없어요',
 };
 
 const en: Dict = {
@@ -560,6 +574,18 @@ const en: Dict = {
   'pm.deleteConfirm': 'Delete {name}?',
   'pm.deleteConfirmMsg': 'Tags in linked diary entries will also be removed.',
   'pm.empty': 'No hamsters registered yet. Introduce your hamster!',
+  'nt.subtitle': 'Comments and likes on your posts, new followers, and view milestones gather here.',
+  'nt.empty': 'No notifications yet. Write a post and connect with fellow keepers! 🐹',
+  'dm.subtitle': '1:1 chats between keepers. Search by nickname to send a new message, or start one with the ✉ button in the lounge.',
+  'dm.migrationNeeded': 'To use messages, please apply migration 0006.',
+  'dm.emptyThreads': 'No messages yet.',
+  'dm.mePrefix': 'Me: ', 'dm.startConvo': 'Start a conversation',
+  'dm.back': '← Messages', 'dm.greet': 'Say hello to start the conversation.',
+  'dm.inputPh': 'Type a message', 'dm.send': 'Send', 'dm.sendFail': 'Failed to send',
+  'dm.close': 'Close', 'dm.newMessage': '✏️ New message',
+  'dm.searchPh': 'Search by keeper nickname', 'dm.searchBtn': 'Search',
+  'dm.noResults': 'No results. Please check that you typed the nickname correctly.',
+  'dm.startWith': 'Start chat →', 'dm.cantOpen': 'Couldn’t open the conversation',
 };
 
 const ja: Dict = {
@@ -806,6 +832,18 @@ const ja: Dict = {
   'pm.deleteConfirm': '{name}を削除しますか？',
   'pm.deleteConfirmMsg': '紐づいた育児日記のタグも消えます。',
   'pm.empty': 'まだ登録したハムがいません。うちのハムを紹介してください！',
+  'nt.subtitle': '自分の投稿へのコメント・いいね、新しいフォロワー、閲覧数のお知らせが集まります。',
+  'nt.empty': 'まだ通知がありません。投稿して飼い主たちと交流しましょう！🐹',
+  'dm.subtitle': '飼い主同士の1:1チャット。ニックネームで検索して新しいメッセージを送るか、ラウンジの✉ボタンからも始められます。',
+  'dm.migrationNeeded': 'メッセージ機能を使うにはマイグレーション0006を適用してください。',
+  'dm.emptyThreads': 'まだやり取りしたメッセージがありません。',
+  'dm.mePrefix': '自分：', 'dm.startConvo': '会話を始めましょう',
+  'dm.back': '← メッセージ', 'dm.greet': '挨拶を送って会話を始めましょう。',
+  'dm.inputPh': 'メッセージを入力', 'dm.send': '送信', 'dm.sendFail': '送信に失敗しました',
+  'dm.close': '閉じる', 'dm.newMessage': '✏️ 新規メッセージ',
+  'dm.searchPh': '飼い主のニックネームで検索', 'dm.searchBtn': '検索',
+  'dm.noResults': '検索結果がありません。ニックネームが正しいかご確認ください。',
+  'dm.startWith': '会話を始める →', 'dm.cantOpen': '会話を開けませんでした',
 };
 
 const zh: Dict = {
@@ -1052,6 +1090,18 @@ const zh: Dict = {
   'pm.deleteConfirm': '要删除{name}吗？',
   'pm.deleteConfirmMsg': '关联养育日记中的标记也会消失。',
   'pm.empty': '还没有登记仓鼠。来介绍一下自家仓鼠吧！',
+  'nt.subtitle': '你帖子的评论与点赞、新粉丝、浏览量里程碑都会汇集在这里。',
+  'nt.empty': '还没有通知。发帖和铲屎官们互动起来吧！🐹',
+  'dm.subtitle': '铲屎官之间的1对1聊天。按昵称搜索发送新私信，也可以用大厅的✉按钮发起。',
+  'dm.migrationNeeded': '要使用私信功能，请先应用迁移0006。',
+  'dm.emptyThreads': '还没有往来的私信。',
+  'dm.mePrefix': '我：', 'dm.startConvo': '开始一段对话吧',
+  'dm.back': '← 私信箱', 'dm.greet': '打个招呼，开始对话吧。',
+  'dm.inputPh': '输入消息', 'dm.send': '发送', 'dm.sendFail': '发送失败',
+  'dm.close': '关闭', 'dm.newMessage': '✏️ 写新私信',
+  'dm.searchPh': '按铲屎官昵称搜索', 'dm.searchBtn': '搜索',
+  'dm.noResults': '没有搜索结果。请确认昵称是否输入正确。',
+  'dm.startWith': '开始对话 →', 'dm.cantOpen': '无法打开对话',
 };
 
 export const DICT: Record<Locale, Dict> = { ko, en, ja, zh };
