@@ -1,8 +1,8 @@
--- 도감 전문 콘텐츠 보강 v3 (백과사전 수준)
--- 핵심 종의 description / care_tips 를 구조화된 상세 내용으로 갱신.
+-- 0015: 도감 전문 콘텐츠 보강 (백과사전 수준) — 자동배포 마이그레이션
+-- 핵심 종의 description / care_tips 를 구조화된 상세 내용으로 갱신한다.
+-- 한 번만 실행되며, 이후 관리자가 /admin/species 에서 수정한 내용은 덮어쓰지 않는다.
 -- species 상세 페이지는 description을 plain text(whitespace-pre-line)로 렌더하므로
 -- 【섹션】 형태의 헤더로 가독성을 확보한다.
--- 여러 번 실행해도 안전 (UPDATE).
 
 -- ── 골든/시리안 햄스터 ──────────────────────────────────────────
 update public.species set
