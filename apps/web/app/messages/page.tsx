@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { NewMessageButton } from '@/components/NewMessageButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,8 +39,11 @@ export default async function DMListPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">✉ 쪽지</h1>
-      <p className="text-sm text-cocoa-300">햄집사 간 1:1 대화. 라운지의 ✉ 버튼으로도 시작할 수 있어요.</p>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">✉ 쪽지</h1>
+        <NewMessageButton currentUserId={user.id} />
+      </div>
+      <p className="text-sm text-cocoa-300">햄집사 간 1:1 대화. 닉네임으로 검색해 새 쪽지를 보내거나, 라운지의 ✉ 버튼으로도 시작할 수 있어요.</p>
 
       {error?.message?.includes('dm_threads') && (
         <div className="card text-amber-500">

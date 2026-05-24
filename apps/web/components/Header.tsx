@@ -14,13 +14,13 @@ type Props = {
   notifUnread?: number;
 };
 
-// 사용자가 요청한 메뉴 순서: 공지 → 도감 → 가이드 → 커뮤니티 → 모먼트 → 상품 → 구조대 → 병원
+// 사용자가 요청한 메뉴 순서: 공지 → 도감 → 가이드 → 커뮤니티 → 육아일기 → 상품 → 구조대 → 병원
 const NAV: { href: string; label: string; emoji: string }[] = [
   { href: '/announcements', label: '공지',   emoji: '📢' },
   { href: '/species',       label: '도감',   emoji: '🐹' },
   { href: '/guides',        label: '가이드', emoji: '📖' },
   { href: '/community',     label: '커뮤니티', emoji: '💬' },
-  { href: '/moments',       label: '모먼트', emoji: '📸' },
+  { href: '/moments',       label: '육아일기', emoji: '📸' },
   { href: '/products',      label: '상품',   emoji: '🛍' },
   { href: '/rescue',        label: '구조대', emoji: '🆘' },
   { href: '/hospitals',     label: '병원',   emoji: '🏥' },

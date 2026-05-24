@@ -35,7 +35,7 @@ export default async function MomentsPage({
     <div className="mx-auto max-w-3xl space-y-4">
       <header className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">✨ 모먼트</h1>
+          <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">✨ 육아일기</h1>
           <p className="mt-1 text-sm text-cocoa-300">우리집 햄찌의 귀여운 순간을 기록하고 나눠요</p>
         </div>
         <Link href="/moments/new" className="btn-primary text-sm">📸 기록하기</Link>
@@ -46,14 +46,14 @@ export default async function MomentsPage({
         {user && <FeedTab href="/moments?feed=following" active={feed === 'following'}>⭐ 팔로잉</FeedTab>}
       </div>
 
-      {error && <EmptyState title="모먼트를 준비하고 있어요" description="잠시 후 다시 와 주세요!" />}
+      {error && <EmptyState title="육아일기를 준비하고 있어요" description="잠시 후 다시 와 주세요!" />}
 
       {moments.length === 0 ? (
         feed === 'following' ? (
-          <EmptyState title="팔로잉 모먼트가 없어요" description="마음에 드는 햄집사를 팔로우하면 여기에 모여요." kind="winterwhite" />
+          <EmptyState title="팔로잉 육아일기가 없어요" description="마음에 드는 햄집사를 팔로우하면 여기에 모여요." kind="winterwhite" />
         ) : (
           <EmptyState
-            title="첫 모먼트를 남겨보세요"
+            title="첫 육아일기를 남겨보세요"
             description="우리집 햄찌의 일상 사진을 올리고 햄집사들과 나눠요!"
             action={<Link href="/moments/new" className="btn-primary text-sm">📸 기록하기</Link>}
             kind="golden"

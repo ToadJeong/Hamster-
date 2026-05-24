@@ -15,7 +15,7 @@ export default async function NewMomentPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-4">
-      <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">📸 모먼트 기록하기</h1>
+      <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">📸 육아일기 쓰기</h1>
       <p className="text-sm text-cocoa-300">우리집 햄찌의 귀여운 순간을 사진과 함께 남겨요.</p>
       <MomentComposer pets={(pets as Pick<Pet, 'id' | 'name'>[]) ?? []} />
     </div>

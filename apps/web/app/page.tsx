@@ -95,7 +95,7 @@ export default async function HomePage() {
 
       {/* 도감 미리보기 */}
       <section>
-        <SectionHeader title="🐹 햄스터 도감" subtitle="한국에서 키우는 30여 종을 가나다순으로" moreHref="/species" />
+        <SectionHeader title="🐹 햄스터 도감" subtitle="우리나라에서 키우는 햄스터를 가나다순으로" moreHref="/species" />
         {species.length === 0 ? (
           <div className="card text-center text-sm text-cocoa-300">
             🐹 도감을 준비하고 있어요. 곧 다양한 햄스터 친구들을 만나볼 수 있어요!
@@ -120,10 +120,10 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* 모먼트 */}
+      {/* 육아일기 */}
       {moments.length > 0 && (
         <section>
-          <SectionHeader title="📸 모먼트" subtitle="우리집 햄찌들의 귀여운 순간" moreHref="/moments" />
+          <SectionHeader title="📸 육아일기" subtitle="우리집 햄찌들의 귀여운 순간" moreHref="/moments" />
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
             {moments.map((m) => (
               <Link key={m.id} href={`/moments/${m.id}`}

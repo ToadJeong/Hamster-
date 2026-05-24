@@ -19,7 +19,7 @@ export function MomentComposer({ pets }: { pets: Pick<Pet, 'id' | 'name'>[] }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!imageUrl) { await modal.alert({ title: '사진/영상을 올려주세요', message: '모먼트는 사진이나 동영상이 꼭 필요해요 🐹', tone: 'info' }); return; }
+    if (!imageUrl) { await modal.alert({ title: '사진/영상을 올려주세요', message: '육아일기는 사진이나 동영상이 꼭 필요해요 🐹', tone: 'info' }); return; }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/login'); return; }
@@ -65,7 +65,7 @@ export function MomentComposer({ pets }: { pets: Pick<Pet, 'id' | 'name'>[] }) {
       <div className="flex justify-end gap-2">
         <button type="button" className="btn-secondary" onClick={() => router.back()}>취소</button>
         <button type="submit" className="btn-primary" disabled={saving || !imageUrl}>
-          {saving ? '올리는 중…' : '모먼트 올리기'}
+          {saving ? '올리는 중…' : '육아일기 올리기'}
         </button>
       </div>
     </form>
