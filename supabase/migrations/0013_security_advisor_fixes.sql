@@ -3,6 +3,14 @@
 --   (2) search_path 미설정 함수 보정
 
 -- ──────────────────────────────────────────────────────────────
+-- 0. 안전장치: 0009가 실제로 적용되지 않은 환경 대비
+--    아래 뷰들이 참조하는 view_count 컬럼을 보장한다(없으면 추가).
+-- ──────────────────────────────────────────────────────────────
+alter table public.guides          add column if not exists view_count int not null default 0;
+alter table public.community_posts add column if not exists view_count int not null default 0;
+alter table public.rescue_posts    add column if not exists view_count int not null default 0;
+
+-- ──────────────────────────────────────────────────────────────
 -- 1. 뷰 재정의 (security_invoker = on, 민감 컬럼 제외)
 --    guides / community_posts 의 anonymous_password_hash 는 절대 노출하지 않는다.
 -- ──────────────────────────────────────────────────────────────
