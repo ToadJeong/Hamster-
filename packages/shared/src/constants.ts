@@ -48,6 +48,16 @@ export const COMMUNITY_CATEGORY_LABEL: Record<import('./types').CommunityCategor
   'show-off':  { label: '자랑',   emoji: '✨' },
 };
 
+export const PRODUCT_CATEGORY_LABEL: Record<import('./types').ProductCategory, { label: string; emoji: string }> = {
+  'cage':    { label: '케이지',   emoji: '🏠' },
+  'food':    { label: '사료/간식', emoji: '🥕' },
+  'wheel':   { label: '휠',       emoji: '🎡' },
+  'bedding': { label: '베딩',     emoji: '🛏' },
+  'toy':     { label: '장난감',   emoji: '🧸' },
+  'sand':    { label: '모래/목욕', emoji: '🏖' },
+  'etc':     { label: '기타',     emoji: '📦' },
+};
+
 export const CHAT_CHANNEL = 'hamster-lobby';
 export const PRESENCE_CHANNEL = 'hamster-presence';
 export const MAX_CHAT_MESSAGE_LENGTH = 200;

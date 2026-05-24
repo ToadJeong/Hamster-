@@ -386,7 +386,7 @@ function PetSprite({
       style={{
         left: `${pos.x * 100}%`,
         top: `${pos.y * 100}%`,
-        transform: `translate(-50%, -100%) scaleX(${dir})`,
+        transform: 'translate(-50%, -100%)',
         width:  60 * scale,
         height: 56 * scale,
         marginLeft: -30 * scale,
@@ -396,15 +396,16 @@ function PetSprite({
       aria-label={`${pet.nickname} 햄스터 (${meta.label})`}
       onClick={handleClick}
     >
+      {/* 말풍선은 좌우반전 밖에 둬서 글씨가 항상 똑바로 보이게 */}
       {cuddle && (
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs shadow-soft pet-cuddle-pop"
-          style={{ transform: `scaleX(${dir})` }}
-        >
+        <div className="pointer-events-none absolute left-1/2 top-0 z-10 whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs shadow-soft pet-cuddle-pop">
           {cuddle}
         </div>
       )}
-      <CuteHamsterSvg meta={meta} mood={mood} reaction={reaction} animClass={animClass} />
+      {/* 좌우반전은 햄스터 그림에만 적용 */}
+      <div style={{ transform: `scaleX(${dir})`, width: '100%', height: '100%' }}>
+        <CuteHamsterSvg meta={meta} mood={mood} reaction={reaction} animClass={animClass} />
+      </div>
     </div>
   );
 }

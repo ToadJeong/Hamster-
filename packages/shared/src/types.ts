@@ -6,7 +6,18 @@ export type Profile = {
   phone: string | null;
   interest_tags: string[];
   is_admin: boolean;
+  is_moderator: boolean;
   created_at: string;
+};
+
+export type Gender = 'male' | 'female' | 'other' | 'undisclosed';
+
+/* 개인정보 (본인/관리자만 조회) */
+export type ProfilePrivate = {
+  id: string;
+  real_name: string | null;
+  birth_date: string | null;
+  gender: Gender | null;
 };
 
 export type Species = {
@@ -194,6 +205,29 @@ export type DMMessage = {
   body: string;
   read_at: string | null;
   created_at: string;
+};
+
+/* 상품 추천 게시판 */
+export type ProductCategory = 'cage' | 'food' | 'wheel' | 'bedding' | 'toy' | 'sand' | 'etc';
+
+export type ProductPost = {
+  id: string;
+  author_id: string | null;
+  title: string;
+  url: string | null;
+  image_url: string | null;
+  price: string | null;
+  category: ProductCategory;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  view_count: number;
+};
+
+export type ProductPostFeed = ProductPost & {
+  author_username: string | null;
+  author_avatar_url: string | null;
+  like_count: number;
 };
 
 /* 커뮤니티 피드 */

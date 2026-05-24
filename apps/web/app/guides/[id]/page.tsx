@@ -10,6 +10,7 @@ import { CommentSection } from '@/components/CommentSection';
 import { GuideActions } from '@/components/GuideActions';
 import { ViewTracker } from '@/components/ViewTracker';
 import { ReportButton } from '@/components/ReportButton';
+import { StaffDeleteButton } from '@/components/StaffDeleteButton';
 import { CorrectionButton } from '@/components/CorrectionButton';
 import type { GuideWithCounts, CommentWithAuthor } from '@hamster/shared';
 
@@ -20,6 +21,12 @@ export default async function GuideDetail({ params }: { params: { id: string } }
 
   const { data: { user } } = await supabase.auth.getUser();
   const settings = await getSiteSettings();
+
+  let isStaff = false;
+  if (user) {
+    const { data: pr } = await supabase.from('profiles').select('is_admin, is_moderator').eq('id', user.id).maybeSingle();
+    isStaff = !!(pr as any)?.is_admin || !!(pr as any)?.is_moderator;
+  }
 
   const { data: guide } = await supabase
     .from('guides_with_counts')
@@ -115,6 +122,7 @@ export default async function GuideDetail({ params }: { params: { id: string } }
         <div className="flex items-center gap-2">
           <span className="text-sm text-cocoa-300">💬 {g.comment_count} · ❤ {g.like_count}</span>
           {!isAuthor && <ReportButton targetType="guide" targetId={g.id} />}
+          {isStaff && !isAuthor && <StaffDeleteButton type="guide" id={g.id} redirectTo="/guides" />}
         </div>
       </div>
 

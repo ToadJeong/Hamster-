@@ -18,6 +18,9 @@ export function SignupForm({
   const [email, setEmail] = useState('');           // 로그인 이메일
   const [phone, setPhone] = useState('');           // 휴대폰
   const [password, setPassword] = useState('');
+  const [realName, setRealName] = useState('');     // 본명
+  const [birthDate, setBirthDate] = useState('');   // 생년월일
+  const [gender, setGender] = useState('');         // 성별
   const [agree, setAgree] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -28,6 +31,9 @@ export function SignupForm({
     if (!/^[a-z0-9_\-가-힣]{2,16}$/i.test(username)) {
       return '아이디는 2~16자, 한글·영문·숫자·_·- 만 사용할 수 있어요.';
     }
+    if (realName.trim().length < 2) return '본명을 입력해 주세요.';
+    if (!birthDate) return '생년월일을 입력해 주세요.';
+    if (!gender) return '성별을 선택해 주세요.';
     if (phone && !/^[0-9\-]{9,15}$/.test(phone)) {
       return '휴대폰번호 형식을 확인해 주세요. (예: 010-1234-5678)';
     }
@@ -46,7 +52,12 @@ export function SignupForm({
       email,
       password,
       options: {
-        data: { username, phone },
+        data: {
+          username, phone,
+          real_name: realName.trim(),
+          birth_date: birthDate,
+          gender,
+        },
         emailRedirectTo: typeof window !== 'undefined'
           ? `${window.location.origin}/auth/callback`
           : undefined,
@@ -106,6 +117,43 @@ export function SignupForm({
           <p className="mt-1 text-xs text-cocoa-300">로그인 시 사용하며, 본인 인증 메일을 받게 됩니다.</p>
         </Field>
 
+        <Field label="본명" required>
+          <input
+            type="text"
+            className="input"
+            value={realName}
+            onChange={(e) => setRealName(e.target.value)}
+            placeholder="홍길동"
+            autoComplete="name"
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="생년월일" required>
+            <input
+              type="date"
+              className="input"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+            />
+          </Field>
+          <Field label="성별" required>
+            <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
+              <option value="">선택</option>
+              <option value="male">남성</option>
+              <option value="female">여성</option>
+              <option value="other">기타</option>
+              <option value="undisclosed">밝히지 않음</option>
+            </select>
+          </Field>
+        </div>
+
+        <div className="rounded-2xl bg-cream-50 px-3 py-2 text-xs text-cocoa-400">
+          🔒 본명·생년월일·성별·휴대폰번호는 <strong>본인과 운영자만</strong> 볼 수 있어요.
+          운영자도 부정 이용 확인 등 꼭 필요한 경우에만 열람합니다. 다른 회원에게는 공개되지 않아요.
+        </div>
+
         <Field label="휴대폰번호 (선택)">
           <input
             type="tel"
@@ -115,7 +163,6 @@ export function SignupForm({
             placeholder="010-1234-5678"
             autoComplete="tel"
           />
-          <p className="mt-1 text-xs text-cocoa-300">분양 게시판 등에서 본인 확인용. 외부에 공개되지 않아요.</p>
         </Field>
 
         <Field label="비밀번호" required>
