@@ -1,0 +1,31 @@
+name: Apply Supabase migrations
+
+# main 브랜치의 supabase/migrations 가 바뀌면 자동으로 원격 DB에 적용한다.
+# 처음 한 번은 아래 "최초 1회 설정"을 마쳐야 정상 동작한다.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch: {} # 수동 실행도 허용
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: nkgkaprpuejjumlvwohm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Push migrations
+        run: supabase db push
