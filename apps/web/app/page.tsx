@@ -4,6 +4,8 @@ import { getSiteSettings } from '@/lib/site-settings';
 import { GuideCard } from '@/components/GuideCard';
 import { HomeSearchBar } from '@/components/HomeSearchBar';
 import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { Media } from '@/components/Media';
+import { isVideoUrl } from '@/lib/media';
 import { SectionHeader } from '@/components/SectionHeader';
 import { formatDate } from '@/lib/format';
 import {
@@ -126,8 +128,10 @@ export default async function HomePage() {
             {moments.map((m) => (
               <Link key={m.id} href={`/moments/${m.id}`}
                 className="group relative aspect-square overflow-hidden rounded-2xl bg-cream-100 ring-1 ring-cream-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.image_url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                <Media url={m.image_url} className="h-full w-full object-cover transition group-hover:scale-105" />
+                {isVideoUrl(m.image_url) && (
+                  <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-black/45 text-[10px] text-white">▶</span>
+                )}
                 {m.like_count > 0 && (
                   <span className="absolute bottom-1 left-1 rounded-full bg-black/45 px-1.5 py-0.5 text-[10px] font-bold text-white">❤ {m.like_count}</span>
                 )}
@@ -152,8 +156,12 @@ export default async function HomePage() {
                   <Link href={`/community/${p.id}`} className="card block transition hover:-translate-y-0.5 hover:shadow-soft">
                     <div className="flex items-start gap-3">
                       {p.cover_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.cover_url} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+                        <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl">
+                          <Media url={p.cover_url} className="h-full w-full object-cover" />
+                          {isVideoUrl(p.cover_url) && (
+                            <span className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/45 text-[9px] text-white">▶</span>
+                          )}
+                        </span>
                       ) : (
                         <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-cream-100 text-2xl">
                           {meta.emoji}

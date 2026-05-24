@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { Media } from '@/components/Media';
 import { MomentDetailActions } from '@/components/MomentDetailActions';
+import { MomentLikeButton } from '@/components/MomentLikeButton';
 import { MomentCommentSection } from '@/components/MomentCommentSection';
 import type { MomentFeed } from '@hamster/shared';
 
@@ -17,9 +19,14 @@ export default async function MomentDetail({ params }: { params: { id: string } 
   const m = data as MomentFeed;
 
   let isStaff = false;
+  let liked = false;
   if (user) {
-    const { data: pr } = await supabase.from('profiles').select('is_admin, is_moderator').eq('id', user.id).maybeSingle();
+    const [{ data: pr }, { data: likeRow }] = await Promise.all([
+      supabase.from('profiles').select('is_admin, is_moderator').eq('id', user.id).maybeSingle(),
+      supabase.from('moment_likes').select('moment_id').eq('moment_id', m.id).eq('user_id', user.id).maybeSingle(),
+    ]);
     isStaff = !!(pr as any)?.is_admin || !!(pr as any)?.is_moderator;
+    liked = !!likeRow;
   }
   const isAuthor = user?.id === m.author_id;
 
@@ -51,8 +58,11 @@ export default async function MomentDetail({ params }: { params: { id: string } 
           </div>
           {(isAuthor || isStaff) && <MomentDetailActions momentId={m.id} canStaff={isStaff && !isAuthor} />}
         </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={m.image_url} alt={m.caption ?? ''} className="w-full bg-cream-50 object-cover" />
+        <Media url={m.image_url} alt={m.caption ?? ''} controls className="w-full bg-black object-contain" />
+        <div className="flex items-center gap-3 px-4 pt-3">
+          <MomentLikeButton momentId={m.id} initialLiked={liked} initialCount={m.like_count} isAuthed={!!user} />
+          <span className="text-sm text-cocoa-300">💬 {m.comment_count}</span>
+        </div>
         {m.caption && (
           <p className="whitespace-pre-line px-4 py-3 text-[15px] leading-6 text-cocoa-500">
             <span className="font-bold">{m.author_username ?? '햄집사'}</span> {m.caption}

@@ -19,7 +19,7 @@ export function MomentComposer({ pets }: { pets: Pick<Pet, 'id' | 'name'>[] }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!imageUrl) { await modal.alert({ title: '사진을 올려주세요', message: '모먼트는 사진이 꼭 필요해요 🐹', tone: 'info' }); return; }
+    if (!imageUrl) { await modal.alert({ title: '사진/영상을 올려주세요', message: '모먼트는 사진이나 동영상이 꼭 필요해요 🐹', tone: 'info' }); return; }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/login'); return; }
@@ -37,8 +37,8 @@ export function MomentComposer({ pets }: { pets: Pick<Pet, 'id' | 'name'>[] }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <ImageUploader bucket="community-images" value={imageUrl} onChange={setImageUrl}
-        label="사진 (필수)" hint="우리집 햄찌의 한 컷! JPG/PNG/WebP/GIF · 최대 5MB" />
+      <ImageUploader bucket="community-images" value={imageUrl} onChange={setImageUrl} allowVideo
+        label="사진/동영상 (필수)" hint="우리집 햄찌의 한 컷! 사진 5MB · 동영상 30MB 이하" />
 
       <textarea
         className="input min-h-[120px] text-[15px] leading-7"

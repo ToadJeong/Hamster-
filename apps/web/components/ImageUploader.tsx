@@ -21,25 +21,40 @@ type Props = {
   onChange: (url: string | null) => void;
   label?: string;
   hint?: string;
+  allowVideo?: boolean;
 };
 
-const MAX_SIZE = 5 * 1024 * 1024;
-const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 30 * 1024 * 1024;
+const ALLOWED_IMAGE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_VIDEO = ['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg'];
 
 export function ImageUploader({
-  bucket, value, onChange, label = '이미지', hint,
+  bucket, value, onChange, label = '이미지', hint, allowVideo = false,
 }: Props) {
   const supabase = createSupabaseBrowserClient();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const allowedTypes = allowVideo ? [...ALLOWED_IMAGE, ...ALLOWED_VIDEO] : ALLOWED_IMAGE;
+  const accept = allowedTypes.join(',');
+  const isVideo = (value ?? '').match(/\.(mp4|webm|mov|m4v|ogg)(\?|#|$)/i) != null;
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
 
-    if (!ALLOWED.includes(file.type)) { setError('JPG/PNG/WebP/GIF 만 업로드 가능해요.'); return; }
-    if (file.size > MAX_SIZE) { setError('5MB 이하 파일만 업로드 가능해요.'); return; }
+    const fileIsVideo = file.type.startsWith('video/');
+    if (!allowedTypes.includes(file.type)) {
+      setError(allowVideo ? '이미지(JPG/PNG/WebP/GIF) 또는 동영상(MP4/WebM/MOV)만 업로드 가능해요.' : 'JPG/PNG/WebP/GIF 만 업로드 가능해요.');
+      return;
+    }
+    const maxSize = fileIsVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+    if (file.size > maxSize) {
+      setError(fileIsVideo ? '동영상은 30MB 이하만 업로드 가능해요.' : '이미지는 5MB 이하만 업로드 가능해요.');
+      return;
+    }
 
     setUploading(true);
     try {
@@ -70,8 +85,12 @@ export function ImageUploader({
       <p className="text-sm text-cocoa-400">{label}</p>
       {value ? (
         <div className="relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="" className="max-h-60 w-full rounded-2xl object-cover" />
+          {isVideo ? (
+            <video src={value} controls playsInline className="max-h-60 w-full rounded-2xl bg-black object-contain" />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={value} alt="" className="max-h-60 w-full rounded-2xl object-cover" />
+          )}
           <button
             type="button"
             onClick={() => onChange(null)}
@@ -84,13 +103,13 @@ export function ImageUploader({
         <label className="block cursor-pointer rounded-2xl border-2 border-dashed border-cream-200 bg-cream-50 px-4 py-6 text-center transition hover:border-peach-300 hover:bg-peach-50">
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept={accept}
             className="hidden"
             onChange={handleFile}
             disabled={uploading}
           />
           <p className="text-sm font-medium text-cocoa-500">
-            {uploading ? '업로드 중…' : '📷 클릭해서 이미지 업로드'}
+            {uploading ? '업로드 중…' : allowVideo ? '📷 클릭해서 사진/동영상 업로드' : '📷 클릭해서 이미지 업로드'}
           </p>
           {hint && <p className="mt-1 text-xs text-cocoa-300">{hint}</p>}
         </label>
