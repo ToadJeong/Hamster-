@@ -78,8 +78,8 @@ export function Header({
           })}
         </nav>
 
-        {/* 데스크톱 통합검색 */}
-        <form onSubmit={submitSearch} className="ml-auto hidden min-w-0 flex-1 max-w-[140px] lg:block xl:max-w-xs">
+        {/* 데스크톱/태블릿 통합검색 */}
+        <form onSubmit={submitSearch} className="ml-auto hidden min-w-0 flex-1 max-w-xs md:block lg:max-w-[140px] xl:max-w-xs">
           <input
             type="search"
             value={q}
