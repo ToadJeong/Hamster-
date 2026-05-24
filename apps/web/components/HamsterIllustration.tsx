@@ -107,8 +107,9 @@ export function HamsterIllustration({
   bg?: boolean;
 }): ReactNode {
   const { color, belly, ear, earInner, eyeColor, stripe, whiteFace, longHair, band, long } = visual;
-  const bodyRx = long ? 23 : 21;
-  const bodyRy = long ? 16 : 18;
+  // 중국햄=길쭉, 로보(whiteFace)=작고 동그란 비율로 더 또렷하게
+  const bodyRx = long ? 25 : whiteFace ? 18 : 21;
+  const bodyRy = long ? 14 : whiteFace ? 17 : 18;
 
   return (
     <svg viewBox="0 0 64 60" xmlns="http://www.w3.org/2000/svg" className={className} role="img" aria-label="햄스터 일러스트">
@@ -137,11 +138,11 @@ export function HamsterIllustration({
       {/* 몸통 */}
       <ellipse cx="32" cy="34" rx={bodyRx} ry={bodyRy} fill={color} />
 
-      {/* 등 줄무늬 */}
+      {/* 등 줄무늬 (드워프/중국햄 특징 — 굵고 진하게) */}
       {stripe && (
         <path
-          d={long ? 'M12 24 L52 24' : 'M14 22 L23 16 L32 13 L41 16 L50 22'}
-          stroke={shade(color, -45)} strokeWidth="2.2" fill="none" strokeLinecap="round"
+          d={long ? 'M11 23 L53 23' : 'M13 22 L23 15 L32 12 L41 15 L51 22'}
+          stroke={shade(color, -55)} strokeWidth="3.4" fill="none" strokeLinecap="round"
         />
       )}
 
@@ -149,8 +150,14 @@ export function HamsterIllustration({
       <ellipse cx="32" cy="40" rx={bodyRx - 7} ry={bodyRy - 9} fill={belly} opacity="0.9" />
       {band && <ellipse cx="32" cy="36" rx="19" ry="6.5" fill="#FFFAF1" />}
 
-      {/* 화이트페이스 */}
-      {whiteFace && <ellipse cx="32" cy="27" rx="15" ry="11" fill="#FFFAF0" />}
+      {/* 화이트페이스 (로보 특징 — 눈썹 위 흰 마스크 또렷하게) */}
+      {whiteFace && (
+        <>
+          <ellipse cx="32" cy="25" rx="16" ry="12" fill="#FFFAF0" />
+          <ellipse cx="22" cy="20" rx="4" ry="3" fill="#FFFFFF" />
+          <ellipse cx="42" cy="20" rx="4" ry="3" fill="#FFFFFF" />
+        </>
+      )}
 
       {/* 귀 */}
       <g>

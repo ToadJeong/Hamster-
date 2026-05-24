@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
+import { TipBar } from '@/components/TipBar';
 import { Footer } from '@/components/Footer';
 import { PetHamsterLayer } from '@/components/PetHamsterLayer';
 import { LiveChat } from '@/components/LiveChat';
@@ -65,6 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             dmUnread={dmUnread}
             notifUnread={notifUnread}
           />
+          <TipBar />
           <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 md:px-6">
             {children}
           </main>

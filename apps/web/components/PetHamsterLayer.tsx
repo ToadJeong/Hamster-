@@ -304,6 +304,27 @@ function PetSprite({
     return () => cancelAnimationFrame(raf);
   }, [pet.born_at, mood, meta.size, onMove]);
 
+  // 혼잣말 (클릭 없이 가끔 말풍선) — 햄스터마다 다른 타이밍
+  useEffect(() => {
+    const idleLines = [
+      '🌰 배고프다…', '😪 졸려…', '🎵 룰루랄라~', '🤔 여긴 어디지?',
+      '🏃 달려볼까?', '🥱 하암~', '👀 누구 없나?', '🧀 간식 어디 갔지',
+      '✨ 오늘도 평화롭다', '🐾 심심해~', '💭 햄생이란…',
+    ];
+    let timer: number;
+    const schedule = () => {
+      timer = window.setTimeout(() => {
+        // 점프/클릭 반응 중이 아니면 혼잣말
+        setReaction((r) => r);
+        setCuddle((c) => c ?? idleLines[Math.floor(Math.random() * idleLines.length)]);
+        window.setTimeout(() => setCuddle(null), 2200);
+        schedule();
+      }, 9000 + Math.random() * 12000);
+    };
+    schedule();
+    return () => window.clearTimeout(timer);
+  }, []);
+
   function handleClick(e: React.MouseEvent) {
     const el = containerRef.current;
     if (!el) return;
@@ -356,7 +377,7 @@ function PetSprite({
     reaction === 'startle' ? 'pet-startle' :
                               baseAnim;
 
-  const scale = meta.size;
+  const scale = meta.size * 1.35; // 전체적으로 더 크게
 
   return (
     <div
