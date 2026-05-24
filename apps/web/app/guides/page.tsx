@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideCard } from '@/components/GuideCard';
+import { EmptyState } from '@/components/EmptyState';
 import type { GuideWithCounts, Species } from '@hamster/shared';
 
 export const revalidate = 30;
@@ -73,11 +74,14 @@ export default async function GuidesIndex({
       </div>
 
       {guides.length === 0 ? (
-        <div className="card text-center text-cocoa-300">
-          아직 가이드가 없어요. 첫 가이드를 작성해 보세요!
-        </div>
+        <EmptyState
+          title="아직 가이드가 없어요"
+          description="사육 노하우·꿀팁·경험담을 가장 먼저 나눠보세요!"
+          action={<Link href="/guides/new" className="btn-primary text-sm">가이드 쓰기</Link>}
+          kind="teddy"
+        />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           {guides.map((g) => <GuideCard key={g.id} guide={g} />)}
         </div>
       )}

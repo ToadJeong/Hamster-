@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { EmptyState } from '@/components/EmptyState';
 import {
   RESCUE_KIND_LABEL, RESCUE_STATUS_LABEL,
   type RescueKind, type RescueStatus, type RescuePostWithAuthor,
@@ -63,7 +64,12 @@ export default async function RescueIndex({
       )}
 
       {items.length === 0 ? (
-        <div className="card text-center text-cocoa-300">아직 글이 없어요. 첫 글을 올려보세요.</div>
+        <EmptyState
+          title="아직 등록된 글이 없어요"
+          description="새 가족이 필요한 햄찌, 잃어버린 햄찌 소식을 올려보세요."
+          action={<Link href="/rescue/new" className="btn-primary text-sm">글 올리기</Link>}
+          kind="roborovski"
+        />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {items.map((r) => {

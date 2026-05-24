@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { EmptyState } from '@/components/EmptyState';
 import { PRODUCT_CATEGORY_LABEL, type ProductCategory } from '@hamster/shared';
 
 export const revalidate = 20;
@@ -46,7 +47,12 @@ export default async function ProductsIndex({
       )}
 
       {items.length === 0 ? (
-        <div className="card text-center text-cocoa-300">아직 추천 상품이 없어요. 첫 상품을 추천해 주세요!</div>
+        <EmptyState
+          title="아직 추천 상품이 없어요"
+          description="직접 써본 케이지·휠·사료 등 좋은 용품을 추천해 주세요!"
+          action={<Link href="/products/new" className="btn-primary text-sm">상품 추천하기</Link>}
+          kind="campbell"
+        />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {items.map((p: any) => {

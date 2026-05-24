@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import { ReadBadge } from '@/components/ReadBadge';
+import { EmptyState } from '@/components/EmptyState';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 export const revalidate = 15;
@@ -98,11 +99,15 @@ export default async function CommunityIndex({
       )}
 
       {posts.length === 0 ? (
-        <div className="card text-center text-cocoa-300">
-          {feed === 'following'
-            ? '팔로우한 햄집사가 아직 없어요. 마음에 드는 글의 작성자를 팔로우해 보세요!'
-            : '아직 글이 없어요. 첫 글을 남겨보세요!'}
-        </div>
+        feed === 'following' ? (
+          <EmptyState title="팔로우한 햄집사가 아직 없어요" description="마음에 드는 글의 작성자를 팔로우하면 여기에 모여요." kind="winterwhite" />
+        ) : (
+          <EmptyState
+            title="아직 글이 없어요"
+            description="햄집사들과 나누고 싶은 이야기를 가장 먼저 남겨보세요!"
+            action={<Link href="/community/new" className="btn-primary text-sm">글쓰기</Link>}
+          />
+        )
       ) : (
         <ul className="space-y-2">
           {posts.map((p: any) => {
