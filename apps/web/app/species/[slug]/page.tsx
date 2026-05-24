@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideCard } from '@/components/GuideCard';
 import { CorrectionButton } from '@/components/CorrectionButton';
-import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { Hamster, paletteForSpecies } from '@/components/Hamster';
 import { EmptyState } from '@/components/EmptyState';
 import type { Species, GuideWithCounts } from '@hamster/shared';
 
@@ -41,7 +41,7 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
               // eslint-disable-next-line @next/next/no-img-element
               <img src={s.image_url} alt={s.name_ko} className="h-full w-full object-cover" />
             ) : (
-              <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
+              <Hamster palette={paletteForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
             )}
           </div>
           <div className="min-w-0">
@@ -53,13 +53,17 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
             <p className="mt-2.5 text-cocoa-500">{s.summary}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <a
-                href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent('햄스터 ' + s.name_ko)}`}
+                href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(s.name_ko + ' 햄스터')}`}
                 target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm"
               >📸 사진 보기</a>
               <a
-                href={`https://www.google.com/search?q=${encodeURIComponent(s.name_ko + ' 햄스터 분양')}`}
+                href={`https://www.google.com/search?q=${encodeURIComponent(s.name_ko + ' 햄스터 특징 사육')}`}
                 target="_blank" rel="noopener noreferrer" className="btn-ghost text-sm"
               >🔍 정보 더 찾기</a>
+              <a
+                href={`https://namu.wiki/Search?q=${encodeURIComponent(s.name_ko)}`}
+                target="_blank" rel="noopener noreferrer" className="btn-ghost text-sm"
+              >📚 백과사전</a>
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useModal } from '@/components/Modal';
-import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { Hamster, paletteForSpecies } from '@/components/Hamster';
 import { formatDate } from '@/lib/format';
 import type { Pet } from '@hamster/shared';
 
@@ -123,7 +123,7 @@ export function PetManager({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={pet.photo_url} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <HamsterIllustration visual={visualForSpecies(pet.species_label ?? 'golden')} className="h-full w-full" bg={false} />
+                  <Hamster palette={paletteForSpecies(pet.species_label ?? 'golden')} className="h-full w-full" />
                 )}
               </div>
               <div className="min-w-0 flex-1">

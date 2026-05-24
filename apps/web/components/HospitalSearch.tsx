@@ -1,15 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export function HospitalSearch() {
   const [q, setQ] = useState('');
+  const linkRef = useRef<HTMLAnchorElement>(null);
 
+  const term = q.trim();
+  const query = term ? `${term} 햄스터 동물병원` : '내 주변 햄스터 동물병원';
+  const url = `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
+
+  // 엔터로 제출하면 실제 링크를 클릭해 새 탭을 연다.
+  // (window.open 은 일부 브라우저에서 팝업 차단으로 무반응 → 지역 버튼과 동일한 <a> 방식 사용)
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const term = q.trim();
-    const query = term ? `${term} 햄스터 동물병원` : '내 주변 햄스터 동물병원';
-    window.open(`https://map.naver.com/p/search/${encodeURIComponent(query)}`, '_blank', 'noopener,noreferrer');
+    linkRef.current?.click();
   }
 
   return (
@@ -25,7 +30,15 @@ export function HospitalSearch() {
         />
       </label>
       <div className="flex justify-end">
-        <button type="submit" className="btn-primary">🗺 네이버 지도에서 찾기</button>
+        <a
+          ref={linkRef}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          🗺 네이버 지도에서 찾기
+        </a>
       </div>
     </form>
   );

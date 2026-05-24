@@ -3,7 +3,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 import { GuideCard } from '@/components/GuideCard';
 import { HomeSearchBar } from '@/components/HomeSearchBar';
-import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { Hamster, paletteForSpecies } from '@/components/Hamster';
+import { CategoryIcon } from '@/components/HamlandAssets';
 import { Media } from '@/components/Media';
 import { isVideoUrl } from '@/lib/media';
 import { SectionHeader } from '@/components/SectionHeader';
@@ -71,6 +72,29 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* 카테고리 바로가기 */}
+      <nav aria-label="카테고리 바로가기">
+        <ul className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+          {([
+            { href: '/announcements', kind: 'announcements', label: '공지' },
+            { href: '/species', kind: 'species', label: '도감' },
+            { href: '/guides', kind: 'guides', label: '가이드' },
+            { href: '/community', kind: 'community', label: '커뮤니티' },
+            { href: '/products', kind: 'products', label: '상품' },
+            { href: '/rescue', kind: 'rescue', label: '구조대' },
+            { href: '/hospitals', kind: 'hospitals', label: '병원' },
+            { href: '/identify', kind: 'identify', label: '사진찾기' },
+          ] as const).map((c) => (
+            <li key={c.href}>
+              <Link href={c.href} className="flex flex-col items-center gap-1 rounded-2xl p-1.5 transition hover:-translate-y-0.5 hover:bg-white/70">
+                <CategoryIcon kind={c.kind} className="h-12 w-12 sm:h-14 sm:w-14" />
+                <span className="text-[11px] font-semibold text-cocoa-500">{c.label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
       {/* 최근 공지 */}
       {announcements.length > 0 && (
         <section>
@@ -110,7 +134,7 @@ export default async function HomePage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={s.image_url} alt={s.name_ko} className="h-full w-full object-cover" />
                   ) : (
-                    <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
+                    <Hamster palette={paletteForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
                   )}
                 </div>
                 <h3 className="line-clamp-1 w-full text-center text-[11px] font-semibold text-cocoa-500 group-hover:text-peach-500">{s.name_ko}</h3>

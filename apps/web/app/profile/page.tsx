@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ProfileEditor } from '@/components/ProfileEditor';
 import { PetManager } from '@/components/PetManager';
 import { GuideCard } from '@/components/GuideCard';
-import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { Hamster, paletteForSpecies } from '@/components/Hamster';
 import { EmptyState } from '@/components/EmptyState';
 import { formatDate } from '@/lib/format';
 import type { GuideWithCounts, Pet, Profile, Species } from '@hamster/shared';
@@ -49,7 +49,7 @@ export default async function ProfilePage() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
             ) : (
-              <HamsterIllustration visual={visualForSpecies('golden')} className="h-full w-full" bg={false} />
+              <Hamster palette="goldenSyrian" className="h-full w-full" />
             )}
           </div>
           <div className="min-w-0 flex-1">

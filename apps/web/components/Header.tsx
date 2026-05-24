@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { LogoWordmark } from '@/components/HamlandAssets';
 
 type Props = {
   user: { email: string } | null;
@@ -54,9 +55,8 @@ export function Header({
   return (
     <header className="sticky top-0 z-30 border-b border-cream-200 bg-[var(--bg)]/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl items-center gap-2 px-3 py-2.5 md:gap-3 md:px-6 md:py-3">
-        <Link href="/" className="flex shrink-0 items-center gap-1.5">
-          <span aria-hidden className="text-2xl">🐹</span>
-          <span className="font-display text-lg font-extrabold text-cocoa-500 md:text-xl">햄랜드</span>
+        <Link href="/" className="flex shrink-0 items-center" aria-label="햄랜드 홈">
+          <LogoWordmark variant="horizontal" className="h-10 w-auto" />
         </Link>
 
         {/* 데스크톱 네비 — 볼드체 + 더 큰 글씨 */}

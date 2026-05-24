@@ -1,6 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+type CookieToSet = { name: string; value: string; options?: CookieOptions };
+
 export function createSupabaseServerClient() {
   const cookieStore = cookies();
   return createServerClient(
@@ -8,21 +10,15 @@ export function createSupabaseServerClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
+        setAll(cookiesToSet: CookieToSet[]) {
           try {
-            cookieStore.set({ name, value, ...options });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options));
           } catch {
-            // Server Component에서 set 호출 시 무시 (미들웨어에서 처리)
-          }
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: '', ...options });
-          } catch {
-            // ignore
+            // Server Component에서 set 호출 시 무시 (쿠키 갱신은 미들웨어에서 처리)
           }
         },
       },
