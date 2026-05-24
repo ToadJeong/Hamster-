@@ -67,8 +67,9 @@ export function CommunityEditPanel({ initial }: Props) {
         bucket="community-images"
         value={coverUrl}
         onChange={setCoverUrl}
-        label="대표 이미지 (선택)"
-        hint="JPG/PNG/WebP/GIF · 최대 5MB"
+        allowVideo
+        label="대표 사진/동영상 (선택)"
+        hint="사진 5MB · 동영상 30MB 이하"
       />
 
       <textarea className="input min-h-[280px] text-[15px] leading-7" value={body} onChange={(e) => setBody(e.target.value)} required />

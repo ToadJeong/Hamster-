@@ -97,8 +97,9 @@ export function CommunityEditor({
           bucket="community-images"
           value={coverUrl}
           onChange={setCoverUrl}
-          label="대표 이미지 (선택)"
-          hint="JPG/PNG/WebP/GIF · 최대 5MB"
+          allowVideo
+          label="대표 사진/동영상 (선택)"
+          hint="사진 5MB · 동영상 30MB 이하"
         />
       )}
 

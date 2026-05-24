@@ -9,6 +9,7 @@ import { CommunityAuthorActions } from '@/components/CommunityAuthorActions';
 import { ReportButton } from '@/components/ReportButton';
 import { StaffDeleteButton } from '@/components/StaffDeleteButton';
 import { ViewTracker } from '@/components/ViewTracker';
+import { Media } from '@/components/Media';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -61,8 +62,7 @@ export default async function CommunityDetail({ params }: { params: { id: string
       <Link href="/community" className="text-sm text-cocoa-300 hover:text-peach-500">← 커뮤니티</Link>
 
       {p.cover_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={p.cover_url} alt="" className="aspect-[16/9] w-full rounded-cute object-cover" />
+        <Media url={p.cover_url} controls className="aspect-[16/9] w-full rounded-cute bg-black object-contain" />
       )}
 
       <header className="space-y-3">

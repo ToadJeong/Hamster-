@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { MomentCard } from '@/components/MomentCard';
+import { Media } from '@/components/Media';
+import { isVideoUrl } from '@/lib/media';
 import { EmptyState } from '@/components/EmptyState';
 import type { MomentFeed } from '@hamster/shared';
 
@@ -30,17 +31,8 @@ export default async function MomentsPage({
   const { data, error } = await q;
   const moments = (data as MomentFeed[]) ?? [];
 
-  // 내 좋아요 표시용
-  let likedSet = new Set<string>();
-  if (user && moments.length) {
-    const { data: likes } = await supabase
-      .from('moment_likes').select('moment_id').eq('user_id', user.id)
-      .in('moment_id', moments.map((m) => m.id));
-    likedSet = new Set(((likes ?? []) as any[]).map((l) => l.moment_id));
-  }
-
   return (
-    <div className="mx-auto max-w-xl space-y-4">
+    <div className="mx-auto max-w-3xl space-y-4">
       <header className="flex items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">✨ 모먼트</h1>
@@ -68,9 +60,20 @@ export default async function MomentsPage({
           />
         )
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {moments.map((m) => (
-            <MomentCard key={m.id} moment={m} liked={likedSet.has(m.id)} isAuthed={!!user} />
+            <Link key={m.id} href={`/moments/${m.id}`}
+              className="group relative aspect-square overflow-hidden rounded-2xl bg-cream-100 ring-1 ring-cream-200">
+              <Media url={m.image_url} alt={m.caption ?? ''} className="h-full w-full object-cover transition group-hover:scale-105" />
+              {isVideoUrl(m.image_url) && (
+                <span className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/45 text-xs text-white">▶</span>
+              )}
+              {/* 하단 그라데이션 + 좋아요/댓글 */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/55 to-transparent px-2.5 pb-1.5 pt-6 text-[12px] font-bold text-white opacity-0 transition group-hover:opacity-100">
+                <span>❤ {m.like_count}</span>
+                <span>💬 {m.comment_count}</span>
+              </div>
+            </Link>
           ))}
         </div>
       )}

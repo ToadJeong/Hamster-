@@ -68,7 +68,7 @@ export function Header({
                 key={item.href}
                 href={item.href}
                 className={
-                  'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-bold transition ' +
+                  'whitespace-nowrap rounded-full px-2.5 py-1.5 text-[13px] font-bold transition xl:px-3 xl:text-sm ' +
                   (active ? 'bg-peach-100 text-peach-500' : 'text-cocoa-500 hover:bg-cream-100')
                 }
               >
@@ -78,8 +78,8 @@ export function Header({
           })}
         </nav>
 
-        {/* 데스크톱 통합검색 */}
-        <form onSubmit={submitSearch} className="ml-auto hidden flex-1 max-w-xs xl:block">
+        {/* 데스크톱/태블릿 통합검색 */}
+        <form onSubmit={submitSearch} className="ml-auto hidden min-w-0 flex-1 max-w-xs md:block lg:max-w-[140px] xl:max-w-xs">
           <input
             type="search"
             value={q}

@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import { ReadBadge } from '@/components/ReadBadge';
 import { EmptyState } from '@/components/EmptyState';
+import { Media } from '@/components/Media';
+import { isVideoUrl } from '@/lib/media';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
 export const revalidate = 15;
@@ -117,8 +119,12 @@ export default async function CommunityIndex({
               <li key={p.id}>
                 <Link href={`/community/${p.id}`} className="group flex gap-3 rounded-2xl border border-cream-200/80 bg-white/95 p-3.5 shadow-softer transition hover:-translate-y-0.5 hover:border-peach-200 hover:shadow-soft has-[[data-read=true]]:opacity-55 sm:p-4">
                   {p.cover_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.cover_url} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-cream-200" />
+                    <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1 ring-cream-200">
+                      <Media url={p.cover_url} className="h-full w-full object-cover" />
+                      {isVideoUrl(p.cover_url) && (
+                        <span className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/45 text-[9px] text-white">▶</span>
+                      )}
+                    </span>
                   ) : (
                     <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-cream-100 text-xl text-cocoa-300">{meta.emoji}</span>
                   )}
