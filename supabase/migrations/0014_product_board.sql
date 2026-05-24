@@ -53,17 +53,22 @@ select
 from public.product_posts pp
 left join public.profiles p on p.id = pp.author_id;
 
--- 상품 이미지 버킷
-insert into storage.buckets (id, name, public) values ('product-images','product-images',true)
-on conflict (id) do nothing;
-drop policy if exists "product-images readable"          on storage.objects;
-drop policy if exists "product-images writable by owner" on storage.objects;
-drop policy if exists "product-images deletable by owner" on storage.objects;
-create policy "product-images readable" on storage.objects for select using (bucket_id='product-images');
-create policy "product-images writable by owner" on storage.objects for insert
-  with check (bucket_id='product-images' and auth.uid()::text=(storage.foldername(name))[1]);
-create policy "product-images deletable by owner" on storage.objects for delete
-  using (bucket_id='product-images' and auth.uid()::text=(storage.foldername(name))[1]);
+-- 상품 이미지 버킷 (storage 권한 문제 대비 예외 처리)
+do $$
+begin
+  insert into storage.buckets (id, name, public) values ('product-images','product-images',true)
+  on conflict (id) do nothing;
+  drop policy if exists "product-images readable"          on storage.objects;
+  drop policy if exists "product-images writable by owner" on storage.objects;
+  drop policy if exists "product-images deletable by owner" on storage.objects;
+  create policy "product-images readable" on storage.objects for select using (bucket_id='product-images');
+  create policy "product-images writable by owner" on storage.objects for insert
+    with check (bucket_id='product-images' and auth.uid()::text=(storage.foldername(name))[1]);
+  create policy "product-images deletable by owner" on storage.objects for delete
+    using (bucket_id='product-images' and auth.uid()::text=(storage.foldername(name))[1]);
+exception when others then
+  raise notice 'product storage setup skipped: %', sqlerrm;
+end $$;
 
 -- 제보 자동반영을 위해 운영자(staff)가 가이드도 수정할 수 있도록 정책 추가
 drop policy if exists "guides updatable by staff" on public.guides;

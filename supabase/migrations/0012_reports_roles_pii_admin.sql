@@ -29,39 +29,46 @@ create policy "post_reports delete by admin" on public.post_reports for delete u
 alter table public.community_posts add column if not exists cover_url text;
 alter table public.announcements  add column if not exists cover_url text;
 
--- 1-3. 스토리지 버킷
-insert into storage.buckets (id, name, public) values
-  ('community-images','community-images',true),
-  ('rescue-images','rescue-images',true),
-  ('announcement-images','announcement-images',true)
-on conflict (id) do nothing;
+-- 1-3. 스토리지 버킷 + 정책
+--   storage 스키마는 CLI(postgres) 권한으로 막힐 수 있어 예외 처리로 감싼다.
+--   실패해도 마이그레이션은 통과하며, 버킷/정책은 대시보드에서 보완 가능.
+do $$
+begin
+  insert into storage.buckets (id, name, public) values
+    ('community-images','community-images',true),
+    ('rescue-images','rescue-images',true),
+    ('announcement-images','announcement-images',true)
+  on conflict (id) do nothing;
 
-drop policy if exists "community-images readable"          on storage.objects;
-drop policy if exists "community-images writable by owner" on storage.objects;
-drop policy if exists "community-images deletable by owner" on storage.objects;
-create policy "community-images readable" on storage.objects for select using (bucket_id='community-images');
-create policy "community-images writable by owner" on storage.objects for insert
-  with check (bucket_id='community-images' and auth.uid()::text=(storage.foldername(name))[1]);
-create policy "community-images deletable by owner" on storage.objects for delete
-  using (bucket_id='community-images' and auth.uid()::text=(storage.foldername(name))[1]);
+  drop policy if exists "community-images readable"          on storage.objects;
+  drop policy if exists "community-images writable by owner" on storage.objects;
+  drop policy if exists "community-images deletable by owner" on storage.objects;
+  create policy "community-images readable" on storage.objects for select using (bucket_id='community-images');
+  create policy "community-images writable by owner" on storage.objects for insert
+    with check (bucket_id='community-images' and auth.uid()::text=(storage.foldername(name))[1]);
+  create policy "community-images deletable by owner" on storage.objects for delete
+    using (bucket_id='community-images' and auth.uid()::text=(storage.foldername(name))[1]);
 
-drop policy if exists "rescue-images readable"          on storage.objects;
-drop policy if exists "rescue-images writable by owner" on storage.objects;
-drop policy if exists "rescue-images deletable by owner" on storage.objects;
-create policy "rescue-images readable" on storage.objects for select using (bucket_id='rescue-images');
-create policy "rescue-images writable by owner" on storage.objects for insert
-  with check (bucket_id='rescue-images' and auth.uid()::text=(storage.foldername(name))[1]);
-create policy "rescue-images deletable by owner" on storage.objects for delete
-  using (bucket_id='rescue-images' and auth.uid()::text=(storage.foldername(name))[1]);
+  drop policy if exists "rescue-images readable"          on storage.objects;
+  drop policy if exists "rescue-images writable by owner" on storage.objects;
+  drop policy if exists "rescue-images deletable by owner" on storage.objects;
+  create policy "rescue-images readable" on storage.objects for select using (bucket_id='rescue-images');
+  create policy "rescue-images writable by owner" on storage.objects for insert
+    with check (bucket_id='rescue-images' and auth.uid()::text=(storage.foldername(name))[1]);
+  create policy "rescue-images deletable by owner" on storage.objects for delete
+    using (bucket_id='rescue-images' and auth.uid()::text=(storage.foldername(name))[1]);
 
-drop policy if exists "announcement-images readable"           on storage.objects;
-drop policy if exists "announcement-images writable by admins" on storage.objects;
-drop policy if exists "announcement-images deletable by admins" on storage.objects;
-create policy "announcement-images readable" on storage.objects for select using (bucket_id='announcement-images');
-create policy "announcement-images writable by admins" on storage.objects for insert
-  with check (bucket_id='announcement-images' and public.is_admin());
-create policy "announcement-images deletable by admins" on storage.objects for delete
-  using (bucket_id='announcement-images' and public.is_admin());
+  drop policy if exists "announcement-images readable"           on storage.objects;
+  drop policy if exists "announcement-images writable by admins" on storage.objects;
+  drop policy if exists "announcement-images deletable by admins" on storage.objects;
+  create policy "announcement-images readable" on storage.objects for select using (bucket_id='announcement-images');
+  create policy "announcement-images writable by admins" on storage.objects for insert
+    with check (bucket_id='announcement-images' and public.is_admin());
+  create policy "announcement-images deletable by admins" on storage.objects for delete
+    using (bucket_id='announcement-images' and public.is_admin());
+exception when others then
+  raise notice 'storage setup skipped (insufficient privilege?): %', sqlerrm;
+end $$;
 
 -- 1-4. 콘텐츠 제보 (0009 보강 — 없으면 생성)
 create table if not exists public.content_corrections (
