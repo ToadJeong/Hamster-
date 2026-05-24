@@ -67,7 +67,7 @@ export function Header({
                 key={item.href}
                 href={item.href}
                 className={
-                  'whitespace-nowrap rounded-full px-3.5 py-1.5 text-[15px] font-bold transition ' +
+                  'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-bold transition ' +
                   (active ? 'bg-peach-100 text-peach-500' : 'text-cocoa-500 hover:bg-cream-100')
                 }
               >
