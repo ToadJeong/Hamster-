@@ -207,6 +207,37 @@ export type DMMessage = {
   created_at: string;
 };
 
+/* 내 햄찌 */
+export type Pet = {
+  id: string;
+  owner_id: string;
+  name: string;
+  species_id: string | null;
+  species_label: string | null;
+  birthday: string | null;
+  photo_url: string | null;
+  bio: string | null;
+  created_at: string;
+};
+
+/* 모먼트 (반려 햄찌 일상 기록 피드) */
+export type Moment = {
+  id: string;
+  author_id: string;
+  pet_id: string | null;
+  image_url: string;
+  caption: string | null;
+  created_at: string;
+};
+
+export type MomentFeed = Moment & {
+  author_username: string | null;
+  author_avatar_url: string | null;
+  pet_name: string | null;
+  like_count: number;
+  comment_count: number;
+};
+
 /* 상품 추천 게시판 */
 export type ProductCategory = 'cage' | 'food' | 'wheel' | 'bedding' | 'toy' | 'sand' | 'etc';
 

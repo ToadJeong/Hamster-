@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ProfileEditor } from '@/components/ProfileEditor';
+import { PetManager } from '@/components/PetManager';
 import { GuideCard } from '@/components/GuideCard';
 import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
 import { EmptyState } from '@/components/EmptyState';
 import { formatDate } from '@/lib/format';
-import type { GuideWithCounts, Profile } from '@hamster/shared';
+import type { GuideWithCounts, Pet, Profile, Species } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,17 +22,21 @@ export default async function ProfilePage() {
     .eq('id', user.id)
     .maybeSingle();
 
-  const [guidesRes, communityRes, followersRes, followingRes] = await Promise.all([
+  const [guidesRes, communityRes, followersRes, followingRes, petsRes, speciesRes] = await Promise.all([
     supabase.from('guides_with_counts').select('*').eq('author_id', user.id).order('created_at', { ascending: false }),
     supabase.from('community_posts_feed').select('*').eq('author_id', user.id).order('created_at', { ascending: false }).limit(20),
     supabase.from('follows').select('follower_id', { count: 'exact', head: true }).eq('followee_id', user.id),
     supabase.from('follows').select('followee_id', { count: 'exact', head: true }).eq('follower_id', user.id),
+    supabase.from('pets').select('*').eq('owner_id', user.id).order('created_at'),
+    supabase.from('species').select('id, slug, name_ko').order('name_ko'),
   ]);
 
   const myGuides = (guidesRes.data as GuideWithCounts[]) ?? [];
   const myPosts = (communityRes.data as any[]) ?? [];
   const followers = followersRes.count ?? 0;
   const following = followingRes.count ?? 0;
+  const myPets = (petsRes.data as Pet[]) ?? [];
+  const speciesList = (speciesRes.data as Pick<Species, 'id' | 'slug' | 'name_ko'>[]) ?? [];
   const p = profile as Profile;
 
   return (
@@ -82,6 +87,9 @@ export default async function ProfilePage() {
           <ProfileEditor profile={p} />
         </div>
       </details>
+
+      {/* 내 햄찌 */}
+      <PetManager initialPets={myPets} species={speciesList} />
 
       {/* 내 커뮤니티 글 */}
       {myPosts.length > 0 && (
