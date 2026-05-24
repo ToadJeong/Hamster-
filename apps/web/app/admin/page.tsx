@@ -57,14 +57,12 @@ export default async function AdminPage() {
           <h3 className="font-semibold text-cocoa-500">🚫 채팅 금지어</h3>
           <p className="mt-1 text-sm text-cocoa-300">실시간 채팅에서 차단할 단어를 추가·삭제해요.</p>
         </Link>
+        <Link href="/admin/species" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
+          <h3 className="font-semibold text-cocoa-500">🐹 도감 관리</h3>
+          <p className="mt-1 text-sm text-cocoa-300">햄스터 종을 홈페이지에서 직접 추가·수정·삭제해요.</p>
+        </Link>
       </div>
 
-      <section className="card text-sm text-cocoa-400">
-        <h2 className="mb-1 font-semibold text-cocoa-500">햄스터 도감 관리</h2>
-        <p className="text-cocoa-300">
-          현재는 Supabase Studio의 Table Editor에서 직접 편집할 수 있어요. 전용 관리 UI는 v2에서 제공됩니다.
-        </p>
-      </section>
     </div>
   );
 }
