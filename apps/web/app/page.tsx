@@ -20,7 +20,7 @@ export default async function HomePage() {
 
   // 병렬 조회 (테이블이 없는 경우 빈 배열로 처리)
   const [speciesRes, guidesRes, announcementsRes, rescueRes, communityRes] = await Promise.all([
-    supabase.from('species').select('id, slug, name_ko, summary, image_url').order('name_ko').limit(6),
+    supabase.from('species').select('id, slug, name_ko, summary, image_url').order('name_ko').limit(12),
     supabase.from('guides_with_counts').select('*').order('created_at', { ascending: false }).limit(4),
     supabase.from('announcements').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(3),
     supabase.from('rescue_posts_with_author').select('*').eq('status', 'open').order('created_at', { ascending: false }).limit(4),
@@ -97,20 +97,19 @@ export default async function HomePage() {
             🐹 도감을 준비하고 있어요. 곧 다양한 햄스터 친구들을 만나볼 수 있어요!
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
             {species.map((s) => (
               <Link key={s.id} href={`/species/${s.slug}`}
-                className="card group transition hover:-translate-y-0.5 hover:shadow-soft">
-                <div className="mb-3 aspect-square overflow-hidden rounded-2xl bg-cream-100">
+                className="group flex flex-col items-center gap-1.5 rounded-2xl border border-transparent p-1.5 transition hover:border-cream-200 hover:bg-white/70">
+                <div className="aspect-square w-full overflow-hidden rounded-xl bg-cream-100 ring-1 ring-cream-200">
                   {s.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={s.image_url} alt={s.name_ko} className="h-full w-full rounded-2xl object-cover" />
+                    <img src={s.image_url} alt={s.name_ko} className="h-full w-full object-cover" />
                   ) : (
                     <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
                   )}
                 </div>
-                <h3 className="line-clamp-1 font-semibold text-cocoa-500 group-hover:text-peach-500">{s.name_ko}</h3>
-                <p className="mt-1 line-clamp-2 text-xs text-cocoa-300">{s.summary}</p>
+                <h3 className="line-clamp-1 w-full text-center text-[11px] font-semibold text-cocoa-500 group-hover:text-peach-500">{s.name_ko}</h3>
               </Link>
             ))}
           </div>

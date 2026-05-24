@@ -59,8 +59,8 @@ export default async function ProductsIndex({
             const m = PRODUCT_CATEGORY_LABEL[p.category as ProductCategory] ?? PRODUCT_CATEGORY_LABEL.etc;
             return (
               <li key={p.id}>
-                <Link href={`/products/${p.id}`} className="card flex gap-3 transition hover:-translate-y-0.5 hover:shadow-soft">
-                  <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-cream-100 text-2xl">
+                <Link href={`/products/${p.id}`} className="group flex gap-3.5 rounded-2xl border border-cream-200/80 bg-white/95 p-3.5 shadow-softer transition hover:-translate-y-0.5 hover:border-peach-200 hover:shadow-soft sm:p-4">
+                  <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-cream-100 text-xl ring-1 ring-cream-200">
                     {p.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.image_url} alt="" className="h-full w-full object-cover" />
@@ -68,13 +68,13 @@ export default async function ProductsIndex({
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                      <span className="badge bg-cream-100 text-cocoa-500">{m.emoji} {m.label}</span>
-                      {p.price && <span className="badge bg-peach-100 text-peach-500">{p.price}</span>}
+                      <span className="rounded-md bg-cream-100 px-1.5 py-0.5 text-[11px] font-bold text-cocoa-500">{m.emoji} {m.label}</span>
+                      {p.price && <span className="rounded-md bg-peach-50 px-1.5 py-0.5 text-[11px] font-bold text-peach-500">{p.price}</span>}
                     </div>
-                    <h3 className="line-clamp-1 font-semibold text-cocoa-500">{p.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-cocoa-300">{p.description}</p>
-                    <div className="mt-1 text-xs text-cocoa-300">
-                      {p.author_username ?? '익명'} · {formatDate(p.created_at)} · 👍 {p.like_count ?? 0}
+                    <h3 className="line-clamp-1 font-bold text-cocoa-500 group-hover:text-peach-500">{p.title}</h3>
+                    <p className="mt-0.5 line-clamp-1 text-[13px] text-cocoa-400">{p.description}</p>
+                    <div className="mt-1.5 text-[11px] text-cocoa-300">
+                      <span className="font-medium text-cocoa-400">{p.author_username ?? '익명'}</span> · {formatDate(p.created_at)} · 👍 {p.like_count ?? 0}
                     </div>
                   </div>
                 </Link>

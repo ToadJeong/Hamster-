@@ -76,26 +76,26 @@ export default async function RescueIndex({
             const kindMeta = RESCUE_KIND_LABEL[r.kind];
             return (
               <li key={r.id}>
-                <Link href={`/rescue/${r.id}`} className="card flex gap-3 transition hover:-translate-y-0.5 hover:shadow-soft">
-                  <div className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-cream-100 text-3xl">
+                <Link href={`/rescue/${r.id}`} className="group flex gap-3.5 rounded-2xl border border-cream-200/80 bg-white/95 p-3.5 shadow-softer transition hover:-translate-y-0.5 hover:border-peach-200 hover:shadow-soft sm:p-4">
+                  <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-cream-100 text-xl ring-1 ring-cream-200">
                     {r.cover_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={r.cover_url} alt="" className="h-full w-full rounded-2xl object-cover" />
-                    ) : '🐹'}
+                      <img src={r.cover_url} alt="" className="h-full w-full object-cover" />
+                    ) : kindMeta.emoji}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                      <span className="badge bg-peach-100 text-peach-500">{kindMeta.emoji} {kindMeta.label}</span>
+                      <span className="rounded-md bg-peach-50 px-1.5 py-0.5 text-[11px] font-bold text-peach-500">{kindMeta.emoji} {kindMeta.label}</span>
                       {r.status !== 'open' && (
-                        <span className="badge bg-cocoa-100 text-cocoa-400">{RESCUE_STATUS_LABEL[r.status]}</span>
+                        <span className="rounded-md bg-cocoa-100 px-1.5 py-0.5 text-[11px] font-medium text-cocoa-400">{RESCUE_STATUS_LABEL[r.status]}</span>
                       )}
-                      {r.region && <span className="badge">📍 {r.region}</span>}
+                      {r.region && <span className="text-[11px] font-medium text-cocoa-400">📍 {r.region}</span>}
                     </div>
-                    <h3 className="line-clamp-1 font-semibold text-cocoa-500">{r.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-cocoa-300">{r.body}</p>
-                    <div className="mt-1 text-xs text-cocoa-300">
-                      {r.species_name_ko && <span>#{r.species_name_ko} · </span>}
-                      {r.author_username ?? '익명'} · {formatDate(r.created_at)}
+                    <h3 className="line-clamp-1 font-bold text-cocoa-500 group-hover:text-peach-500">{r.title}</h3>
+                    <p className="mt-0.5 line-clamp-1 text-[13px] text-cocoa-400">{r.body}</p>
+                    <div className="mt-1.5 text-[11px] text-cocoa-300">
+                      {r.species_name_ko && <span className="text-mint-400">#{r.species_name_ko} · </span>}
+                      <span className="font-medium text-cocoa-400">{r.author_username ?? '익명'}</span> · {formatDate(r.created_at)}
                     </div>
                   </div>
                 </Link>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { SignupForm } from '@/components/SignupForm';
+import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
 import { getSiteSettings } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
@@ -7,10 +8,10 @@ export const dynamic = 'force-dynamic';
 export default async function SignupPage() {
   const settings = await getSiteSettings();
   return (
-    <div className="mx-auto max-w-md space-y-6">
-      <div className="text-center">
-        <p className="text-3xl">🐹</p>
-        <h1 className="mt-2 font-display text-2xl font-bold text-cocoa-500">햄찌랜드 가입</h1>
+    <div className="mx-auto max-w-md space-y-6 pt-4">
+      <div className="flex flex-col items-center text-center">
+        <div className="h-20 w-24"><HamsterIllustration visual={visualForSpecies('winterwhite')} className="h-full w-full" bg={false} /></div>
+        <h1 className="mt-1 font-display text-2xl font-bold text-cocoa-500">햄랜드 가입</h1>
         <p className="mt-1 text-sm text-cocoa-300">햄집사 친구들과 노하우를 나눠보세요</p>
       </div>
       <SignupForm
