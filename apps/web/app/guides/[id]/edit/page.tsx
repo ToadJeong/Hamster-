@@ -17,8 +17,13 @@ export default async function EditGuidePage({ params }: { params: { id: string }
     .maybeSingle();
 
   if (!guide) notFound();
+
+  // 본인 글이거나, 운영자/관리자면 수정 허용
+  let isStaff = false;
   if (guide.author_id !== user.id) {
-    redirect(`/guides/${params.id}`);
+    const { data: pr } = await supabase.from('profiles').select('is_admin, is_moderator').eq('id', user.id).maybeSingle();
+    isStaff = !!(pr as any)?.is_admin || !!(pr as any)?.is_moderator;
+    if (!isStaff) redirect(`/guides/${params.id}`);
   }
 
   const { data: speciesList } = await supabase

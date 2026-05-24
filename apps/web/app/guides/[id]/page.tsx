@@ -102,9 +102,19 @@ export default async function GuideDetail({ params }: { params: { id: string } }
             <span>{g.author_username ?? '익명'}</span>
             {isAnonymousGuide && <span className="badge bg-cocoa-100 text-cocoa-400">익명</span>}
           </div>
-          {(isAuthor || isAnonymousGuide) && (
-            <GuideActions guideId={g.id} isAnonymous={isAnonymousGuide} canEdit={isAuthor} />
-          )}
+          <div className="flex items-center gap-2">
+            {(isAuthor || isAnonymousGuide) && (
+              <GuideActions guideId={g.id} isAnonymous={isAnonymousGuide} canEdit={isAuthor} />
+            )}
+            {isStaff && !isAuthor && (
+              <Link
+                href={`/guides/${g.id}/edit`}
+                className="inline-flex items-center gap-1 rounded-full border border-lilac-200 bg-white px-3 py-1.5 text-sm font-medium text-lilac-400 shadow-softer hover:bg-lilac-50"
+              >
+                🛡 운영자 수정
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
