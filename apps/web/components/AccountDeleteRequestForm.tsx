@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useT } from '@/components/I18nProvider';
 
 type Props = {
   currentEmail: string | null;
@@ -8,18 +9,19 @@ type Props = {
 };
 
 export function AccountDeleteRequestForm({ currentEmail, contactEmail }: Props) {
+  const t = useT();
   const [email, setEmail] = useState(currentEmail ?? '');
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
 
   function buildMailto(): string {
     const to = contactEmail || '';
-    const subject = encodeURIComponent('[햄찌랜드] 데이터 삭제 요청');
+    const subject = encodeURIComponent(t('ad.subject'));
     const bodyText = [
-      `요청 이메일: ${email}`,
-      `사유: ${reason}`,
+      `${t('ad.emailField')}: ${email}`,
+      `${t('ad.reasonField')}: ${reason}`,
       '',
-      '추가 내용:',
+      `${t('ad.detailsField')}:`,
       details,
     ].join('\n');
     return `mailto:${to}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
@@ -28,27 +30,27 @@ export function AccountDeleteRequestForm({ currentEmail, contactEmail }: Props) 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
       <label className="block">
-        <span className="text-sm text-cocoa-400">계정 이메일</span>
+        <span className="text-sm text-cocoa-400">{t('ad.emailLabel')}</span>
         <input
           className="input mt-1"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          placeholder="가입에 사용한 이메일"
+          placeholder={t('ad.emailPh')}
         />
       </label>
       <label className="block">
-        <span className="text-sm text-cocoa-400">사유 (선택)</span>
+        <span className="text-sm text-cocoa-400">{t('ad.reasonLabel')}</span>
         <input
           className="input mt-1"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="예: 서비스 이용 중단"
+          placeholder={t('ad.reasonPh')}
         />
       </label>
       <label className="block">
-        <span className="text-sm text-cocoa-400">추가 안내 (선택)</span>
+        <span className="text-sm text-cocoa-400">{t('ad.detailsLabel')}</span>
         <textarea
           className="input mt-1 min-h-[80px]"
           value={details}
@@ -60,10 +62,10 @@ export function AccountDeleteRequestForm({ currentEmail, contactEmail }: Props) 
         className="btn-primary w-full justify-center"
         aria-disabled={!contactEmail}
       >
-        메일 앱으로 요청 보내기
+        {t('ad.sendBtn')}
       </a>
       <p className="text-xs text-cocoa-300">
-        이 양식은 메일 앱을 열어 운영자에게 보낼 내용을 미리 채워줘요. 실제 발송은 메일 앱에서 진행됩니다.
+        {t('ad.note')}
       </p>
     </form>
   );

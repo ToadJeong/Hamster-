@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useT } from '@/components/I18nProvider';
 
 export function MomentLikeButton({
   momentId, initialLiked, initialCount, isAuthed,
@@ -14,6 +15,7 @@ export function MomentLikeButton({
 }) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
 
@@ -42,7 +44,7 @@ export function MomentLikeButton({
       aria-pressed={liked}
     >
       <span className="text-base leading-none">{liked ? '❤' : '🤍'}</span>
-      <span>좋아요 {count}</span>
+      <span>{t('act.like')} {count}</span>
     </button>
   );
 }
