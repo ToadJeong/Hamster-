@@ -2,16 +2,25 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import { ProductLikeButton } from '@/components/ProductLikeButton';
 import { PRODUCT_CATEGORY_LABEL, type ProductCategory } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
   const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   const { data, error } = await supabase.from('product_posts_feed').select('*').eq('id', params.id).maybeSingle();
   if (error || !data) notFound();
   const p = data as any;
   const m = PRODUCT_CATEGORY_LABEL[p.category as ProductCategory] ?? PRODUCT_CATEGORY_LABEL.etc;
+
+  let liked = false;
+  if (user) {
+    const { data: l } = await supabase.from('product_likes')
+      .select('user_id').eq('product_id', p.id).eq('user_id', user.id).maybeSingle();
+    liked = !!l;
+  }
 
   return (
     <article className="mx-auto max-w-3xl space-y-5">
@@ -29,9 +38,11 @@ export default async function ProductDetail({ params }: { params: { id: string }
         </div>
         <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{p.title}</h1>
         <div className="flex items-center gap-2 text-sm text-cocoa-300">
-          <span>{p.author_username ?? '익명'} · {formatDate(p.created_at)} · 👍 {p.like_count ?? 0}</span>
+          <span>{p.author_username ?? '익명'} · {formatDate(p.created_at)}</span>
         </div>
       </header>
+
+      <ProductLikeButton productId={p.id} initialLiked={liked} initialCount={p.like_count ?? 0} isAuthed={!!user} />
 
       {p.url && (
         <a href={p.url} target="_blank" rel="noopener noreferrer"
