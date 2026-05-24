@@ -4,6 +4,7 @@ import { getSiteSettings } from '@/lib/site-settings';
 import { GuideCard } from '@/components/GuideCard';
 import { HomeSearchBar } from '@/components/HomeSearchBar';
 import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { SectionHeader } from '@/components/SectionHeader';
 import { formatDate } from '@/lib/format';
 import {
   RESCUE_KIND_LABEL, COMMUNITY_CATEGORY_LABEL,
@@ -42,28 +43,26 @@ export default async function HomePage() {
       )}
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-gradient-to-br from-peach-100 via-cream-100 to-lilac-100 p-7 shadow-soft md:p-14">
-        {/* 장식용 동글동글 */}
-        <div aria-hidden className="pointer-events-none absolute -left-10 -bottom-12 h-44 w-44 rounded-full bg-mint-200/40 blur-2xl" />
-        <div aria-hidden className="pointer-events-none absolute right-10 top-6 h-28 w-28 rounded-full bg-peach-200/40 blur-2xl" />
-        <div className="relative z-10 max-w-2xl">
-          <p className="badge mb-3 bg-white/70 text-peach-500 shadow-softer">🐹 햄집사들의 따뜻한 커뮤니티</p>
-          <h1 className="font-display text-[26px] font-bold leading-tight text-cocoa-500 sm:text-4xl md:text-5xl">
-            우리집 햄스터,<br />이름은 알지만 <span className="text-peach-500">종</span>은 모르셨나요?
+      <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-peach-100 via-cream-100 to-lilac-100 p-6 shadow-soft md:p-9">
+        <div aria-hidden className="pointer-events-none absolute -left-8 -bottom-10 h-32 w-32 rounded-full bg-mint-200/40 blur-2xl" />
+        <div className="relative z-10 max-w-xl">
+          <p className="badge mb-2.5 bg-white/70 text-peach-500 shadow-softer">🐹 햄집사들의 따뜻한 커뮤니티</p>
+          <h1 className="font-display text-xl font-bold leading-snug text-cocoa-500 sm:text-2xl md:text-[28px]">
+            우리집 햄스터, 이름은 알지만 <span className="text-peach-500">종</span>은 모르셨나요?
           </h1>
-          <p className="mt-3 text-sm text-cocoa-400 sm:text-base md:text-lg">
-            한국 햄집사를 위한 <b className="font-semibold text-cocoa-500">도감 · 사육 가이드 · 커뮤니티 · 구조대</b>를 한 곳에서.
+          <p className="mt-2 text-sm text-cocoa-400">
+            도감 · 사육 가이드 · 커뮤니티 · 구조대를 한 곳에서.
           </p>
-          <div className="mt-5">
+          <div className="mt-4 max-w-md">
             <HomeSearchBar />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/species" className="btn-primary">🐹 도감 보기</Link>
-            <Link href="/identify" className="btn-secondary">📷 사진으로 찾기</Link>
-            <Link href="/guides" className="btn-secondary">📖 가이드</Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/species" className="btn-primary text-sm">도감 보기</Link>
+            <Link href="/identify" className="btn-secondary text-sm">📷 사진으로 찾기</Link>
           </div>
         </div>
-        <div aria-hidden className="pointer-events-none absolute -right-4 -top-6 select-none text-[150px] opacity-20 md:-right-8 md:text-[240px]">
+        {/* 작고 단정한 장식 햄스터 */}
+        <div aria-hidden className="pointer-events-none absolute -right-1 bottom-2 select-none text-5xl opacity-70 md:right-8 md:top-1/2 md:-translate-y-1/2 md:text-7xl">
           🐹
         </div>
       </section>
@@ -71,10 +70,7 @@ export default async function HomePage() {
       {/* 최근 공지 */}
       {announcements.length > 0 && (
         <section>
-          <div className="mb-3 flex items-end justify-between">
-            <h2 className="font-display text-xl font-bold text-cocoa-500 sm:text-2xl">📢 공지사항</h2>
-            <Link href="/announcements" className="text-sm font-medium text-peach-500 hover:underline">전체 →</Link>
-          </div>
+          <SectionHeader title="📢 공지사항" moreHref="/announcements" />
           <ul className="space-y-2">
             {announcements.map((a) => (
               <li key={a.id}>
@@ -95,13 +91,7 @@ export default async function HomePage() {
 
       {/* 도감 미리보기 */}
       <section>
-        <div className="mb-3 flex items-end justify-between">
-          <div>
-            <h2 className="font-display text-xl font-bold text-cocoa-500 sm:text-2xl">🐹 햄스터 도감</h2>
-            <p className="text-sm text-cocoa-300">한국에서 키우는 30여 종을 가나다순으로</p>
-          </div>
-          <Link href="/species" className="text-sm font-medium text-peach-500 hover:underline">전체 →</Link>
-        </div>
+        <SectionHeader title="🐹 햄스터 도감" subtitle="한국에서 키우는 30여 종을 가나다순으로" moreHref="/species" />
         {species.length === 0 ? (
           <div className="card text-center text-sm text-cocoa-300">
             🐹 도감을 준비하고 있어요. 곧 다양한 햄스터 친구들을 만나볼 수 있어요!
@@ -129,13 +119,7 @@ export default async function HomePage() {
 
       {/* 커뮤니티 최근 글 */}
       <section>
-        <div className="mb-3 flex items-end justify-between">
-          <div>
-            <h2 className="font-display text-xl font-bold text-cocoa-500 sm:text-2xl">💬 커뮤니티</h2>
-            <p className="text-sm text-cocoa-300">햄집사들의 따끈한 글</p>
-          </div>
-          <Link href="/community" className="text-sm font-medium text-peach-500 hover:underline">전체 →</Link>
-        </div>
+        <SectionHeader title="💬 커뮤니티" subtitle="햄집사들의 따끈한 글" moreHref="/community" />
         {community.length === 0 ? (
           <div className="card text-center text-sm text-cocoa-300">아직 글이 없어요. 첫 글을 남겨보세요!</div>
         ) : (
@@ -181,13 +165,7 @@ export default async function HomePage() {
 
       {/* 유기햄 구조대 */}
       <section>
-        <div className="mb-3 flex items-end justify-between">
-          <div>
-            <h2 className="font-display text-xl font-bold text-cocoa-500 sm:text-2xl">🆘 유기햄 구조대</h2>
-            <p className="text-sm text-cocoa-300">새 가족이 필요한 햄찌들</p>
-          </div>
-          <Link href="/rescue" className="text-sm font-medium text-peach-500 hover:underline">전체 →</Link>
-        </div>
+        <SectionHeader title="🆘 유기햄 구조대" subtitle="새 가족이 필요한 햄찌들" moreHref="/rescue" />
         {rescues.length === 0 ? (
           <div className="card text-center text-cocoa-300 text-sm">현재 진행 중인 글이 없어요.</div>
         ) : (
@@ -219,13 +197,7 @@ export default async function HomePage() {
 
       {/* 최신 가이드 */}
       <section>
-        <div className="mb-3 flex items-end justify-between">
-          <div>
-            <h2 className="font-display text-xl font-bold text-cocoa-500 sm:text-2xl">📖 최신 가이드</h2>
-            <p className="text-sm text-cocoa-300">햄집사들이 직접 쓴 사육 노하우</p>
-          </div>
-          <Link href="/guides" className="text-sm font-medium text-peach-500 hover:underline">전체 →</Link>
-        </div>
+        <SectionHeader title="📖 최신 가이드" subtitle="햄집사들이 직접 쓴 사육 노하우" moreHref="/guides" />
         {guides.length === 0 ? (
           <div className="card text-center text-cocoa-300 text-sm">
             아직 가이드가 없어요. 첫 가이드를 작성해 보세요!
