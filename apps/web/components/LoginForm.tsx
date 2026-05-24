@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useT } from '@/components/I18nProvider';
+import type { TFn } from '@/lib/i18n';
 
 type Props = {
   nextPath: string;
@@ -14,6 +16,7 @@ type Props = {
 export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
 
   const [identifier, setIdentifier] = useState('');  // 이메일 또는 아이디
   const [password, setPassword] = useState('');
@@ -33,7 +36,7 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
         p_username: emailToUse,
       });
       if (rpcErr || !data) {
-        setError('해당 아이디로 가입된 계정이 없어요.');
+        setError(t('err.noUsername'));
         setLoading(false);
         return;
       }
@@ -46,7 +49,7 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
     });
     setLoading(false);
     if (error) {
-      setError(translateAuthError(error.message));
+      setError(translateAuthError(error.message, t));
       return;
     }
     router.push(nextPath);
@@ -68,7 +71,7 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
     <div className="space-y-4">
       <form onSubmit={handleLogin} className="card space-y-3">
         <label className="block">
-          <span className="text-sm text-cocoa-400">아이디 또는 이메일</span>
+          <span className="text-sm text-cocoa-400">{t('auth.idOrEmail')}</span>
           <input
             type="text"
             className="input mt-1"
@@ -76,11 +79,11 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
             onChange={(e) => setIdentifier(e.target.value)}
             required
             autoComplete="username"
-            placeholder="햄집사123  또는  hamster@example.com"
+            placeholder={t('auth.idOrEmail.ph')}
           />
         </label>
         <label className="block">
-          <span className="text-sm text-cocoa-400">비밀번호</span>
+          <span className="text-sm text-cocoa-400">{t('auth.password')}</span>
           <input
             type="password"
             className="input mt-1"
@@ -92,20 +95,20 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
         </label>
         {error && <p className="text-sm text-red-500">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={loading}>
-          {loading ? '로그인 중…' : '로그인'}
+          {loading ? t('auth.login.submitting') : t('auth.login.submit')}
         </button>
       </form>
 
       {anySocialEnabled && (
         <>
           <div className="relative my-2 text-center text-xs text-cocoa-300">
-            <span className="bg-[var(--bg)] px-2">또는</span>
+            <span className="bg-[var(--bg)] px-2">{t('auth.or')}</span>
             <div className="absolute inset-x-0 top-1/2 -z-10 h-px bg-cream-200" />
           </div>
           <div className="space-y-2">
             {googleEnabled && (
               <button onClick={() => handleOAuth('google')} className="btn-secondary w-full">
-                <span>🇬</span> Google로 계속하기
+                <span>🇬</span> {t('auth.google.continue')}
               </button>
             )}
             {kakaoEnabled && (
@@ -113,7 +116,7 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
                 onClick={() => handleOAuth('kakao')}
                 className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#FEE500] px-5 py-2.5 font-semibold text-[#3C1E1E] shadow-softer transition hover:brightness-95 active:scale-[0.98]"
               >
-                <span>💬</span> 카카오로 계속하기
+                <span>💬</span> {t('auth.kakao.continue')}
               </button>
             )}
           </div>
@@ -123,11 +126,11 @@ export function LoginForm({ nextPath, googleEnabled, kakaoEnabled, errorMessage 
   );
 }
 
-function translateAuthError(message: string): string {
-  if (/invalid login credentials/i.test(message)) return '아이디·이메일 또는 비밀번호가 올바르지 않아요.';
-  if (/email not confirmed/i.test(message)) return '이메일 인증이 완료되지 않았어요. 메일함과 스팸함을 확인해 주세요.';
+function translateAuthError(message: string, t: TFn): string {
+  if (/invalid login credentials/i.test(message)) return t('err.invalidCreds');
+  if (/email not confirmed/i.test(message)) return t('err.emailNotConfirmed');
   if (/email rate limit|over_email_send_rate_limit/i.test(message)) {
-    return '메일 발송 한도에 도달했어요. 잠시 후 다시 시도해 주세요.';
+    return t('err.emailRate');
   }
   return message;
 }
