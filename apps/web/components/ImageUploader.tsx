@@ -97,10 +97,17 @@ export function ImageUploader({
       return;
     }
 
+    const mb = (bytes: number) => (bytes / 1024 / 1024).toFixed(1);
+
     if (fileIsVideo) {
-      // 동영상은 브라우저에서 압축이 어려워 한도 초과 시 안내만 한다.
+      // 동영상은 브라우저에서 압축이 어려워 한도 초과 시 자세히 안내한다.
       if (file.size > MAX_VIDEO_SIZE) {
-        setError('동영상은 30MB까지 올릴 수 있어요. 길이를 짧게 잘라서 다시 올려주세요.');
+        const over = file.size - MAX_VIDEO_SIZE;
+        setError(
+          `이 동영상은 약 ${mb(file.size)}MB예요. 한도(30MB)보다 ${mb(over)}MB 초과했어요.\n` +
+          `· 영상 길이를 짧게 잘라서 올려보세요.\n` +
+          `· 휴대폰이라면 갤러리에서 ‘해상도 낮춰 저장(720p)’ 후 올리면 용량이 크게 줄어요.`
+        );
         return;
       }
     }
@@ -118,7 +125,12 @@ export function ImageUploader({
       if (!fileIsVideo && file.size > MAX_IMAGE_SIZE) {
         uploadFile = await compressImage(file);
         if (uploadFile.size > MAX_IMAGE_SIZE) {
-          setError('사진 용량이 너무 커요. 더 작은 사진으로 올려주세요.');
+          const over = uploadFile.size - MAX_IMAGE_SIZE;
+          setError(
+            `이 사진은 자동 축소 후에도 약 ${mb(uploadFile.size)}MB로, 한도(5MB)보다 ${mb(over)}MB 큽니다.\n` +
+            `· 더 낮은 해상도로 저장한 사진을 올리거나\n` +
+            `· 화면 캡처본 대신 적당한 크기의 사진을 사용해 주세요.`
+          );
           setUploading(false);
           return;
         }
@@ -175,7 +187,7 @@ export function ImageUploader({
           {hint && <p className="mt-1 text-xs text-cocoa-300">{hint}</p>}
         </label>
       )}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="whitespace-pre-line text-sm text-red-500">{error}</p>}
     </div>
   );
 }
