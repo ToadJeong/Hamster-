@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideEditor } from '@/components/GuideEditor';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import type { Species } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +11,7 @@ export default async function EditGuidePage({ params }: { params: { id: string }
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
+  const t = makeT(getLocale());
 
   const { data: guide } = await supabase
     .from('guides')
@@ -33,7 +36,7 @@ export default async function EditGuidePage({ params }: { params: { id: string }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="font-display text-3xl font-bold text-cocoa-500">가이드 수정</h1>
+      <h1 className="font-display text-3xl font-bold text-cocoa-500">{t('ge.editTitle')}</h1>
       <GuideEditor
         species={(speciesList as Pick<Species,'id'|'slug'|'name_ko'>[]) ?? []}
         preselectSlug={null}

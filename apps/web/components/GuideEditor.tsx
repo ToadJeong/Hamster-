@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { insertAnonymousGuide, validateAnonPassword } from '@/lib/anon-password';
 import { ImageUploader } from '@/components/ImageUploader';
+import { useT } from '@/components/I18nProvider';
 import type { Species } from '@hamster/shared';
 
 type Props = {
@@ -27,6 +28,7 @@ type Props = {
 export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, initial }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const t = useT();
 
   const preselectId =
     initial?.species_id ?? (preselectSlug ? species.find((s) => s.slug === preselectSlug)?.id ?? '' : '');
@@ -85,19 +87,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
   const canSubmit = title.trim().length > 0 && body.trim().length > 0 && !saving &&
     (isAuthed || (canUseAnon && anonNickname.trim().length >= 1 && anonPassword.length >= 4));
 
-  const placeholder = useMemo(
-    () => `## 시작하기 전에
-이 가이드에서 다룰 내용을 짧게 적어주세요.
-
-## 준비물
-- 케이지 (60×40cm 이상)
-- 베딩
-- 휠 (직경 20cm 이상)
-
-## 본문
-경험과 팁을 자유롭게 공유해 주세요.`,
-    []
-  );
+  const placeholder = t('ge.bodyPlaceholder');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -107,7 +97,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
       // 익명 작성
       if (!isAuthed) {
         if (!canUseAnon) {
-          setError('현재 익명 작성이 비활성화되어 있어요. 로그인해 주세요.');
+          setError(t('ge.anonDisabledMsg'));
           setSaving(false);
           return;
         }
@@ -122,7 +112,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
           species_id: speciesId || null,
           cover_url: coverUrl.trim() || null,
         });
-        if (error || !id) throw error ?? new Error('작성 실패');
+        if (error || !id) throw error ?? new Error(t('form.submitFailed'));
         try { localStorage.removeItem(draftKey); } catch {}
         router.push(`/guides/${id}`);
         router.refresh();
@@ -131,7 +121,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
 
       // 회원 작성/수정
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setError('로그인이 필요해요.'); setSaving(false); return; }
+      if (!user) { setError(t('form.loginRequired')); setSaving(false); return; }
 
       const payload = {
         title: title.trim(),
@@ -158,7 +148,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
       }
       router.refresh();
     } catch (err: any) {
-      setError(err.message ?? '저장 중 오류가 발생했어요.');
+      setError(err.message ?? t('ge.saveError'));
     } finally {
       setSaving(false);
     }
@@ -169,14 +159,14 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
       {!isAuthed && (
         canUseAnon ? (
           <div className="card bg-cream-50">
-            <div className="mb-2 text-sm font-semibold text-cocoa-500">익명으로 작성</div>
+            <div className="mb-2 text-sm font-semibold text-cocoa-500">{t('form.anonWrite')}</div>
             <p className="mb-3 text-xs text-cocoa-300">
-              닉네임과 4자 이상의 비밀번호를 입력해 주세요. 비밀번호는 본인 글을 수정·삭제할 때만 사용돼요.
+              {t('ge.anonHint')}
             </p>
             <div className="grid gap-2 md:grid-cols-2">
               <input
                 className="input"
-                placeholder="닉네임 (예: 햄집사123)"
+                placeholder={t('ge.nicknamePh')}
                 value={anonNickname}
                 onChange={(e) => setAnonNickname(e.target.value)}
                 maxLength={20}
@@ -185,7 +175,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
               <input
                 className="input"
                 type="password"
-                placeholder="비밀번호 (4자 이상)"
+                placeholder={t('form.passwordMin')}
                 value={anonPassword}
                 onChange={(e) => setAnonPassword(e.target.value)}
                 minLength={4}
@@ -196,7 +186,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
           </div>
         ) : (
           <div className="card text-sm text-cocoa-400">
-            로그인이 필요해요. <a href="/login?next=/guides/new" className="text-peach-500 underline">로그인하러 가기</a>
+            {t('form.loginRequired')} <a href="/login?next=/guides/new" className="text-peach-500 underline">{t('ge.loginGo')}</a>
           </div>
         )
       )}
@@ -204,7 +194,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
       <div className="grid gap-3 md:grid-cols-[2fr,1fr]">
         <input
           className="input text-lg font-semibold"
-          placeholder="가이드 제목"
+          placeholder={t('ge.titlePh')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -215,7 +205,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
           value={speciesId}
           onChange={(e) => setSpeciesId(e.target.value)}
         >
-          <option value="">(종 선택 안 함)</option>
+          <option value="">{t('ge.speciesNone')}</option>
           {species.map((s) => (
             <option key={s.id} value={s.id}>{s.name_ko}</option>
           ))}
@@ -228,14 +218,14 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
           bucket="guide-covers"
           value={coverUrl || null}
           onChange={(url) => setCoverUrl(url ?? '')}
-          label="커버 이미지 (선택)"
-          hint="JPG/PNG/WebP/GIF · 최대 5MB"
+          label={t('ge.cover')}
+          hint={t('ge.coverHint')}
         />
       ) : (
         <input
           className="input"
           type="url"
-          placeholder="커버 이미지 URL (선택, 이미지 업로드는 회원만 가능)"
+          placeholder={t('ge.coverUrlPh')}
           value={coverUrl}
           onChange={(e) => setCoverUrl(e.target.value)}
         />
@@ -250,7 +240,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
             (tab === 'write' ? 'bg-white shadow-softer font-semibold' : 'text-cocoa-300')
           }
         >
-          작성
+          {t('form.write')}
         </button>
         <button
           type="button"
@@ -260,7 +250,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
             (tab === 'preview' ? 'bg-white shadow-softer font-semibold' : 'text-cocoa-300')
           }
         >
-          미리보기
+          {t('form.preview')}
         </button>
       </div>
 
@@ -277,7 +267,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
           {body.trim() ? (
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
           ) : (
-            <p className="text-cocoa-300">미리보기에 표시할 내용이 없어요.</p>
+            <p className="text-cocoa-300">{t('form.noPreview')}</p>
           )}
         </div>
       )}
@@ -286,10 +276,10 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
 
       <div className="flex justify-end gap-2">
         <button type="button" className="btn-secondary" onClick={() => router.back()}>
-          취소
+          {t('form.cancel')}
         </button>
         <button type="submit" className="btn-primary" disabled={!canSubmit}>
-          {saving ? '저장 중…' : initial ? '수정 완료' : '게시하기'}
+          {saving ? t('ge.saving') : initial ? t('ge.editDone') : t('ge.publish')}
         </button>
       </div>
     </form>
