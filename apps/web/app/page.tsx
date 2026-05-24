@@ -42,25 +42,28 @@ export default async function HomePage() {
       )}
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-cute bg-gradient-to-br from-peach-100 via-cream-100 to-lilac-100 p-6 md:p-12">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-gradient-to-br from-peach-100 via-cream-100 to-lilac-100 p-7 shadow-soft md:p-14">
+        {/* 장식용 동글동글 */}
+        <div aria-hidden className="pointer-events-none absolute -left-10 -bottom-12 h-44 w-44 rounded-full bg-mint-200/40 blur-2xl" />
+        <div aria-hidden className="pointer-events-none absolute right-10 top-6 h-28 w-28 rounded-full bg-peach-200/40 blur-2xl" />
         <div className="relative z-10 max-w-2xl">
-          <p className="badge mb-3">🐹 햄집사 커뮤니티</p>
-          <h1 className="font-display text-2xl font-bold leading-tight text-cocoa-500 sm:text-3xl md:text-5xl">
+          <p className="badge mb-3 bg-white/70 text-peach-500 shadow-softer">🐹 햄집사들의 따뜻한 커뮤니티</p>
+          <h1 className="font-display text-[26px] font-bold leading-tight text-cocoa-500 sm:text-4xl md:text-5xl">
             우리집 햄스터,<br />이름은 알지만 <span className="text-peach-500">종</span>은 모르셨나요?
           </h1>
           <p className="mt-3 text-sm text-cocoa-400 sm:text-base md:text-lg">
-            한국 햄집사를 위한 도감·사육 가이드·커뮤니티·구조대를 한 곳에서.
+            한국 햄집사를 위한 <b className="font-semibold text-cocoa-500">도감 · 사육 가이드 · 커뮤니티 · 구조대</b>를 한 곳에서.
           </p>
           <div className="mt-5">
             <HomeSearchBar />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/species" className="btn-primary">도감 보기</Link>
+            <Link href="/species" className="btn-primary">🐹 도감 보기</Link>
             <Link href="/identify" className="btn-secondary">📷 사진으로 찾기</Link>
-            <Link href="/guides" className="btn-secondary">가이드</Link>
+            <Link href="/guides" className="btn-secondary">📖 가이드</Link>
           </div>
         </div>
-        <div aria-hidden className="pointer-events-none absolute -right-4 -top-4 text-[140px] opacity-15 md:-right-6 md:-top-6 md:text-[220px]">
+        <div aria-hidden className="pointer-events-none absolute -right-4 -top-6 select-none text-[150px] opacity-20 md:-right-8 md:text-[240px]">
           🐹
         </div>
       </section>
