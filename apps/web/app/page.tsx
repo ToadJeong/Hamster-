@@ -19,12 +19,13 @@ export default async function HomePage() {
   const settings = await getSiteSettings();
 
   // 병렬 조회 (테이블이 없는 경우 빈 배열로 처리)
-  const [speciesRes, guidesRes, announcementsRes, rescueRes, communityRes] = await Promise.all([
+  const [speciesRes, guidesRes, announcementsRes, rescueRes, communityRes, momentsRes] = await Promise.all([
     supabase.from('species').select('id, slug, name_ko, summary, image_url').order('name_ko').limit(12),
     supabase.from('guides_with_counts').select('*').order('created_at', { ascending: false }).limit(4),
     supabase.from('announcements').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(3),
     supabase.from('rescue_posts_with_author').select('*').eq('status', 'open').order('created_at', { ascending: false }).limit(4),
     supabase.from('community_posts_feed').select('*').order('created_at', { ascending: false }).limit(5),
+    supabase.from('moments_feed').select('id, image_url, like_count').order('created_at', { ascending: false }).limit(8),
   ]);
 
   const species = (speciesRes.data as Pick<Species,'id'|'slug'|'name_ko'|'summary'|'image_url'>[]) ?? [];
@@ -32,6 +33,7 @@ export default async function HomePage() {
   const announcements = (announcementsRes.data as Announcement[]) ?? [];
   const rescues = (rescueRes.data as RescuePostWithAuthor[]) ?? [];
   const community = ((communityRes.data as any[]) ?? []);
+  const moments = ((momentsRes.data as { id: string; image_url: string; like_count: number }[]) ?? []);
 
   return (
     <div className="space-y-10">
@@ -115,6 +117,25 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* 모먼트 */}
+      {moments.length > 0 && (
+        <section>
+          <SectionHeader title="📸 모먼트" subtitle="우리집 햄찌들의 귀여운 순간" moreHref="/moments" />
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+            {moments.map((m) => (
+              <Link key={m.id} href={`/moments/${m.id}`}
+                className="group relative aspect-square overflow-hidden rounded-2xl bg-cream-100 ring-1 ring-cream-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={m.image_url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                {m.like_count > 0 && (
+                  <span className="absolute bottom-1 left-1 rounded-full bg-black/45 px-1.5 py-0.5 text-[10px] font-bold text-white">❤ {m.like_count}</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 커뮤니티 최근 글 */}
       <section>

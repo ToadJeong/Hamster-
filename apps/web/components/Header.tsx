@@ -14,12 +14,13 @@ type Props = {
   notifUnread?: number;
 };
 
-// 사용자가 요청한 메뉴 순서: 공지 → 도감 → 가이드 → 커뮤니티 → 구조대
+// 사용자가 요청한 메뉴 순서: 공지 → 도감 → 가이드 → 커뮤니티 → 모먼트 → 상품 → 구조대 → 병원
 const NAV: { href: string; label: string; emoji: string }[] = [
   { href: '/announcements', label: '공지',   emoji: '📢' },
   { href: '/species',       label: '도감',   emoji: '🐹' },
   { href: '/guides',        label: '가이드', emoji: '📖' },
   { href: '/community',     label: '커뮤니티', emoji: '💬' },
+  { href: '/moments',       label: '모먼트', emoji: '📸' },
   { href: '/products',      label: '상품',   emoji: '🛍' },
   { href: '/rescue',        label: '구조대', emoji: '🆘' },
   { href: '/hospitals',     label: '병원',   emoji: '🏥' },
@@ -78,7 +79,7 @@ export function Header({
         </nav>
 
         {/* 데스크톱 통합검색 */}
-        <form onSubmit={submitSearch} className="ml-auto hidden flex-1 max-w-xs lg:block">
+        <form onSubmit={submitSearch} className="ml-auto hidden flex-1 max-w-xs xl:block">
           <input
             type="search"
             value={q}
