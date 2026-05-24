@@ -79,11 +79,11 @@ export default async function ProductsIndex({
       )}
 
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
-        <Link href="/products" className={'badge ' + (!cat ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>{t('common.all')}</Link>
+        <Link href="/products" scroll={false} className={'badge ' + (!cat ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>{t('common.all')}</Link>
         {(Object.keys(PRODUCT_CATEGORY_LABEL) as ProductCategory[]).map((k) => {
           const m = PRODUCT_CATEGORY_LABEL[k];
           return (
-            <Link key={k} href={`/products?c=${k}`}
+            <Link key={k} href={`/products?c=${k}`} scroll={false}
               className={'badge ' + (cat === k ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>
               {m.emoji} {m.label}
             </Link>

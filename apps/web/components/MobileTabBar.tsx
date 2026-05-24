@@ -25,7 +25,7 @@ export function MobileTabBar() {
               <Link
                 href={tab.href}
                 className={
-                  'flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition ' +
+                  'flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition ' +
                   (active ? 'text-peach-500' : 'text-cocoa-300')
                 }
               >

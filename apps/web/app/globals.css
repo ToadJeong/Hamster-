@@ -183,6 +183,9 @@
   50%      { transform: scale(1.08); }
 }
 
+/* 움직이는 요소는 GPU 레이어로 승격해 프레임 드랍/지터를 줄인다 */
+.pet-walk, .pet-breathe, .pet-hop, .pet-spin, .pet-roll, .pet-startle,
+.pet-leg-left, .pet-leg-right { will-change: transform; backface-visibility: hidden; }
 .pet-walk            { animation: pet-body-walk 0.5s ease-in-out infinite; }
 .pet-breathe         { animation: pet-body-breathe 2.6s ease-in-out infinite; }
 .pet-hop             { animation: pet-body-hop 0.6s ease-out; }

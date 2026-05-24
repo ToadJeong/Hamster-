@@ -72,13 +72,13 @@ export default async function CommunityIndex({
 
       {/* 카테고리 필터 */}
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
-        <Link href={`/community?feed=${feed}`} className={'badge ' + (!cat && !tag ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>
+        <Link href={`/community?feed=${feed}`} scroll={false} className={'badge ' + (!cat && !tag ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>
           {t('common.all')}
         </Link>
         {(Object.keys(COMMUNITY_CATEGORY_LABEL) as CommunityCategory[]).map((k) => {
           const meta = COMMUNITY_CATEGORY_LABEL[k];
           return (
-            <Link key={k} href={`/community?feed=${feed}&c=${k}`}
+            <Link key={k} href={`/community?feed=${feed}&c=${k}`} scroll={false}
               className={'badge ' + (cat === k ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>
               {meta.emoji} {meta.label}
             </Link>
@@ -89,7 +89,7 @@ export default async function CommunityIndex({
       {topTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {topTags.map((tg) => (
-            <Link key={tg} href={`/community?tag=${encodeURIComponent(tg)}`}
+            <Link key={tg} href={`/community?tag=${encodeURIComponent(tg)}`} scroll={false}
               className={'badge ' + (tag === tg ? 'bg-lilac-200 text-lilac-400' : 'hover:bg-cream-200')}>
               #{tg}
             </Link>
@@ -161,7 +161,7 @@ export default async function CommunityIndex({
 
 function FeedTab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link href={href}
+    <Link href={href} scroll={false}
       className={
         'border-b-2 px-3 py-2 text-sm font-medium transition ' +
         (active ? 'border-peach-400 text-peach-500' : 'border-transparent text-cocoa-300 hover:text-cocoa-500')

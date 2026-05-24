@@ -86,7 +86,7 @@ export default async function MomentsPage({
 
 function FeedTab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link href={href}
+    <Link href={href} scroll={false}
       className={'border-b-2 px-3 py-2 text-sm font-bold transition ' +
         (active ? 'border-peach-400 text-peach-500' : 'border-transparent text-cocoa-300 hover:text-cocoa-500')}>
       {children}

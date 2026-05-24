@@ -75,7 +75,7 @@ export function Header({
     <header className="sticky top-0 z-30 border-b border-cream-200 bg-[var(--bg)]/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl items-center gap-2 px-3 py-2.5 md:gap-3 md:px-6 md:py-3">
         <Link href="/" className="flex shrink-0 items-center" aria-label={t('header.brandHome')}>
-          <LogoWordmark variant="horizontal" className="h-10 w-auto" />
+          <LogoWordmark variant="horizontal" className="h-9 w-auto sm:h-10" />
         </Link>
 
         {/* 데스크톱 네비 — 볼드체 + 더 큰 글씨 */}
@@ -87,7 +87,7 @@ export function Header({
                 key={item.href}
                 href={item.href}
                 className={
-                  'whitespace-nowrap rounded-full px-2.5 py-1.5 text-[13px] font-bold transition xl:px-3 xl:text-sm ' +
+                  'whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-bold transition xl:px-3 xl:text-sm ' +
                   (active ? 'bg-peach-100 text-peach-500' : 'text-cocoa-500 hover:bg-cream-100')
                 }
               >
@@ -104,7 +104,7 @@ export function Header({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t('action.search.placeholder')}
-            className="input py-1.5 text-sm"
+            className="input py-2 text-sm"
           />
         </form>
 
@@ -115,7 +115,7 @@ export function Header({
             <Link
               href="/admin"
               className={
-                'hidden whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-bold transition md:inline-flex ' +
+                'hidden whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-bold transition md:inline-flex ' +
                 (pathname.startsWith('/admin') ? 'bg-lilac-200 text-lilac-400' : 'text-lilac-400 hover:bg-lilac-50')
               }
             >
@@ -125,7 +125,7 @@ export function Header({
           {user && (
             <Link
               href="/notifications"
-              className="relative hidden shrink-0 rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
+              className="relative hidden shrink-0 rounded-full px-2.5 py-2 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
               title={t('common.notifications')}
             >
               🔔
@@ -139,7 +139,7 @@ export function Header({
           {user && (
             <Link
               href="/messages"
-              className="relative hidden shrink-0 rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
+              className="relative hidden shrink-0 rounded-full px-2.5 py-2 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
               title={t('common.messages')}
             >
               ✉
@@ -154,7 +154,7 @@ export function Header({
             <>
               <Link
                 href="/profile"
-                className="flex shrink-0 items-center gap-1.5 rounded-full bg-cream-100 px-2.5 py-1.5 text-sm font-medium text-cocoa-500 hover:bg-cream-200"
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-cream-100 px-2.5 py-2 text-sm font-medium text-cocoa-500 hover:bg-cream-200"
               >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -166,7 +166,7 @@ export function Header({
               </Link>
               <button
                 onClick={handleLogout}
-                className="hidden whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
+                className="hidden whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-medium text-cocoa-400 hover:bg-cream-100 md:inline-flex"
               >
                 {t('action.logout')}
               </button>
@@ -175,13 +175,13 @@ export function Header({
             <>
               <Link
                 href="/login"
-                className="whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-medium text-cocoa-500 hover:bg-cream-100"
+                className="whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-medium text-cocoa-500 hover:bg-cream-100"
               >
                 {t('action.login')}
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-peach-400 px-3 py-1.5 text-sm font-bold text-white shadow-soft hover:bg-peach-500"
+                className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-peach-400 px-3 py-2 text-sm font-bold text-white shadow-soft hover:bg-peach-500"
               >
                 {t('action.signup')}
               </Link>
@@ -190,7 +190,7 @@ export function Header({
 
           <button
             onClick={() => setOpen(!open)}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-cocoa-500 hover:bg-cream-100 lg:hidden"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-xl text-cocoa-500 hover:bg-cream-100 lg:hidden"
             aria-label={t('action.menu')}
           >
             {open ? '✕' : '☰'}

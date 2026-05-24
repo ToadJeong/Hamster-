@@ -47,11 +47,11 @@ export default async function RescueIndex({
 
       {/* 필터 */}
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
-        <Link href="/rescue" className={'badge ' + (!searchParams.kind ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>{t('common.all')}</Link>
+        <Link href="/rescue" scroll={false} className={'badge ' + (!searchParams.kind ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>{t('common.all')}</Link>
         {(Object.keys(RESCUE_KIND_LABEL) as RescueKind[]).map((k) => {
           const meta = RESCUE_KIND_LABEL[k];
           return (
-            <Link key={k} href={`/rescue?kind=${k}`}
+            <Link key={k} href={`/rescue?kind=${k}`} scroll={false}
               className={'badge ' + (searchParams.kind === k ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')}>
               {meta.emoji} {meta.label}
             </Link>

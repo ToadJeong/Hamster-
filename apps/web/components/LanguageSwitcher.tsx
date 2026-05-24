@@ -20,7 +20,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     <div className={'relative ' + (className ?? '')}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-sm font-medium text-cocoa-400 hover:bg-cream-100"
+        className="inline-flex items-center gap-1 rounded-full px-2.5 py-2 text-sm font-medium text-cocoa-400 hover:bg-cream-100"
         aria-label="언어 / Language"
       >
         <span>{LOCALE_FLAG[current]}</span>
@@ -36,7 +36,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
                 <button
                   onClick={() => pick(loc)}
                   className={
-                    'flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-cream-100 ' +
+                    'flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm hover:bg-cream-100 ' +
                     (loc === current ? 'font-bold text-peach-500' : 'text-cocoa-500')
                   }
                 >

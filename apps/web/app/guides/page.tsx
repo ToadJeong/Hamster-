@@ -56,6 +56,7 @@ export default async function GuidesIndex({
       <div className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
         <Link
           href="/guides"
+          scroll={false}
           className={
             'badge ' + (!speciesSlug ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')
           }
@@ -66,6 +67,7 @@ export default async function GuidesIndex({
           <Link
             key={s.slug}
             href={`/guides?species=${s.slug}`}
+            scroll={false}
             className={
               'badge ' +
               (speciesSlug === s.slug ? 'bg-peach-100 text-peach-500' : 'hover:bg-cream-200')
