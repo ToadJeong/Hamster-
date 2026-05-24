@@ -110,25 +110,27 @@ export default async function CommunityIndex({
             const meta = COMMUNITY_CATEGORY_LABEL[p.category as CommunityCategory] ?? COMMUNITY_CATEGORY_LABEL.free;
             return (
               <li key={p.id}>
-                <Link href={`/community/${p.id}`} className="card flex gap-3 transition hover:-translate-y-0.5 hover:shadow-soft has-[[data-read=true]]:opacity-60">
+                <Link href={`/community/${p.id}`} className="group flex gap-3 rounded-2xl border border-cream-200/80 bg-white/95 p-3.5 shadow-softer transition hover:-translate-y-0.5 hover:border-peach-200 hover:shadow-soft has-[[data-read=true]]:opacity-55 sm:p-4">
                   {p.cover_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.cover_url} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
-                  ) : null}
+                    <img src={p.cover_url} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-cream-200" />
+                  ) : (
+                    <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-cream-100 text-xl text-cocoa-300">{meta.emoji}</span>
+                  )}
                   <div className="min-w-0 flex-1">
-                    <div className="mb-1.5 flex items-center gap-1.5">
-                      <span className="badge bg-cream-100 text-cocoa-500">{meta.emoji} {meta.label}</span>
-                      {(p.tags as string[] ?? []).slice(0, 3).map((t) => (
-                        <span key={t} className="badge bg-lilac-50 text-lilac-400">#{t}</span>
+                    <div className="mb-1 flex items-center gap-1.5">
+                      <span className="rounded-md bg-peach-50 px-1.5 py-0.5 text-[11px] font-bold text-peach-500">{meta.label}</span>
+                      {(p.tags as string[] ?? []).slice(0, 2).map((t) => (
+                        <span key={t} className="text-[11px] font-medium text-lilac-400">#{t}</span>
                       ))}
                       <ReadBadge type="community" id={p.id} />
                     </div>
-                    <h3 className="line-clamp-1 font-semibold text-cocoa-500">{p.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-cocoa-300">{p.body}</p>
-                    <div className="mt-1.5 flex items-center gap-3 text-xs text-cocoa-300">
-                      <span>{display}{!p.author_id && ' · 익명'}</span>
+                    <h3 className="line-clamp-1 font-bold text-cocoa-500 group-hover:text-peach-500">{p.title}</h3>
+                    <p className="mt-0.5 line-clamp-1 text-[13px] text-cocoa-400">{p.body}</p>
+                    <div className="mt-1.5 flex items-center gap-2.5 text-[11px] text-cocoa-300">
+                      <span className="font-medium text-cocoa-400">{display}{!p.author_id && ' · 익명'}</span>
                       <span>{formatDate(p.created_at)}</span>
-                      <span>❤ {p.like_count ?? 0}</span>
+                      <span>♥ {p.like_count ?? 0}</span>
                       <span>💬 {p.comment_count ?? 0}</span>
                       <span>👁 {p.view_count ?? 0}</span>
                     </div>

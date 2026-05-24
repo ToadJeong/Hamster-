@@ -57,9 +57,10 @@ export default async function SpeciesIndex({
 
       {/* 초성 인덱스 점프 바 */}
       {!q && groups.length > 0 && (
-        <nav className="flex flex-wrap gap-2 rounded-cute border border-cream-200 bg-white p-3">
+        <nav className="sticky top-[57px] z-10 -mx-1 flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white/90 px-2.5 py-2 backdrop-blur md:top-[61px]">
           {groups.map(({ key }) => (
-            <a key={key} href={`#sec-${key}`} className="badge hover:bg-peach-100 hover:text-peach-500">
+            <a key={key} href={`#sec-${key}`}
+              className="grid h-7 min-w-7 place-items-center rounded-lg px-2 text-sm font-bold text-cocoa-400 transition hover:bg-peach-100 hover:text-peach-500">
               {key}
             </a>
           ))}
@@ -69,36 +70,40 @@ export default async function SpeciesIndex({
       {groups.length === 0 ? (
         <div className="card text-center text-cocoa-300">검색 결과가 없어요.</div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-7">
           {groups.map(({ key, items }) => (
-            <section key={key} id={`sec-${key}`}>
-              <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">{key}</h2>
-              <div className="grid gap-3 md:grid-cols-2">
+            <section key={key} id={`sec-${key}`} className="scroll-mt-28">
+              <h2 className="mb-2.5 flex items-center gap-2 font-display text-lg font-bold text-cocoa-500">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-peach-100 text-sm text-peach-500">{key}</span>
+              </h2>
+              <div className="grid gap-2.5 md:grid-cols-2">
                 {items.map((s) => (
                   <Link
                     key={s.id}
                     href={`/species/${s.slug}`}
-                    className="card flex gap-4 transition hover:-translate-y-0.5 hover:shadow-soft"
+                    className="group flex items-center gap-3.5 rounded-2xl border border-cream-200/80 bg-white/95 p-3 shadow-softer transition hover:-translate-y-0.5 hover:border-peach-200 hover:shadow-soft"
                   >
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-cream-100">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-cream-100 ring-1 ring-cream-200">
                       {s.image_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={s.image_url} alt={s.name_ko} className="h-full w-full rounded-2xl object-cover" />
+                        <img src={s.image_url} alt={s.name_ko} className="h-full w-full object-cover" />
                       ) : (
                         <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline gap-2">
-                        <h3 className="font-semibold text-cocoa-500">{s.name_ko}</h3>
-                        {s.name_en && <span className="text-xs text-cocoa-300">{s.name_en}</span>}
+                      <div className="flex items-baseline gap-1.5">
+                        <h3 className="truncate font-bold text-cocoa-500 group-hover:text-peach-500">{s.name_ko}</h3>
+                        {s.name_en && <span className="truncate text-[11px] text-cocoa-300">{s.name_en}</span>}
                       </div>
-                      <p className="mt-1 line-clamp-2 text-sm text-cocoa-400">{s.summary}</p>
-                      <div className="mt-2 flex flex-wrap gap-1 text-xs">
-                        {s.size_cm && <span className="badge">📏 {s.size_cm}</span>}
-                        {s.temperament && <span className="badge">💗 {s.temperament}</span>}
+                      <p className="mt-0.5 line-clamp-1 text-[13px] text-cocoa-400">{s.summary}</p>
+                      <div className="mt-1.5 flex flex-wrap gap-1 text-[11px] text-cocoa-300">
+                        {s.size_cm && <span>{s.size_cm}</span>}
+                        {s.size_cm && s.temperament && <span className="text-cream-300">·</span>}
+                        {s.temperament && <span>{s.temperament}</span>}
                       </div>
                     </div>
+                    <span className="shrink-0 text-cream-300 transition group-hover:text-peach-400">›</span>
                   </Link>
                 ))}
               </div>

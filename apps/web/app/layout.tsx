@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { TipBar } from '@/components/TipBar';
+import { MobileTabBar } from '@/components/MobileTabBar';
 import { Footer } from '@/components/Footer';
 import { PetHamsterLayer } from '@/components/PetHamsterLayer';
 import { LiveChat } from '@/components/LiveChat';
@@ -67,10 +68,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             notifUnread={notifUnread}
           />
           <TipBar />
-          <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 md:px-6">
+          <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 md:px-6 lg:pb-24">
             {children}
           </main>
           <Footer />
+
+          {/* 모바일 하단 탭바 (앱 느낌) */}
+          <MobileTabBar />
 
           {/* 회원 읽음 기록 동기화 + 실시간 알림 */}
           <ReadStateLoader enabled={!!user} />
