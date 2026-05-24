@@ -207,6 +207,29 @@ export type DMMessage = {
   created_at: string;
 };
 
+/* 상품 추천 게시판 */
+export type ProductCategory = 'cage' | 'food' | 'wheel' | 'bedding' | 'toy' | 'sand' | 'etc';
+
+export type ProductPost = {
+  id: string;
+  author_id: string | null;
+  title: string;
+  url: string | null;
+  image_url: string | null;
+  price: string | null;
+  category: ProductCategory;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  view_count: number;
+};
+
+export type ProductPostFeed = ProductPost & {
+  author_username: string | null;
+  author_avatar_url: string | null;
+  like_count: number;
+};
+
 /* 커뮤니티 피드 */
 export type CommunityPostFeed = CommunityPost & {
   author_username: string | null;
