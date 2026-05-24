@@ -110,7 +110,7 @@ export function Header({
 
         {/* 오른쪽 액션 */}
         <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
-          <LanguageSwitcher className="hidden md:block" />
+          <LanguageSwitcher />
           {isAdmin && (
             <Link
               href="/admin"
@@ -202,18 +202,15 @@ export function Header({
       {open && (
         <div className="border-t border-cream-200 bg-[var(--bg)] lg:hidden">
           <div className="mx-auto w-full max-w-5xl space-y-3 px-3 py-3 md:px-6">
-            <div className="flex items-center justify-between gap-2">
-              <form onSubmit={submitSearch} className="flex-1">
-                <input
-                  type="search"
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder={t('action.search.placeholder')}
-                  className="input"
-                />
-              </form>
-              <LanguageSwitcher />
-            </div>
+            <form onSubmit={submitSearch}>
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={t('action.search.placeholder')}
+                className="input"
+              />
+            </form>
             <nav className="grid grid-cols-2 gap-2">
               {NAV.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + '/');
