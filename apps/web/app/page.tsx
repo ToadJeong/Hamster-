@@ -5,6 +5,8 @@ import { GuideCard } from '@/components/GuideCard';
 import { HomeSearchBar } from '@/components/HomeSearchBar';
 import { Hamster } from '@/components/Hamster';
 import { GENUS_ORDER, GENUS_INFO } from '@/lib/genus';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import { CategoryIcon } from '@/components/HamlandAssets';
 import { Media } from '@/components/Media';
 import { isVideoUrl } from '@/lib/media';
@@ -21,6 +23,7 @@ export const revalidate = 30;
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
   const settings = await getSiteSettings();
+  const t = makeT(getLocale());
 
   // 병렬 조회 (테이블이 없는 경우 빈 배열로 처리)
   const [guidesRes, announcementsRes, rescueRes, communityRes, momentsRes] = await Promise.all([
@@ -87,7 +90,7 @@ export default async function HomePage() {
             <li key={c.href}>
               <Link href={c.href} className="flex flex-col items-center gap-1 rounded-2xl p-1.5 transition hover:-translate-y-0.5 hover:bg-white/70">
                 <CategoryIcon kind={c.kind} className="h-12 w-12 sm:h-14 sm:w-14" />
-                <span className="text-[11px] font-semibold text-cocoa-500">{c.label}</span>
+                <span className="text-[11px] font-semibold text-cocoa-500">{t('nav.' + c.kind)}</span>
               </Link>
             </li>
           ))}
@@ -97,7 +100,7 @@ export default async function HomePage() {
       {/* 최근 공지 */}
       {announcements.length > 0 && (
         <section>
-          <SectionHeader title="📢 공지사항" moreHref="/announcements" />
+          <SectionHeader title={t('home.section.notices')} moreHref="/announcements" moreLabel={t('home.more')} />
           <ul className="space-y-2">
             {announcements.map((a) => (
               <li key={a.id}>
@@ -118,7 +121,7 @@ export default async function HomePage() {
 
       {/* 도감 미리보기 — 5종 */}
       <section>
-        <SectionHeader title="🐹 햄스터 도감" subtitle="반려 햄스터 5종을 한눈에" moreHref="/species" />
+        <SectionHeader title={t('home.section.species')} subtitle={t('home.section.species.sub')} moreHref="/species" moreLabel={t('home.more')} />
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {GENUS_ORDER.map((g) => {
             const info = GENUS_INFO[g];
@@ -138,7 +141,7 @@ export default async function HomePage() {
       {/* 육아일기 */}
       {moments.length > 0 && (
         <section>
-          <SectionHeader title="📸 육아일기" subtitle="우리집 햄찌들의 귀여운 순간" moreHref="/moments" />
+          <SectionHeader title={t('home.section.moments')} subtitle={t('home.section.moments.sub')} moreHref="/moments" moreLabel={t('home.more')} />
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
             {moments.map((m) => (
               <Link key={m.id} href={`/moments/${m.id}`}
@@ -158,7 +161,7 @@ export default async function HomePage() {
 
       {/* 커뮤니티 최근 글 */}
       <section>
-        <SectionHeader title="💬 커뮤니티" subtitle="햄집사들의 따끈한 글" moreHref="/community" />
+        <SectionHeader title={t('home.section.community')} subtitle={t('home.section.community.sub')} moreHref="/community" moreLabel={t('home.more')} />
         {community.length === 0 ? (
           <div className="card text-center text-sm text-cocoa-300">아직 글이 없어요. 첫 글을 남겨보세요!</div>
         ) : (
@@ -208,7 +211,7 @@ export default async function HomePage() {
 
       {/* 유기햄 구조대 */}
       <section>
-        <SectionHeader title="🆘 유기햄 구조대" subtitle="새 가족이 필요한 햄찌들" moreHref="/rescue" />
+        <SectionHeader title={t('home.section.rescue')} subtitle={t('home.section.rescue.sub')} moreHref="/rescue" moreLabel={t('home.more')} />
         {rescues.length === 0 ? (
           <div className="card text-center text-cocoa-300 text-sm">현재 진행 중인 글이 없어요.</div>
         ) : (
@@ -240,7 +243,7 @@ export default async function HomePage() {
 
       {/* 최신 가이드 */}
       <section>
-        <SectionHeader title="📖 최신 가이드" subtitle="햄집사들이 직접 쓴 사육 노하우" moreHref="/guides" />
+        <SectionHeader title={t('home.section.guides')} subtitle={t('home.section.guides.sub')} moreHref="/guides" moreLabel={t('home.more')} />
         {guides.length === 0 ? (
           <div className="card text-center text-cocoa-300 text-sm">
             아직 가이드가 없어요. 첫 가이드를 작성해 보세요!

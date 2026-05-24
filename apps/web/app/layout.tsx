@@ -13,6 +13,8 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
+import { getLocale } from '@/lib/i18n-server';
+import { I18nProvider } from '@/components/I18nProvider';
 
 export const metadata: Metadata = {
   title: '햄랜드 · 햄집사들의 따뜻한 커뮤니티',
@@ -37,9 +39,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     profile = data;
   }
   // 안읽은 쪽지/알림 배지는 서버 렌더를 막지 않도록 헤더에서 클라이언트로 조회한다.
+  const locale = getLocale();
 
   return (
-    <html lang="ko">
+    <html lang={locale}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -53,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className="min-h-screen bg-[var(--bg)]">
+        <I18nProvider locale={locale}>
         <ModalProvider>
           <Header
             user={user ? { email: user.email ?? '' } : null}
@@ -86,6 +90,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             } : null}
           />
         </ModalProvider>
+        </I18nProvider>
 
         {/* Vercel 방문자 분석 + 성능 측정 */}
         <Analytics />
