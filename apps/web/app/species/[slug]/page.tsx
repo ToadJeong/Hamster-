@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideCard } from '@/components/GuideCard';
 import { CorrectionButton } from '@/components/CorrectionButton';
 import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
+import { EmptyState } from '@/components/EmptyState';
 import type { Species, GuideWithCounts } from '@hamster/shared';
 
 export const revalidate = 60;
@@ -33,45 +34,37 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
         ← 도감으로
       </Link>
 
-      <header className="overflow-hidden rounded-cute bg-gradient-to-br from-cream-100 to-peach-100 p-6 md:p-8">
+      <header className="overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-cream-100 via-peach-50 to-lilac-100 p-6 shadow-soft md:p-8">
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-          <div className="aspect-square w-32 shrink-0 overflow-hidden rounded-cute bg-white shadow-softer md:w-44">
+          <div className="aspect-square w-28 shrink-0 overflow-hidden rounded-3xl bg-white shadow-soft ring-4 ring-white/70 md:w-40">
             {s.image_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={s.image_url} alt={s.name_ko} className="h-full w-full rounded-cute object-cover" />
+              <img src={s.image_url} alt={s.name_ko} className="h-full w-full object-cover" />
             ) : (
               <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
             )}
           </div>
           <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl md:text-4xl">{s.name_ko}</h1>
-            <p className="mt-1 text-cocoa-400">
+            <p className="mt-1 text-sm text-cocoa-400">
               {s.name_en}
-              {s.scientific_name && <span className="ml-2 italic">· {s.scientific_name}</span>}
+              {s.scientific_name && <span className="ml-1.5 italic text-cocoa-300">· {s.scientific_name}</span>}
             </p>
-            <p className="mt-3 text-cocoa-500">{s.summary}</p>
+            <p className="mt-2.5 text-cocoa-500">{s.summary}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <a
                 href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent('햄스터 ' + s.name_ko)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary text-sm"
-              >
-                📸 구글에서 사진 보기
-              </a>
+                target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm"
+              >📸 사진 보기</a>
               <a
                 href={`https://www.google.com/search?q=${encodeURIComponent(s.name_ko + ' 햄스터 분양')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-ghost text-sm"
-              >
-                🔍 정보 더 찾기
-              </a>
+                target="_blank" rel="noopener noreferrer" className="btn-ghost text-sm"
+              >🔍 정보 더 찾기</a>
             </div>
           </div>
         </div>
 
-        <dl className="mt-6 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+        <dl className="mt-6 grid grid-cols-2 gap-2.5 text-sm md:grid-cols-4">
           <Fact label="크기" value={s.size_cm} />
           <Fact label="수명" value={s.lifespan_years} />
           <Fact label="성격" value={s.temperament} />
@@ -80,14 +73,18 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
       </header>
 
       <section>
-        <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">소개</h2>
-        <p className="prose-soft whitespace-pre-line">{s.description}</p>
+        <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold text-cocoa-500">
+          <span className="h-4 w-1.5 rounded-full bg-peach-400" aria-hidden />소개
+        </h2>
+        <div className="prose-soft whitespace-pre-line rounded-cute border border-cream-200/80 bg-white/80 p-5">{s.description}</div>
       </section>
 
       {s.care_tips && (
         <section>
-          <h2 className="mb-3 font-display text-xl font-bold text-cocoa-500">사육 팁</h2>
-          <div className="card whitespace-pre-line prose-soft bg-mint-50">{s.care_tips}</div>
+          <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold text-cocoa-500">
+            <span className="h-4 w-1.5 rounded-full bg-mint-400" aria-hidden />사육 팁
+          </h2>
+          <div className="card whitespace-pre-line prose-soft border-mint-200 bg-mint-50">{s.care_tips}</div>
         </section>
       )}
 
@@ -114,9 +111,11 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
             ))}
           </div>
         ) : (
-          <div className="card text-center text-cocoa-300">
-            아직 이 종에 대한 가이드가 없어요. 첫 가이드를 작성해 보세요!
-          </div>
+          <EmptyState
+            title="아직 이 종의 가이드가 없어요"
+            description="이 종을 키우는 노하우를 가장 먼저 남겨보세요!"
+            action={<Link href={`/guides/new?species=${s.slug}`} className="btn-primary text-sm">가이드 쓰기</Link>}
+          />
         )}
       </section>
     </article>
@@ -125,9 +124,9 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
 
 function Fact({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="rounded-2xl bg-white/70 p-3">
-      <dt className="text-xs text-cocoa-300">{label}</dt>
-      <dd className="font-medium text-cocoa-500">{value ?? '—'}</dd>
+    <div className="rounded-2xl bg-white/80 p-3 text-center shadow-softer">
+      <dt className="text-[11px] font-medium text-cocoa-300">{label}</dt>
+      <dd className="mt-0.5 font-bold text-cocoa-500">{value ?? '—'}</dd>
     </div>
   );
 }
