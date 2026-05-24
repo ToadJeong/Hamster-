@@ -9,6 +9,8 @@ import { LikeButton } from '@/components/LikeButton';
 import { CommentSection } from '@/components/CommentSection';
 import { GuideActions } from '@/components/GuideActions';
 import { ViewTracker } from '@/components/ViewTracker';
+import { ReportButton } from '@/components/ReportButton';
+import { CorrectionButton } from '@/components/CorrectionButton';
 import type { GuideWithCounts, CommentWithAuthor } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -110,7 +112,16 @@ export default async function GuideDetail({ params }: { params: { id: string } }
           initialCount={g.like_count}
           isAuthed={!!user}
         />
-        <span className="text-sm text-cocoa-300">💬 {g.comment_count} · ❤ {g.like_count}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-cocoa-300">💬 {g.comment_count} · ❤ {g.like_count}</span>
+          {!isAuthor && <ReportButton targetType="guide" targetId={g.id} />}
+        </div>
+      </div>
+
+      {/* 잘못된 정보 제보 */}
+      <div className="flex items-center justify-between rounded-cute border border-cream-200 bg-cream-50 px-4 py-3">
+        <p className="text-sm text-cocoa-400">내용이 정확하지 않나요? 제보로 더 정확해져요.</p>
+        <CorrectionButton targetType="guide" targetId={g.id} targetName={g.title} />
       </div>
 
       <CommentSection

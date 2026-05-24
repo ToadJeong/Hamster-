@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 import { GuideCard } from '@/components/GuideCard';
 import { HomeSearchBar } from '@/components/HomeSearchBar';
+import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
 import { formatDate } from '@/lib/format';
 import {
   RESCUE_KIND_LABEL, COMMUNITY_CATEGORY_LABEL,
@@ -107,11 +108,13 @@ export default async function HomePage() {
             {species.map((s) => (
               <Link key={s.id} href={`/species/${s.slug}`}
                 className="card group transition hover:-translate-y-0.5 hover:shadow-soft">
-                <div className="mb-3 grid aspect-square place-items-center rounded-2xl bg-cream-100 text-5xl">
+                <div className="mb-3 aspect-square overflow-hidden rounded-2xl bg-cream-100">
                   {s.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={s.image_url} alt={s.name_ko} className="h-full w-full rounded-2xl object-cover" />
-                  ) : '🐹'}
+                  ) : (
+                    <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
+                  )}
                 </div>
                 <h3 className="line-clamp-1 font-semibold text-cocoa-500 group-hover:text-peach-500">{s.name_ko}</h3>
                 <p className="mt-1 line-clamp-2 text-xs text-cocoa-300">{s.summary}</p>

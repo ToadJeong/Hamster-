@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { GuideCard } from '@/components/GuideCard';
 import { CorrectionButton } from '@/components/CorrectionButton';
+import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
 import type { Species, GuideWithCounts } from '@hamster/shared';
 
 export const revalidate = 60;
@@ -34,12 +35,12 @@ export default async function SpeciesDetail({ params }: { params: { slug: string
 
       <header className="overflow-hidden rounded-cute bg-gradient-to-br from-cream-100 to-peach-100 p-6 md:p-8">
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-          <div className="grid aspect-square w-32 shrink-0 place-items-center rounded-cute bg-white text-6xl shadow-softer md:w-44">
+          <div className="aspect-square w-32 shrink-0 overflow-hidden rounded-cute bg-white shadow-softer md:w-44">
             {s.image_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={s.image_url} alt={s.name_ko} className="h-full w-full rounded-cute object-cover" />
             ) : (
-              '🐹'
+              <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
             )}
           </div>
           <div className="min-w-0">
