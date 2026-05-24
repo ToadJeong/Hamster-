@@ -22,9 +22,10 @@ export default async function SearchPage({
   let communityMatches: any[] = [];
   let rescueMatches: RescuePostWithAuthor[] = [];
   let announcementMatches: any[] = [];
+  let commentMatches: any[] = [];
 
   if (q) {
-    const [s, g, c, r, a] = await Promise.all([
+    const [s, g, c, r, a, gc, cc] = await Promise.all([
       supabase.from('species').select('id, slug, name_ko, name_en, summary, image_url')
         .or(`name_ko.ilike.%${q}%,name_en.ilike.%${q}%,scientific_name.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%`)
         .order('name_ko'),
@@ -40,17 +41,29 @@ export default async function SearchPage({
       supabase.from('announcements').select('id, title, body, created_at, pinned')
         .or(`title.ilike.%${q}%,body.ilike.%${q}%`)
         .order('created_at', { ascending: false }).limit(10),
+      // 가이드 댓글
+      supabase.from('comments').select('id, guide_id, body, created_at, anonymous_nickname, author:profiles!comments_author_id_fkey(username)')
+        .ilike('body', `%${q}%`)
+        .order('created_at', { ascending: false }).limit(15),
+      // 커뮤니티 댓글
+      supabase.from('community_comments').select('id, post_id, body, created_at, anonymous_nickname, author:profiles!community_comments_author_id_fkey(username)')
+        .ilike('body', `%${q}%`)
+        .order('created_at', { ascending: false }).limit(15),
     ]);
     speciesMatches = (s.data as any) ?? [];
     guideMatches = (g.data as any) ?? [];
     communityMatches = (c.data as any) ?? [];
     rescueMatches = (r.data as any) ?? [];
     announcementMatches = (a.data as any) ?? [];
+    commentMatches = [
+      ...((gc.data as any[]) ?? []).map((x) => ({ ...x, _kind: 'guide', _link: `/guides/${x.guide_id}` })),
+      ...((cc.data as any[]) ?? []).map((x) => ({ ...x, _kind: 'community', _link: `/community/${x.post_id}` })),
+    ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   }
 
   const total =
     speciesMatches.length + guideMatches.length + communityMatches.length +
-    rescueMatches.length + announcementMatches.length;
+    rescueMatches.length + announcementMatches.length + commentMatches.length;
 
   return (
     <div className="space-y-8">
@@ -152,6 +165,28 @@ export default async function SearchPage({
                           <p className="line-clamp-1 font-semibold text-cocoa-500">{r.title}</p>
                           {r.region && <p className="text-xs text-cocoa-300">📍 {r.region}</p>}
                         </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </SearchSection>
+
+          <SearchSection title="댓글" emoji="🗨" count={commentMatches.length}>
+            {commentMatches.length === 0 ? (
+              <div className="card text-center text-cocoa-300">일치하는 댓글 없음</div>
+            ) : (
+              <ul className="space-y-2">
+                {commentMatches.map((c: any) => {
+                  const who = c.author?.username ?? c.anonymous_nickname ?? '익명';
+                  return (
+                    <li key={c.id}>
+                      <Link href={c._link} className="card block transition hover:-translate-y-0.5 hover:shadow-soft">
+                        <p className="line-clamp-2 text-sm text-cocoa-500">“{c.body}”</p>
+                        <p className="mt-1 text-xs text-cocoa-300">
+                          {who} · {c._kind === 'guide' ? '가이드' : '커뮤니티'} 댓글 · {formatDate(c.created_at)}
+                        </p>
                       </Link>
                     </li>
                   );

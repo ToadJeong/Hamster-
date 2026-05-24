@@ -6,6 +6,7 @@ import { PetHamsterLayer } from '@/components/PetHamsterLayer';
 import { LiveChat } from '@/components/LiveChat';
 import { ModalProvider } from '@/components/Modal';
 import { ReadStateLoader } from '@/components/ReadStateLoader';
+import { NotificationToaster } from '@/components/NotificationToaster';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 
@@ -67,8 +68,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </main>
           <Footer />
 
-          {/* 회원 읽음 기록 동기화 */}
+          {/* 회원 읽음 기록 동기화 + 실시간 알림 */}
           <ReadStateLoader enabled={!!user} />
+          {user && <NotificationToaster userId={user.id} />}
 
           {/* 화면 위를 돌아다니는 펫 햄스터 */}
           <PetHamsterLayer />

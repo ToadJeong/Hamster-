@@ -21,6 +21,7 @@ const NAV: { href: string; label: string; emoji: string }[] = [
   { href: '/guides',        label: '가이드', emoji: '📖' },
   { href: '/community',     label: '커뮤니티', emoji: '💬' },
   { href: '/rescue',        label: '구조대', emoji: '🆘' },
+  { href: '/hospitals',     label: '병원',   emoji: '🏥' },
 ];
 
 export function Header({

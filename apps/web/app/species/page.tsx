@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { HamsterIllustration, visualForSpecies } from '@/components/HamsterIllustration';
 import type { Species } from '@hamster/shared';
 
 export const revalidate = 60;
@@ -79,12 +80,12 @@ export default async function SpeciesIndex({
                     href={`/species/${s.slug}`}
                     className="card flex gap-4 transition hover:-translate-y-0.5 hover:shadow-soft"
                   >
-                    <div className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-cream-100 text-3xl">
+                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-cream-100">
                       {s.image_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={s.image_url} alt={s.name_ko} className="h-full w-full rounded-2xl object-cover" />
                       ) : (
-                        '🐹'
+                        <HamsterIllustration visual={visualForSpecies(s.slug, s.name_ko)} className="h-full w-full" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
