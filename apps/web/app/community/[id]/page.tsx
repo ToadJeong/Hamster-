@@ -7,6 +7,7 @@ import { CommunityActions } from '@/components/CommunityActions';
 import { CommunityCommentSection } from '@/components/CommunityCommentSection';
 import { CommunityAuthorActions } from '@/components/CommunityAuthorActions';
 import { ReportButton } from '@/components/ReportButton';
+import { StaffDeleteButton } from '@/components/StaffDeleteButton';
 import { ViewTracker } from '@/components/ViewTracker';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
@@ -16,6 +17,12 @@ export default async function CommunityDetail({ params }: { params: { id: string
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const settings = await getSiteSettings();
+
+  let isStaff = false;
+  if (user) {
+    const { data: pr } = await supabase.from('profiles').select('is_admin, is_moderator').eq('id', user.id).maybeSingle();
+    isStaff = !!(pr as any)?.is_admin || !!(pr as any)?.is_moderator;
+  }
 
   const { data, error } = await supabase
     .from('community_posts_feed')
@@ -90,6 +97,9 @@ export default async function CommunityDetail({ params }: { params: { id: string
               />
             )}
             {!isAuthor && <ReportButton targetType="community" targetId={p.id} />}
+            {isStaff && !isAuthor && (
+              <StaffDeleteButton type="community" id={p.id} redirectTo="/community" />
+            )}
           </div>
         </div>
 

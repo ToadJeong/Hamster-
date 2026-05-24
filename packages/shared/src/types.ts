@@ -6,7 +6,18 @@ export type Profile = {
   phone: string | null;
   interest_tags: string[];
   is_admin: boolean;
+  is_moderator: boolean;
   created_at: string;
+};
+
+export type Gender = 'male' | 'female' | 'other' | 'undisclosed';
+
+/* 개인정보 (본인/관리자만 조회) */
+export type ProfilePrivate = {
+  id: string;
+  real_name: string | null;
+  birth_date: string | null;
+  gender: Gender | null;
 };
 
 export type Species = {

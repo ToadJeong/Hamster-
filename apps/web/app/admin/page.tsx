@@ -41,6 +41,10 @@ export default async function AdminPage() {
       <AdminSettingsForm initial={settings} />
 
       <div className="grid gap-3 md:grid-cols-2">
+        <Link href="/admin/users" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
+          <h3 className="font-semibold text-cocoa-500">👥 회원·운영자 관리</h3>
+          <p className="mt-1 text-sm text-cocoa-300">회원을 검색하고 운영자 권한을 부여·회수해요. (마스터 전용)</p>
+        </Link>
         <Link href="/admin/reports" className="card transition hover:-translate-y-0.5 hover:shadow-soft">
           <h3 className="font-semibold text-cocoa-500">🚨 글 신고 처리</h3>
           <p className="mt-1 text-sm text-cocoa-300">신고된 게시글·댓글을 확인하고 처리해요.</p>
