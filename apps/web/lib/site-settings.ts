@@ -1,7 +1,9 @@
+import { cache } from 'react';
 import { DEFAULT_SITE_SETTINGS, type SiteSettings, type SiteSettingKey } from '@hamster/shared';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
-export async function getSiteSettings(): Promise<SiteSettings> {
+// React cache(): 한 요청 안에서 여러 번 호출돼도 DB는 1번만 조회(레이아웃+페이지 중복 제거)
+export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   const supabase = createSupabaseServerClient();
   const { data } = await supabase.from('site_settings').select('key, value');
   const out: SiteSettings = { ...DEFAULT_SITE_SETTINGS };
@@ -14,4 +16,4 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     }
   }
   return out;
-}
+});

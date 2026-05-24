@@ -5,7 +5,7 @@ import { TipBar } from '@/components/TipBar';
 import { MobileTabBar } from '@/components/MobileTabBar';
 import { Footer } from '@/components/Footer';
 import { PetHamsterLayer } from '@/components/PetHamsterLayer';
-import { LiveChat } from '@/components/LiveChat';
+import { DeferredLiveChat } from '@/components/DeferredLiveChat';
 import { ModalProvider } from '@/components/Modal';
 import { ReadStateLoader } from '@/components/ReadStateLoader';
 import { NotificationToaster } from '@/components/NotificationToaster';
@@ -21,11 +21,13 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // getUser 와 사이트 설정을 병렬로 (설정은 user 와 무관)
+  const [{ data: { user } }, settings] = await Promise.all([
+    supabase.auth.getUser(),
+    getSiteSettings(),
+  ]);
 
   let profile = null;
-  let dmUnread = 0;
-  let notifUnread = 0;
   if (user) {
     const { data } = await supabase
       .from('profiles')
@@ -33,15 +35,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .eq('id', user.id)
       .maybeSingle();
     profile = data;
-    const [dm, nf] = await Promise.all([
-      supabase.rpc('dm_unread_count'),
-      supabase.rpc('notif_unread_count'),
-    ]);
-    dmUnread = (dm.data as number) ?? 0;
-    notifUnread = (nf.data as number) ?? 0;
   }
-
-  const settings = await getSiteSettings();
+  // 안읽은 쪽지/알림 배지는 서버 렌더를 막지 않도록 헤더에서 클라이언트로 조회한다.
 
   return (
     <html lang="ko">
@@ -64,8 +59,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             username={profile?.username ?? null}
             avatarUrl={profile?.avatar_url ?? null}
             isAdmin={!!profile?.is_admin}
-            dmUnread={dmUnread}
-            notifUnread={notifUnread}
           />
           <TipBar />
           <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 md:px-6 lg:pb-24">
@@ -83,8 +76,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {/* 화면 위를 돌아다니는 펫 햄스터 */}
           <PetHamsterLayer />
 
-          {/* 우하단 실시간 채팅 (관리자가 OFF 가능) */}
-          <LiveChat
+          {/* 우하단 실시간 채팅 (관리자가 OFF 가능) — 첫 화면 이후 지연 마운트 */}
+          <DeferredLiveChat
             enabled={settings['chat.enabled']}
             currentUser={user ? {
               id: user.id,

@@ -11,8 +11,6 @@ type Props = {
   username: string | null;
   avatarUrl: string | null;
   isAdmin: boolean;
-  dmUnread?: number;
-  notifUnread?: number;
 };
 
 // 사용자가 요청한 메뉴 순서: 공지 → 도감 → 가이드 → 커뮤니티 → 육아일기 → 상품 → 구조대 → 병원
@@ -28,7 +26,7 @@ const NAV: { href: string; label: string; emoji: string }[] = [
 ];
 
 export function Header({
-  user, username, avatarUrl, isAdmin, dmUnread = 0, notifUnread = 0,
+  user, username, avatarUrl, isAdmin,
 }: Props) {
   const pathname = usePathname();
   const router = useRouter();
@@ -37,6 +35,24 @@ export function Header({
 
   const [q, setQ] = useState(pathname.startsWith('/search') ? params.get('q') ?? '' : '');
   const [open, setOpen] = useState(false);
+
+  // 안읽은 배지는 서버 렌더를 막지 않도록 마운트 후 조회 (페이지 이동 시 갱신)
+  const [dmUnread, setDmUnread] = useState(0);
+  const [notifUnread, setNotifUnread] = useState(0);
+  useEffect(() => {
+    if (!user) { setDmUnread(0); setNotifUnread(0); return; }
+    let active = true;
+    (async () => {
+      const [dm, nf] = await Promise.all([
+        supabase.rpc('dm_unread_count'),
+        supabase.rpc('notif_unread_count'),
+      ]);
+      if (!active) return;
+      setDmUnread((dm.data as number) ?? 0);
+      setNotifUnread((nf.data as number) ?? 0);
+    })();
+    return () => { active = false; };
+  }, [user, pathname, supabase]);
 
   useEffect(() => { setOpen(false); }, [pathname]);
 
