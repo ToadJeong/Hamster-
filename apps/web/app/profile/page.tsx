@@ -7,6 +7,8 @@ import { GuideCard } from '@/components/GuideCard';
 import { Hamster, paletteForSpecies } from '@/components/Hamster';
 import { EmptyState } from '@/components/EmptyState';
 import { formatDate } from '@/lib/format';
+import { getLocale } from '@/lib/i18n-server';
+import { makeT } from '@/lib/i18n';
 import type { GuideWithCounts, Pet, Profile, Species } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +17,7 @@ export default async function ProfilePage() {
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/profile');
+  const t = makeT(getLocale());
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -54,34 +57,34 @@ export default async function ProfilePage() {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-2xl font-bold text-cocoa-500">{p?.username ?? '햄집사'}</h1>
-              {p?.is_admin && <span className="rounded-full bg-lilac-200 px-2 py-0.5 text-[11px] font-bold text-lilac-400">마스터</span>}
-              {p?.is_moderator && <span className="rounded-full bg-mint-100 px-2 py-0.5 text-[11px] font-bold text-mint-400">운영자</span>}
+              <h1 className="font-display text-2xl font-bold text-cocoa-500">{p?.username ?? t('cm.defaultName')}</h1>
+              {p?.is_admin && <span className="rounded-full bg-lilac-200 px-2 py-0.5 text-[11px] font-bold text-lilac-400">{t('pr.master')}</span>}
+              {p?.is_moderator && <span className="rounded-full bg-mint-100 px-2 py-0.5 text-[11px] font-bold text-mint-400">{t('pr.moderator')}</span>}
             </div>
-            <p className="mt-0.5 text-sm text-cocoa-400">{p?.bio || '아직 소개가 없어요'}</p>
-            <p className="mt-0.5 text-xs text-cocoa-300">{user.email} · {p?.created_at ? formatDate(p.created_at) + ' 가입' : ''}</p>
+            <p className="mt-0.5 text-sm text-cocoa-400">{p?.bio || t('pr.noBio')}</p>
+            <p className="mt-0.5 text-xs text-cocoa-300">{user.email} · {p?.created_at ? t('pr.joined').replace('{date}', formatDate(p.created_at)) : ''}</p>
           </div>
         </div>
         {/* 통계 */}
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <Stat label="가이드" value={myGuides.length} />
-          <Stat label="팔로워" value={followers} />
-          <Stat label="팔로잉" value={following} />
+          <Stat label={t('pr.statGuides')} value={myGuides.length} />
+          <Stat label={t('pr.followers')} value={followers} />
+          <Stat label={t('pr.following')} value={following} />
         </div>
       </section>
 
       {/* 빠른 링크 */}
       <div className="flex flex-wrap gap-2">
-        <Link href="/messages" className="btn-secondary text-sm">✉ 쪽지함</Link>
-        <Link href="/notifications" className="btn-secondary text-sm">🔔 알림</Link>
-        {p?.is_admin && <Link href="/admin" className="btn-secondary text-sm">🛠 관리</Link>}
+        <Link href="/messages" className="btn-secondary text-sm">{t('pr.inbox')}</Link>
+        <Link href="/notifications" className="btn-secondary text-sm">🔔 {t('common.notifications')}</Link>
+        {p?.is_admin && <Link href="/admin" className="btn-secondary text-sm">🛠 {t('nav.admin')}</Link>}
       </div>
 
       {/* 프로필 편집 */}
       <details className="group">
         <summary className="flex cursor-pointer items-center gap-2 font-display text-lg font-bold text-cocoa-500">
-          <span className="h-4 w-1.5 rounded-full bg-peach-400" aria-hidden />프로필 편집
-          <span className="text-sm font-normal text-cocoa-300 group-open:hidden">(펼치기)</span>
+          <span className="h-4 w-1.5 rounded-full bg-peach-400" aria-hidden />{t('pr.editProfile')}
+          <span className="text-sm font-normal text-cocoa-300 group-open:hidden">{t('pr.expand')}</span>
         </summary>
         <div className="mt-3">
           <ProfileEditor profile={p} />
@@ -95,7 +98,7 @@ export default async function ProfilePage() {
       {myPosts.length > 0 && (
         <section>
           <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold text-cocoa-500">
-            <span className="h-4 w-1.5 rounded-full bg-lilac-400" aria-hidden />내 커뮤니티 글 {myPosts.length}
+            <span className="h-4 w-1.5 rounded-full bg-lilac-400" aria-hidden />{t('pr.myPosts')} {myPosts.length}
           </h2>
           <ul className="space-y-2">
             {myPosts.map((m) => (
@@ -113,10 +116,10 @@ export default async function ProfilePage() {
       {/* 내 가이드 */}
       <section>
         <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold text-cocoa-500">
-          <span className="h-4 w-1.5 rounded-full bg-peach-400" aria-hidden />내가 쓴 가이드 {myGuides.length}
+          <span className="h-4 w-1.5 rounded-full bg-peach-400" aria-hidden />{t('pr.myGuides')} {myGuides.length}
         </h2>
         {myGuides.length === 0 ? (
-          <EmptyState title="아직 작성한 가이드가 없어요" description="사육 노하우를 정리해 가이드로 남겨보세요!" action={<Link href="/guides/new" className="btn-primary text-sm">가이드 쓰기</Link>} kind="teddy" />
+          <EmptyState title={t('pr.noGuidesTitle')} description={t('pr.noGuidesDesc')} action={<Link href="/guides/new" className="btn-primary text-sm">{t('guides.emptyAction')}</Link>} kind="teddy" />
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {myGuides.map((g) => <GuideCard key={g.id} guide={g} />)}
