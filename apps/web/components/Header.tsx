@@ -78,8 +78,8 @@ export function Header({
           <LogoWordmark variant="horizontal" className="h-9 w-auto sm:h-10" />
         </Link>
 
-        {/* 데스크톱 네비 — 볼드체 + 더 큰 글씨 */}
-        <nav className="hidden flex-1 items-center gap-0.5 lg:flex">
+        {/* 데스크톱 네비 — 글자 크기 통일(text-sm) */}
+        <nav className="hidden items-center gap-0.5 lg:flex xl:gap-1">
           {NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
@@ -87,7 +87,7 @@ export function Header({
                 key={item.href}
                 href={item.href}
                 className={
-                  'whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-bold transition xl:px-3 xl:text-sm ' +
+                  'whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-bold transition ' +
                   (active ? 'bg-peach-100 text-peach-500' : 'text-cocoa-500 hover:bg-cream-100')
                 }
               >
@@ -97,19 +97,17 @@ export function Header({
           })}
         </nav>
 
-        {/* 데스크톱/태블릿 통합검색 */}
-        <form onSubmit={submitSearch} className="ml-auto hidden min-w-0 flex-1 max-w-xs md:block lg:max-w-[140px] xl:max-w-xs">
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t('action.search.placeholder')}
-            className="input py-2 text-sm"
-          />
-        </form>
-
         {/* 오른쪽 액션 */}
-        <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {/* 통합검색: 항상 보이는 아이콘 버튼 (입력은 검색 페이지에서) */}
+          <Link
+            href="/search"
+            aria-label={t('action.search')}
+            title={t('action.search')}
+            className="hidden h-10 w-10 shrink-0 place-items-center rounded-full text-base text-cocoa-400 hover:bg-cream-100 md:grid"
+          >
+            🔍
+          </Link>
           <LanguageSwitcher />
           {isAdmin && (
             <Link
@@ -162,7 +160,7 @@ export function Header({
                 ) : (
                   <span className="grid h-6 w-6 place-items-center rounded-full bg-peach-200 text-xs">🐹</span>
                 )}
-                <span className="hidden whitespace-nowrap md:inline">{username ?? t('nav.profile')}</span>
+                <span className="hidden whitespace-nowrap xl:inline">{username ?? t('nav.profile')}</span>
               </Link>
               <button
                 onClick={handleLogout}

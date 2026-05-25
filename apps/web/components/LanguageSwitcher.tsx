@@ -24,7 +24,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         aria-label="언어 / Language"
       >
         <span>{LOCALE_FLAG[current]}</span>
-        <span className="hidden sm:inline">{LOCALE_LABEL[current]}</span>
+        <span className="hidden xl:inline">{LOCALE_LABEL[current]}</span>
         <span className="text-[10px] text-cocoa-300">▾</span>
       </button>
       {open && (
