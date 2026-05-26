@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 import { formatDate } from '@/lib/format';
+import { RichBody } from '@/components/RichBody';
 import { CommunityActions } from '@/components/CommunityActions';
 import { CommunityCommentSection } from '@/components/CommunityCommentSection';
 import { CommunityAuthorActions } from '@/components/CommunityAuthorActions';
@@ -115,7 +116,7 @@ export default async function CommunityDetail({ params }: { params: { id: string
         )}
       </header>
 
-      <div className="prose-soft whitespace-pre-line text-[15px]">{p.body}</div>
+      <RichBody text={p.body} />
 
       <hr className="border-cream-200" />
 

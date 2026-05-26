@@ -27,6 +27,8 @@ export type RescueApplication = {
   status: 'pending' | 'accepted' | 'rejected';
 };
 
+export type PublicApplicant = { applicant_id: string; username: string | null; status: string };
+
 type Props = {
   postId: string;
   roles: RescueRole[];
@@ -35,10 +37,11 @@ type Props = {
   // 작성자: 역할별 지원자 / 일반 회원: 내 지원 내역
   applicantsByRole: Record<string, RescueApplication[]>;
   myApplications: Record<string, RescueApplication>; // role_id -> 내 지원
+  publicApplicants: Record<string, PublicApplicant[]>; // 모두에게 보이는 지원자 이름
 };
 
 export function RescueRoleBoard({
-  postId, roles, isAuthor, isAuthed, applicantsByRole, myApplications,
+  postId, roles, isAuthor, isAuthed, applicantsByRole, myApplications, publicApplicants,
 }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
@@ -120,6 +123,19 @@ export function RescueRoleBoard({
                     )}
                   </div>
                   <p className="mt-0.5 text-[13px] text-cocoa-300">{meta.desc}</p>
+
+                  {/* 모두에게 보이는 지원자 (이름) */}
+                  {(publicApplicants[role.id]?.length ?? 0) > 0 && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                      <span className="text-[11px] text-cocoa-300">{t('rb.applicantsLabel')}</span>
+                      {publicApplicants[role.id].map((a) => (
+                        <span key={a.applicant_id}
+                          className={'rounded-full px-2 py-0.5 text-[11px] ' + (a.status === 'accepted' ? 'bg-mint-100 font-bold text-mint-500' : 'bg-cream-100 text-cocoa-400')}>
+                          {a.username ?? t('common.anonymous')}{a.status === 'accepted' ? ' ✅' : ''}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   {/* 일반 회원 액션 */}
                   {!isAuthor && !filled && (

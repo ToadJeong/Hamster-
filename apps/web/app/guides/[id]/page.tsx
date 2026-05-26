@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { RichBody } from '@/components/RichBody';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getSiteSettings } from '@/lib/site-settings';
 import { formatDate } from '@/lib/format';
@@ -125,9 +124,7 @@ export default async function GuideDetail({ params }: { params: { id: string } }
         </div>
       </header>
 
-      <div className="prose-soft">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{g.body}</ReactMarkdown>
-      </div>
+      <RichBody text={g.body} className="prose-soft" />
 
       <div className="flex items-center justify-between border-y border-cream-200 py-4">
         <LikeButton

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getLocale } from '@/lib/i18n-server';
 import { makeT } from '@/lib/i18n';
+import { MemorialStar } from '@/components/MemorialStar';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,33 +44,37 @@ export default async function MemorialPage() {
         </div>
 
         <div className="relative mx-auto h-64 w-64 sm:h-72 sm:w-72">
-          {/* 가운데 큰 별 */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-            <div className="text-5xl sm:text-6xl">🌟</div>
+          {/* 가운데 별 (반짝임, 고정) */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <span className="star-twinkle block"><MemorialStar className="h-24 w-24 sm:h-28 sm:w-28" /></span>
           </div>
-          {/* 원형으로 배치된 주민들 */}
-          {orbit.map((m, i) => {
-            const angle = (360 / Math.max(orbit.length, 1)) * i;
-            const radius = orbit.length <= 1 ? 0 : 108;
-            return (
-              <Link
-                key={m.id}
-                href={`/memorial/${m.id}`}
-                title={m.name}
-                className="absolute left-1/2 top-1/2"
-                style={{ transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(${-angle}deg)` }}
-              >
-                <span className="mem-float block" style={{ animationDelay: `${(i % 5) * 0.4}s` }}>
-                  <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-white text-xl shadow-soft ring-2 ring-white/80 sm:h-14 sm:w-14">
-                    {m.photo_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={m.photo_url} alt="" className="h-full w-full object-cover" />
-                    ) : m.emoji}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
+          {/* 별을 중심으로 공전하는 주민들 */}
+          {orbit.length > 0 && (
+            <div className="orbit-ring absolute inset-0">
+              {orbit.map((m, i) => {
+                const angle = (360 / orbit.length) * i;
+                const radius = orbit.length === 1 ? 0 : 104;
+                return (
+                  <div
+                    key={m.id}
+                    className="absolute left-1/2 top-1/2"
+                    style={{ transform: `rotate(${angle}deg) translateY(-${radius}px)` }}
+                  >
+                    <div style={{ transform: `translate(-50%, -50%) rotate(${-angle}deg)` }}>
+                      <Link href={`/memorial/${m.id}`} title={m.name} className="orbit-counter block">
+                        <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-white text-xl shadow-soft ring-2 ring-white/80 transition hover:ring-peach-200 sm:h-14 sm:w-14">
+                          {m.photo_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={m.photo_url} alt="" className="h-full w-full object-cover" />
+                          ) : m.emoji}
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <h1 className="font-display text-2xl font-bold text-cocoa-500 sm:text-3xl">{t('mem.title')}</h1>
