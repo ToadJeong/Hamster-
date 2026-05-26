@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getLocale } from '@/lib/i18n-server';
 import { makeT } from '@/lib/i18n';
-import { MemorialStar } from '@/components/MemorialStar';
+import { MemorialPlanet } from '@/components/MemorialPlanet';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +46,7 @@ export default async function MemorialPage() {
         <div className="relative mx-auto h-64 w-64 sm:h-72 sm:w-72">
           {/* 가운데 별 (반짝임, 고정) */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <span className="star-twinkle block"><MemorialStar className="h-24 w-24 sm:h-28 sm:w-28" /></span>
+            <span className="star-twinkle block"><MemorialPlanet className="h-28 w-28 sm:h-32 sm:w-32" /></span>
           </div>
           {/* 별을 중심으로 공전하는 주민들 */}
           {orbit.length > 0 && (
