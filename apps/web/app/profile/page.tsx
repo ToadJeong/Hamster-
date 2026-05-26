@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { formatDate } from '@/lib/format';
 import { getLocale } from '@/lib/i18n-server';
 import { makeT } from '@/lib/i18n';
-import type { GuideWithCounts, Pet, Profile, Species } from '@hamster/shared';
+import type { GuideWithCounts, Profile, Species } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,12 +25,19 @@ export default async function ProfilePage() {
     .eq('id', user.id)
     .maybeSingle();
 
-  const [guidesRes, communityRes, followersRes, followingRes, petsRes, speciesRes] = await Promise.all([
+  const [guidesRes, communityRes, followersRes, followingRes, petsRes, sentRes, incomingRes, speciesRes] = await Promise.all([
     supabase.from('guides_with_counts').select('*').eq('author_id', user.id).order('created_at', { ascending: false }),
     supabase.from('community_posts_feed').select('*').eq('author_id', user.id).order('created_at', { ascending: false }).limit(20),
     supabase.from('follows').select('follower_id', { count: 'exact', head: true }).eq('followee_id', user.id),
     supabase.from('follows').select('followee_id', { count: 'exact', head: true }).eq('follower_id', user.id),
-    supabase.from('pets').select('*').eq('owner_id', user.id).order('created_at'),
+    // 내가 현재 돌보는 햄찌 (내 햄찌 + 내가 임시보호 중인 햄찌)
+    supabase.from('pets').select('*, owner:profiles!pets_owner_id_fkey(username)').eq('carer_id', user.id).order('created_at'),
+    // 내가 임보 보낸 햄찌 (원소유주는 나, 보호자는 타인)
+    supabase.from('pets').select('*, carer:profiles!pets_carer_id_fkey(username)').eq('owner_id', user.id).neq('carer_id', user.id).order('created_at'),
+    // 내게 온 임보 요청 (대기중)
+    supabase.from('foster_transfers')
+      .select('id, pet_id, from_user, pet:pets!foster_transfers_pet_id_fkey(name, photo_url), from:profiles!foster_transfers_from_user_fkey(username)')
+      .eq('to_user', user.id).eq('status', 'pending'),
     supabase.from('species').select('id, slug, name_ko').order('name_ko'),
   ]);
 
@@ -38,7 +45,9 @@ export default async function ProfilePage() {
   const myPosts = (communityRes.data as any[]) ?? [];
   const followers = followersRes.count ?? 0;
   const following = followingRes.count ?? 0;
-  const myPets = (petsRes.data as Pet[]) ?? [];
+  const myPets = (petsRes.data as any[]) ?? [];
+  const sentPets = (sentRes.data as any[]) ?? [];
+  const incomingFosters = (incomingRes.data as any[]) ?? [];
   const speciesList = (speciesRes.data as Pick<Species, 'id' | 'slug' | 'name_ko'>[]) ?? [];
   const p = profile as Profile;
 
@@ -92,7 +101,13 @@ export default async function ProfilePage() {
       </details>
 
       {/* 내 햄찌 */}
-      <PetManager initialPets={myPets} species={speciesList} />
+      <PetManager
+        initialPets={myPets}
+        sentPets={sentPets}
+        incoming={incomingFosters}
+        currentUserId={user.id}
+        species={speciesList}
+      />
 
       {/* 내 커뮤니티 글 */}
       {myPosts.length > 0 && (

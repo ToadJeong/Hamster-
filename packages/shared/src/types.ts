@@ -217,6 +217,8 @@ export type DMMessage = {
 export type Pet = {
   id: string;
   owner_id: string;
+  carer_id: string | null;
+  status: 'raising' | 'fostering';
   name: string;
   species_id: string | null;
   species_label: string | null;
