@@ -42,6 +42,22 @@ export const RESCUE_STATUS_LABEL: Record<import('./types').RescueStatus, string>
   'closed':      '마감',
 };
 
+// 구조 역할 — 한 케이스를 살리기 위해 사람들이 나눠 맡는 역할들
+export const RESCUE_ROLE_ORDER: import('./types').RescueRoleType[] = [
+  'paper_adopter', 'short_foster', 'transporter', 'long_foster', 'forever_adopter',
+];
+
+export const RESCUE_ROLE_LABEL: Record<
+  import('./types').RescueRoleType,
+  { label: string; emoji: string; desc: string }
+> = {
+  paper_adopter:   { label: '서류상 입양자', emoji: '📄', desc: '보호소 서류상 입양자로 이름을 올려 출소를 돕는 역할' },
+  short_foster:    { label: '단기 임보자',   emoji: '🏠', desc: '평생 가족을 찾는 동안 짧게 돌봐주는 역할' },
+  transporter:     { label: '이동봉사자',    emoji: '🚗', desc: '햄찌를 안전하게 이동시켜 주는 역할' },
+  long_foster:     { label: '장기 임보자',   emoji: '🛏️', desc: '입양이 정해질 때까지 길게 보호해 주는 역할' },
+  forever_adopter: { label: '평생 입양자',   emoji: '💖', desc: '끝까지 함께할 평생 가족' },
+};
+
 export const COMMUNITY_CATEGORY_LABEL: Record<import('./types').CommunityCategory, { label: string; emoji: string }> = {
   'free':      { label: '자유',   emoji: '💬' },
   'question':  { label: '질문',   emoji: '❓' },

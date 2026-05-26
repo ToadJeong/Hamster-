@@ -87,6 +87,9 @@ export default async function RescueIndex({
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                      {(r as any).urgent && (
+                        <span className="rounded-md bg-red-500 px-1.5 py-0.5 text-[11px] font-bold text-white">🚨 긴급</span>
+                      )}
                       <span className="rounded-md bg-peach-50 px-1.5 py-0.5 text-[11px] font-bold text-peach-500">{kindMeta.emoji} {kindMeta.label}</span>
                       {r.status !== 'open' && (
                         <span className="rounded-md bg-cocoa-100 px-1.5 py-0.5 text-[11px] font-medium text-cocoa-400">{RESCUE_STATUS_LABEL[r.status]}</span>

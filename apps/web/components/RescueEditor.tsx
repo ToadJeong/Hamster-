@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useT } from '@/components/I18nProvider';
-import { RESCUE_KIND_LABEL, type RescueKind, type Species } from '@hamster/shared';
+import { RESCUE_KIND_LABEL, RESCUE_ROLE_ORDER, type RescueKind, type Species } from '@hamster/shared';
 
 type Props = {
   species: Pick<Species, 'id' | 'slug' | 'name_ko'>[];
@@ -19,6 +19,9 @@ type Props = {
     contact_hint: string | null;
     age_months: number | null;
     species_id: string | null;
+    images?: string[];
+    urgent?: boolean;
+    deadline?: string | null;
   };
 };
 
@@ -31,7 +34,9 @@ export function RescueEditor({ species, initial }: Props) {
   const [title, setTitle] = useState(initial?.title ?? '');
   const [body, setBody] = useState(initial?.body ?? '');
   const [region, setRegion] = useState(initial?.region ?? '');
-  const [coverUrl, setCoverUrl] = useState(initial?.cover_url ?? '');
+  const [images, setImages] = useState<string[]>(initial?.images ?? (initial?.cover_url ? [initial.cover_url] : []));
+  const [urgent, setUrgent] = useState(initial?.urgent ?? false);
+  const [deadline, setDeadline] = useState(initial?.deadline ? initial.deadline.slice(0, 10) : '');
   const [contactHint, setContactHint] = useState(initial?.contact_hint ?? '');
   const [ageMonths, setAgeMonths] = useState<string>(initial?.age_months?.toString() ?? '');
   const [speciesId, setSpeciesId] = useState<string>(initial?.species_id ?? '');
@@ -51,7 +56,10 @@ export function RescueEditor({ species, initial }: Props) {
         title: title.trim(),
         body: body.trim(),
         region: region.trim() || null,
-        cover_url: coverUrl.trim() || null,
+        images,
+        cover_url: images[0] ?? null,
+        urgent,
+        deadline: deadline ? new Date(deadline + 'T23:59:59').toISOString() : null,
         contact_hint: contactHint.trim() || null,
         age_months: ageMonths ? parseInt(ageMonths, 10) : null,
         species_id: speciesId || null,
@@ -64,7 +72,10 @@ export function RescueEditor({ species, initial }: Props) {
       } else {
         const { data, error } = await supabase.from('rescue_posts').insert(payload).select('id').single();
         if (error) throw error;
-        router.push(`/rescue/${(data as any).id}`);
+        const newId = (data as any).id;
+        // 구조 역할 5종 슬롯 자동 생성 (작성자가 상세에서 관리)
+        await supabase.from('rescue_roles').insert(RESCUE_ROLE_ORDER.map((rt) => ({ post_id: newId, role_type: rt })));
+        router.push(`/rescue/${newId}`);
       }
       router.refresh();
     } catch (e: any) {
@@ -121,13 +132,53 @@ export function RescueEditor({ species, initial }: Props) {
         <input className="input" type="number" min={0} max={48} placeholder={t('re.agePh')} value={ageMonths} onChange={(e) => setAgeMonths(e.target.value)} />
       </div>
 
-      <ImageUploader
-        bucket="rescue-images"
-        value={coverUrl || null}
-        onChange={(url) => setCoverUrl(url ?? '')}
-        label={t('re.cover')}
-        hint={t('form.coverHintImg')}
-      />
+      {/* 다중 사진 */}
+      <div className="space-y-2">
+        {images.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {images.map((url, i) => (
+              <div key={i} className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-cream-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/55 text-xs text-white hover:bg-black/75"
+                  aria-label="삭제"
+                >✕</button>
+                {i === 0 && <span className="absolute left-1 top-1 rounded-full bg-peach-400/90 px-1.5 text-[10px] font-bold text-white">대표</span>}
+              </div>
+            ))}
+          </div>
+        )}
+        {images.length < 10 && (
+          <ImageUploader
+            bucket="rescue-images"
+            value={null}
+            onChange={(url) => { if (url) setImages((prev) => [...prev, url]); }}
+            label={t('re.photos')}
+            hint={t('re.photosHint')}
+          />
+        )}
+      </div>
+
+      {/* 긴급 / 마감 */}
+      <div className="grid gap-2 sm:grid-cols-2">
+        <label className={'flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm transition ' + (urgent ? 'border-red-300 bg-red-50 text-red-500' : 'border-cream-200 bg-white text-cocoa-500')}>
+          <input type="checkbox" checked={urgent} onChange={(e) => setUrgent(e.target.checked)} />
+          {t('re.urgent')}
+        </label>
+        <label className="block">
+          <span className="text-xs text-cocoa-300">{t('re.deadline')}</span>
+          <input
+            type="date"
+            className="input mt-0.5"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
+          />
+        </label>
+      </div>
 
       <input
         className="input"

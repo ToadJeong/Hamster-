@@ -154,6 +154,9 @@ export type CommunityPost = {
 /* 유기햄 구조대 */
 export type RescueKind = 'available' | 'needs-home' | 'lost' | 'found';
 export type RescueStatus = 'open' | 'in_progress' | 'completed' | 'closed';
+export type RescueRoleType =
+  | 'paper_adopter' | 'short_foster' | 'transporter' | 'long_foster' | 'forever_adopter';
+export type RescueRoleStatus = 'open' | 'filled';
 
 export type RescuePost = {
   id: string;
@@ -167,6 +170,9 @@ export type RescuePost = {
   cover_url: string | null;
   contact_hint: string | null;
   age_months: number | null;
+  images: string[];
+  urgent: boolean;
+  deadline: string | null;
   created_at: string;
   updated_at: string;
 };
