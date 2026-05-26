@@ -15,7 +15,7 @@ export default async function EditRescuePost({ params }: { params: { id: string 
 
   const { data: post } = await supabase
     .from('rescue_posts')
-    .select('id, author_id, kind, title, body, region, cover_url, contact_hint, age_months, species_id')
+    .select('id, author_id, kind, title, body, region, cover_url, contact_hint, age_months, species_id, images, urgent, deadline')
     .eq('id', params.id)
     .maybeSingle();
   if (!post) notFound();
@@ -38,6 +38,9 @@ export default async function EditRescuePost({ params }: { params: { id: string 
           contact_hint: (post as any).contact_hint,
           age_months: (post as any).age_months,
           species_id: (post as any).species_id,
+          images: (post as any).images ?? [],
+          urgent: (post as any).urgent ?? false,
+          deadline: (post as any).deadline ?? null,
         }}
       />
     </div>
