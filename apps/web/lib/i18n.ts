@@ -416,6 +416,22 @@ const ko: Dict = {
   'mem.letter': '작별 편지',
   'mem.deleteConfirm': '이 추모를 삭제할까요?',
   'mem.toStar': '별로 보내기',
+  // 임보 이관
+  'ft.incoming': '임보 요청',
+  'ft.requestsFor': '"{name}" 임시보호 요청',
+  'ft.accept': '수락', 'ft.reject': '거절',
+  'ft.raising': '키우는 중', 'ft.fostering': '임시보호중',
+  'ft.owner': '원소유주',
+  'ft.sendFoster': '임보 보내기',
+  'ft.sendTitle': '"{name}" 임보 보내기',
+  'ft.sendMsg': '임보를 맡길 회원의 닉네임을 정확히 입력해 주세요.',
+  'ft.sendPh': '상대 닉네임',
+  'ft.send': '요청 보내기',
+  'ft.noUser': '해당 닉네임의 회원을 찾을 수 없어요',
+  'ft.notSelf': '본인에게는 보낼 수 없어요',
+  'ft.sent': '{name}님께 임보 요청을 보냈어요',
+  'ft.return': '돌려주기', 'ft.returnConfirm': '"{name}"을(를) 원래 가족에게 돌려줄까요?',
+  'ft.sentSection': '임보 보낸 햄찌', 'ft.caredBy': '보호 중', 'ft.takeBack': '회수',
 };
 
 const en: Dict = {
@@ -756,6 +772,21 @@ const en: Dict = {
   'mem.letter': 'Farewell letter',
   'mem.deleteConfirm': 'Delete this memorial?',
   'mem.toStar': 'Send to stars',
+  'ft.incoming': 'Foster requests',
+  'ft.requestsFor': 'wants to foster "{name}"',
+  'ft.accept': 'Accept', 'ft.reject': 'Reject',
+  'ft.raising': 'Raising', 'ft.fostering': 'Fostering',
+  'ft.owner': 'Owner',
+  'ft.sendFoster': 'Send for fostering',
+  'ft.sendTitle': 'Foster out "{name}"',
+  'ft.sendMsg': 'Enter the exact nickname of the member who will foster.',
+  'ft.sendPh': 'Their nickname',
+  'ft.send': 'Send request',
+  'ft.noUser': 'No member found with that nickname',
+  'ft.notSelf': 'You can’t send it to yourself',
+  'ft.sent': 'Foster request sent to {name}',
+  'ft.return': 'Return', 'ft.returnConfirm': 'Return "{name}" to its original family?',
+  'ft.sentSection': 'Fostered out', 'ft.caredBy': 'Cared by', 'ft.takeBack': 'Take back',
 };
 
 const ja: Dict = {
@@ -1096,6 +1127,21 @@ const ja: Dict = {
   'mem.letter': 'お別れの手紙',
   'mem.deleteConfirm': 'この追悼を削除しますか？',
   'mem.toStar': '星へ送る',
+  'ft.incoming': '預かり依頼',
+  'ft.requestsFor': '「{name}」の一時預かり依頼',
+  'ft.accept': '承認', 'ft.reject': '拒否',
+  'ft.raising': '飼育中', 'ft.fostering': '一時預かり中',
+  'ft.owner': '元の飼い主',
+  'ft.sendFoster': '預かりに出す',
+  'ft.sendTitle': '「{name}」を預ける',
+  'ft.sendMsg': '預ける会員のニックネームを正確に入力してください。',
+  'ft.sendPh': '相手のニックネーム',
+  'ft.send': '依頼を送る',
+  'ft.noUser': 'そのニックネームの会員が見つかりません',
+  'ft.notSelf': '自分には送れません',
+  'ft.sent': '{name}さんに預かり依頼を送りました',
+  'ft.return': '返す', 'ft.returnConfirm': '「{name}」を元の家族に返しますか？',
+  'ft.sentSection': '預けたハム', 'ft.caredBy': '預かり中', 'ft.takeBack': '引き取る',
 };
 
 const zh: Dict = {
@@ -1436,6 +1482,21 @@ const zh: Dict = {
   'mem.letter': '告别信',
   'mem.deleteConfirm': '要删除这条纪念吗？',
   'mem.toStar': '送往星空',
+  'ft.incoming': '寄养请求',
+  'ft.requestsFor': '请求寄养"{name}"',
+  'ft.accept': '接受', 'ft.reject': '拒绝',
+  'ft.raising': '饲养中', 'ft.fostering': '寄养中',
+  'ft.owner': '原主人',
+  'ft.sendFoster': '送去寄养',
+  'ft.sendTitle': '把"{name}"送去寄养',
+  'ft.sendMsg': '请准确输入接收寄养的会员昵称。',
+  'ft.sendPh': '对方昵称',
+  'ft.send': '发送请求',
+  'ft.noUser': '找不到该昵称的会员',
+  'ft.notSelf': '不能发送给自己',
+  'ft.sent': '已向 {name} 发送寄养请求',
+  'ft.return': '归还', 'ft.returnConfirm': '要把"{name}"归还给原家庭吗？',
+  'ft.sentSection': '已送养寄养', 'ft.caredBy': '寄养于', 'ft.takeBack': '收回',
 };
 
 export const DICT: Record<Locale, Dict> = { ko, en, ja, zh };
