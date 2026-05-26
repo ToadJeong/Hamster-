@@ -241,6 +241,19 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* 추모 햄스터 별 배너 */}
+      <Link
+        href="/memorial"
+        className="group flex items-center gap-4 overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-r from-lilac-100 via-peach-50 to-cream-100 p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-soft"
+      >
+        <span className="text-4xl transition group-hover:scale-110">🌟</span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-lg font-bold text-cocoa-500">{t('mem.title')}</span>
+          <span className="block text-sm text-cocoa-400">{t('mem.subtitle')}</span>
+        </span>
+        <span className="shrink-0 text-sm font-semibold text-lilac-400">{t('home.more')} →</span>
+      </Link>
+
       {/* 최신 가이드 */}
       <section>
         <SectionHeader title={t('home.section.guides')} subtitle={t('home.section.guides.sub')} moreHref="/guides" moreLabel={t('home.more')} />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { ImageUploader } from '@/components/ImageUploader';
@@ -136,7 +137,10 @@ export function PetManager({
                 </p>
                 {pet.bio && <p className="mt-0.5 truncate text-[13px] text-cocoa-400">{pet.bio}</p>}
               </div>
-              <button onClick={() => remove(pet)} className="shrink-0 text-[11px] text-cocoa-300 hover:text-red-400">{t('cm.delete')}</button>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <Link href={`/memorial/new?pet=${pet.id}`} className="whitespace-nowrap text-[11px] text-lilac-400 hover:text-lilac-500">🌟 {t('mem.toStar')}</Link>
+                <button onClick={() => remove(pet)} className="text-[11px] text-cocoa-300 hover:text-red-400">{t('cm.delete')}</button>
+              </div>
             </li>
           ))}
         </ul>

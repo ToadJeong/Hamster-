@@ -10,6 +10,7 @@ export async function Footer() {
     <footer className="border-t border-cream-200 bg-cream-50/60">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pt-6 pb-28 text-sm text-cocoa-300 md:px-6 lg:pb-6">
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <Link href="/memorial" className="font-medium text-lilac-400 hover:text-lilac-500">{t('mem.title')}</Link>
           <Link href="/privacy" className="hover:text-peach-500">{t('footer.privacy')}</Link>
           <Link href="/terms" className="hover:text-peach-500">{t('footer.terms')}</Link>
           <Link href="/account/delete" className="hover:text-peach-500">{t('footer.dataDelete')}</Link>
