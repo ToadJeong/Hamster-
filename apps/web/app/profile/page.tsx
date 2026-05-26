@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { formatDate } from '@/lib/format';
 import { getLocale } from '@/lib/i18n-server';
 import { makeT } from '@/lib/i18n';
+import { computeLevel, computePoints } from '@/lib/level';
 import type { GuideWithCounts, Profile, Species } from '@hamster/shared';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,10 @@ export default async function ProfilePage() {
     .eq('id', user.id)
     .maybeSingle();
 
-  const [guidesRes, communityRes, followersRes, followingRes, petsRes, sentRes, incomingRes, speciesRes] = await Promise.all([
+  const [
+    guidesRes, communityRes, followersRes, followingRes, petsRes, sentRes, incomingRes, speciesRes,
+    postsCountRes, momentsCountRes, rescuesCountRes, guideCommentsRes, commCommentsRes, momentCommentsRes, tributesRes,
+  ] = await Promise.all([
     supabase.from('guides_with_counts').select('*').eq('author_id', user.id).order('created_at', { ascending: false }),
     supabase.from('community_posts_feed').select('*').eq('author_id', user.id).order('created_at', { ascending: false }).limit(20),
     supabase.from('follows').select('follower_id', { count: 'exact', head: true }).eq('followee_id', user.id),
@@ -39,7 +43,25 @@ export default async function ProfilePage() {
       .select('id, pet_id, from_user, pet:pets!foster_transfers_pet_id_fkey(name, photo_url), from:profiles!foster_transfers_from_user_fkey(username)')
       .eq('to_user', user.id).eq('status', 'pending'),
     supabase.from('species').select('id, slug, name_ko').order('name_ko'),
+    // 레벨 계산용 활동 개수
+    supabase.from('community_posts').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
+    supabase.from('moments').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
+    supabase.from('rescue_posts').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
+    supabase.from('comments').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
+    supabase.from('community_comments').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
+    supabase.from('moment_comments').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
+    supabase.from('memorial_tributes').select('memorial_id', { count: 'exact', head: true }).eq('user_id', user.id),
   ]);
+
+  const activity = {
+    guides: (guidesRes.data as any[])?.length ?? 0,
+    posts: postsCountRes.count ?? 0,
+    moments: momentsCountRes.count ?? 0,
+    rescues: rescuesCountRes.count ?? 0,
+    comments: (guideCommentsRes.count ?? 0) + (commCommentsRes.count ?? 0) + (momentCommentsRes.count ?? 0),
+    tributes: tributesRes.count ?? 0,
+  };
+  const levelInfo = computeLevel(computePoints(activity));
 
   const myGuides = (guidesRes.data as GuideWithCounts[]) ?? [];
   const myPosts = (communityRes.data as any[]) ?? [];
@@ -79,6 +101,31 @@ export default async function ProfilePage() {
           <Stat label={t('pr.statGuides')} value={myGuides.length} />
           <Stat label={t('pr.followers')} value={followers} />
           <Stat label={t('pr.following')} value={following} />
+        </div>
+      </section>
+
+      {/* 레벨 / 활동 이력 */}
+      <section className="card space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-peach-300 to-lilac-300 text-sm font-bold text-white shadow-soft">Lv.{levelInfo.level}</span>
+            <div className="min-w-0">
+              <p className="font-bold text-cocoa-500">{levelInfo.title}</p>
+              <p className="text-xs text-cocoa-300">{levelInfo.points} {t('lv.points')}</p>
+            </div>
+          </div>
+          <span className="shrink-0 text-xs text-cocoa-300">{t('lv.toNext').replace('{n}', String(levelInfo.need - levelInfo.into))}</span>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded-full bg-cream-100">
+          <div className="h-full rounded-full bg-gradient-to-r from-peach-400 to-lilac-400" style={{ width: `${levelInfo.pct}%` }} />
+        </div>
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-cocoa-400">
+          <span>📖 {t('pr.statGuides')} {activity.guides}</span>
+          <span>💬 {t('lv.posts')} {activity.posts}</span>
+          <span>🗨 {t('common.comment')} {activity.comments}</span>
+          <span>📸 {t('nav.moments')} {activity.moments}</span>
+          <span>🆘 {t('nav.rescue')} {activity.rescues}</span>
+          <span>🌟 {t('mem.tribute')} {activity.tributes}</span>
         </div>
       </section>
 

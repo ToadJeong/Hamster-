@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { TipBar } from '@/components/TipBar';
+import { UrgentBar } from '@/components/UrgentBar';
 import { MobileTabBar } from '@/components/MobileTabBar';
 import { Footer } from '@/components/Footer';
 import { PetHamsterLayer } from '@/components/PetHamsterLayer';
@@ -54,8 +55,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     .eq('status', 'open')
     .order('created_at', { ascending: false })
     .limit(6);
-  const urgentTips = ((urgentRescue as { id: string; title: string }[]) ?? [])
-    .map((r) => ({ text: `🆘 ${r.title}`, href: `/rescue/${r.id}`, urgent: true }));
+  const urgentItems = ((urgentRescue as { id: string; title: string }[]) ?? [])
+    .map((r) => ({ text: r.title, href: `/rescue/${r.id}` }));
 
   // 정적 UI 다국어용 로케일(쿠키). 단, <html lang>은 항상 "ko"로 둔다 —
   // 콘텐츠가 한국어이므로, 브라우저 내장 번역이 비한국어 방문자에게
@@ -85,7 +86,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             avatarUrl={profile?.avatar_url ?? null}
             isAdmin={!!profile?.is_admin}
           />
-          <TipBar urgentTips={urgentTips} />
+          <TipBar />
+          <UrgentBar items={urgentItems} />
           <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:px-6">
             {children}
           </main>

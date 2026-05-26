@@ -86,6 +86,19 @@ export default async function RescueDetail({ params }: { params: { id: string } 
     }
   }
 
+  // 모두에게 보이는 지원자 이름 (대기중·확정)
+  const publicApplicants: Record<string, { applicant_id: string; username: string | null; status: string }[]> = {};
+  if (roles.length > 0) {
+    const { data: pub } = await supabase
+      .from('rescue_applicants_public')
+      .select('role_id, applicant_id, applicant_username, status')
+      .eq('post_id', params.id)
+      .in('status', ['pending', 'accepted']);
+    for (const a of (pub as any[]) ?? []) {
+      (publicApplicants[a.role_id] ??= []).push({ applicant_id: a.applicant_id, username: a.applicant_username, status: a.status });
+    }
+  }
+
   // 댓글
   const { data: commentRows } = await supabase
     .from('rescue_comments')
@@ -160,6 +173,7 @@ export default async function RescueDetail({ params }: { params: { id: string } 
           isAuthed={!!user}
           applicantsByRole={applicantsByRole}
           myApplications={myApplications}
+          publicApplicants={publicApplicants}
         />
       )}
 

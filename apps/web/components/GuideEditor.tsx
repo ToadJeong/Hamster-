@@ -7,6 +7,8 @@ import remarkGfm from 'remark-gfm';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { insertAnonymousGuide, validateAnonPassword } from '@/lib/anon-password';
 import { MultiImageUploader } from '@/components/MultiImageUploader';
+import { ImageUploader } from '@/components/ImageUploader';
+import { isVideoUrl } from '@/lib/media';
 import { useT } from '@/components/I18nProvider';
 import type { Species } from '@hamster/shared';
 
@@ -51,6 +53,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
   // 드래프트 자동 저장/복구 (개발 원칙 6)
   const draftKey = `guide-draft:${initial?.id ?? 'new'}`;
   const restoredRef = useRef(false);
+  const bodyTaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (restoredRef.current) return;
@@ -258,13 +261,34 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
       </div>
 
       {tab === 'write' ? (
-        <textarea
-          className="input min-h-[420px] font-mono text-sm leading-7"
-          placeholder={placeholder}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          required
-        />
+        <div className="space-y-2">
+          {isAuthed && (
+            <div className="rounded-2xl border border-cream-200 bg-cream-50/60 p-2">
+              <ImageUploader
+                bucket="guide-covers"
+                value={null}
+                onChange={(url) => {
+                  if (!url) return;
+                  const ta = bodyTaRef.current;
+                  const snippet = isVideoUrl(url) ? `\n${url}\n` : `\n![](${url})\n`;
+                  const s = ta?.selectionStart ?? body.length;
+                  const e = ta?.selectionEnd ?? body.length;
+                  setBody(body.slice(0, s) + snippet + body.slice(e));
+                }}
+                label={t('ce.insertBody')}
+                hint={t('ce.insertHint')}
+              />
+            </div>
+          )}
+          <textarea
+            ref={bodyTaRef}
+            className="input min-h-[420px] font-mono text-sm leading-7"
+            placeholder={placeholder}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            required
+          />
+        </div>
       ) : (
         <div className="card min-h-[420px] prose-soft">
           {body.trim() ? (

@@ -206,6 +206,17 @@
 @keyframes mem-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 .mem-float { animation: mem-float 3.2s ease-in-out infinite; will-change: transform; }
 
+/* 별나라 공전 — 링은 돌고, 주민은 역회전으로 똑바로 유지 */
+@keyframes orbit-rot { to { transform: rotate(360deg); } }
+.orbit-ring     { animation: orbit-rot 46s linear infinite; will-change: transform; }
+.orbit-counter  { animation: orbit-rot 46s linear infinite reverse; will-change: transform; }
+/* 중심 별 반짝임 */
+@keyframes star-twinkle { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,209,120,0.7)); } 50% { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(255,180,138,0.95)); } }
+.star-twinkle { animation: star-twinkle 3.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .orbit-ring, .orbit-counter, .star-twinkle, .mem-float { animation: none; }
+}
+
 /* 햄스터 그림자 */
 .pet-shadow { filter: drop-shadow(0 2px 3px rgba(140, 106, 75, 0.35)); }
 

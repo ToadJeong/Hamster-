@@ -218,6 +218,8 @@ const ko: Dict = {
   'ce.tagsPh': '태그 (쉼표·공백·# 으로 구분, 최대 8개)',
   'ce.tagsHint': '예: 골든, 케이지, 사육꿀팁 — 같은 태그를 단 글끼리 모아 보여요.',
   'ce.post': '게시', 'ce.posting': '게시 중…',
+  'ce.insertBody': '📷 본문에 사진·영상 넣기 (커서 위치에 삽입)',
+  'ce.insertHint': '업로드하면 본문 커서 위치에 들어가요. 텍스트처럼 위치를 옮길 수 있어요.',
   'ce.anonDisabled': '익명 작성이 비활성화되어 있어요.',
   // 가이드 작성
   'ge.newTitle': '가이드 작성', 'ge.editTitle': '가이드 수정',
@@ -391,7 +393,7 @@ const ko: Dict = {
   'rb.appliedPending': '지원함 · 대기 중', 'rb.appliedAccepted': '지원 확정 ✅',
   'rb.withdraw': '지원 취소', 'rb.withdrawConfirm': '지원을 취소할까요?',
   'rb.accept': '수락', 'rb.reopen': '다시 모집',
-  'rb.noApplicants': '아직 지원자가 없어요',
+  'rb.noApplicants': '아직 지원자가 없어요', 'rb.applicantsLabel': '지원',
   'rb.loginHint': '하면 역할에 지원할 수 있어요',
   // 추모 햄스터 별
   'mem.title': '🌟 햄스터 별',
@@ -438,6 +440,7 @@ const ko: Dict = {
   'ft.sent': '{name}님께 임보 요청을 보냈어요',
   'ft.return': '돌려주기', 'ft.returnConfirm': '"{name}"을(를) 원래 가족에게 돌려줄까요?',
   'ft.sentSection': '임보 보낸 햄찌', 'ft.caredBy': '보호 중', 'ft.takeBack': '회수',
+  'lv.points': '포인트', 'lv.toNext': '다음 레벨까지 {n}P', 'lv.posts': '글',
 };
 
 const en: Dict = {
@@ -592,6 +595,8 @@ const en: Dict = {
   'ce.tagsPh': 'Tags (separate with comma, space or #, up to 8)',
   'ce.tagsHint': 'e.g. Golden, cage, care-tips — posts with the same tag are grouped together.',
   'ce.post': 'Post', 'ce.posting': 'Posting…',
+  'ce.insertBody': '📷 Insert photo/video into the body (at cursor)',
+  'ce.insertHint': 'It’s inserted where your cursor is. Move it like text.',
   'ce.anonDisabled': 'Anonymous posting is disabled.',
   'ge.newTitle': 'Write a guide', 'ge.editTitle': 'Edit guide',
   'ge.anonHint': 'Enter a nickname and a password of 4+ characters. The password is only used to edit or delete your own post.',
@@ -753,7 +758,7 @@ const en: Dict = {
   'rb.appliedPending': 'Applied · pending', 'rb.appliedAccepted': 'Confirmed ✅',
   'rb.withdraw': 'Withdraw', 'rb.withdrawConfirm': 'Withdraw your application?',
   'rb.accept': 'Accept', 'rb.reopen': 'Reopen',
-  'rb.noApplicants': 'No applicants yet',
+  'rb.noApplicants': 'No applicants yet', 'rb.applicantsLabel': 'Applied',
   'rb.loginHint': 'to apply for a role',
   'mem.title': '🌟 Hamster Stars',
   'mem.subtitle': 'Warmly remembering the hamsters who became stars',
@@ -798,6 +803,7 @@ const en: Dict = {
   'ft.sent': 'Foster request sent to {name}',
   'ft.return': 'Return', 'ft.returnConfirm': 'Return "{name}" to its original family?',
   'ft.sentSection': 'Fostered out', 'ft.caredBy': 'Cared by', 'ft.takeBack': 'Take back',
+  'lv.points': 'points', 'lv.toNext': '{n}P to next level', 'lv.posts': 'Posts',
 };
 
 const ja: Dict = {
@@ -952,6 +958,8 @@ const ja: Dict = {
   'ce.tagsPh': 'タグ（カンマ・スペース・#で区切り、最大8個）',
   'ce.tagsHint': '例：ゴールデン、ケージ、飼育のコツ — 同じタグの投稿をまとめて表示します。',
   'ce.post': '投稿', 'ce.posting': '投稿中…',
+  'ce.insertBody': '📷 本文に写真・動画を挿入（カーソル位置）',
+  'ce.insertHint': 'アップロードするとカーソル位置に入ります。テキストのように移動できます。',
   'ce.anonDisabled': '匿名投稿が無効になっています。',
   'ge.newTitle': 'ガイドを書く', 'ge.editTitle': 'ガイドを編集',
   'ge.anonHint': 'ニックネームと4文字以上のパスワードを入力してください。パスワードはご自身の投稿を編集・削除する際にのみ使用されます。',
@@ -1113,7 +1121,7 @@ const ja: Dict = {
   'rb.appliedPending': '応募済 · 承認待ち', 'rb.appliedAccepted': '確定 ✅',
   'rb.withdraw': '応募を取り消す', 'rb.withdrawConfirm': '応募を取り消しますか？',
   'rb.accept': '承認', 'rb.reopen': '再募集',
-  'rb.noApplicants': 'まだ応募者がいません',
+  'rb.noApplicants': 'まだ応募者がいません', 'rb.applicantsLabel': '応募',
   'rb.loginHint': 'すると役割に応募できます',
   'mem.title': '🌟 ハムスターの星',
   'mem.subtitle': '星になったハムたちを温かく覚えています',
@@ -1158,6 +1166,7 @@ const ja: Dict = {
   'ft.sent': '{name}さんに預かり依頼を送りました',
   'ft.return': '返す', 'ft.returnConfirm': '「{name}」を元の家族に返しますか？',
   'ft.sentSection': '預けたハム', 'ft.caredBy': '預かり中', 'ft.takeBack': '引き取る',
+  'lv.points': 'ポイント', 'lv.toNext': '次のレベルまで{n}P', 'lv.posts': '投稿',
 };
 
 const zh: Dict = {
@@ -1312,6 +1321,8 @@ const zh: Dict = {
   'ce.tagsPh': '标签（用逗号、空格或#分隔，最多8个）',
   'ce.tagsHint': '例如：金丝熊、笼子、饲养小技巧 — 相同标签的帖子会聚合展示。',
   'ce.post': '发布', 'ce.posting': '发布中…',
+  'ce.insertBody': '📷 在正文插入图片/视频（光标处）',
+  'ce.insertHint': '上传后会插入到光标位置，可以像文字一样移动。',
   'ce.anonDisabled': '匿名发布已关闭。',
   'ge.newTitle': '写指南', 'ge.editTitle': '编辑指南',
   'ge.anonHint': '请输入昵称和4位以上的密码。密码仅用于编辑或删除你自己的帖子。',
@@ -1473,7 +1484,7 @@ const zh: Dict = {
   'rb.appliedPending': '已申请 · 待确认', 'rb.appliedAccepted': '已确认 ✅',
   'rb.withdraw': '取消申请', 'rb.withdrawConfirm': '要取消申请吗？',
   'rb.accept': '接受', 'rb.reopen': '重新招募',
-  'rb.noApplicants': '还没有申请者',
+  'rb.noApplicants': '还没有申请者', 'rb.applicantsLabel': '申请',
   'rb.loginHint': '即可申请角色',
   'mem.title': '🌟 仓鼠之星',
   'mem.subtitle': '温暖地记住化作星星的仓鼠们',
@@ -1518,6 +1529,7 @@ const zh: Dict = {
   'ft.sent': '已向 {name} 发送寄养请求',
   'ft.return': '归还', 'ft.returnConfirm': '要把"{name}"归还给原家庭吗？',
   'ft.sentSection': '已送养寄养', 'ft.caredBy': '寄养于', 'ft.takeBack': '收回',
+  'lv.points': '积分', 'lv.toNext': '距下一级还差{n}P', 'lv.posts': '帖子',
 };
 
 export const DICT: Record<Locale, Dict> = { ko, en, ja, zh };

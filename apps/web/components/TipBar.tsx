@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 type Tip = { text: string; href?: string; urgent?: boolean };
@@ -15,9 +15,8 @@ const DEFAULT_TIPS: Tip[] = [
   { text: '🎡 휠은 시리안 20cm, 드워프 16cm 이상! 작으면 척추에 무리가 가요', href: '/guides' },
 ];
 
-export function TipBar({ tips = DEFAULT_TIPS, urgentTips = [] }: { tips?: Tip[]; urgentTips?: Tip[] }) {
-  // 긴급 구조 글을 앞쪽에 섞어 보여준다 (같은 TIP 모양, 빨간 배지)
-  const all = useMemo<Tip[]>(() => [...urgentTips, ...tips], [urgentTips, tips]);
+export function TipBar({ tips = DEFAULT_TIPS }: { tips?: Tip[] }) {
+  const all = tips;
   const [idx, setIdx] = useState(0);
   const [show, setShow] = useState(true);
 
@@ -43,16 +42,13 @@ export function TipBar({ tips = DEFAULT_TIPS, urgentTips = [] }: { tips?: Tip[];
         (show ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0')
       }
     >
-      <span className={
-        'shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white ' +
-        (tip.urgent ? 'bg-red-500' : 'bg-peach-400')
-      }>{tip.urgent ? '긴급' : 'TIP'}</span>
+      <span className="shrink-0 rounded-full bg-peach-400 px-1.5 py-0.5 text-[10px] font-bold text-white">TIP</span>
       <span className="truncate">{tip.text}</span>
     </span>
   );
 
   return (
-    <div className={'border-b border-cream-200 bg-gradient-to-r ' + (tip.urgent ? 'from-red-50 via-cream-50 to-peach-50' : 'from-peach-50 via-cream-50 to-lilac-50')}>
+    <div className="border-b border-cream-200 bg-gradient-to-r from-peach-50 via-cream-50 to-lilac-50">
       <div className="mx-auto flex h-9 w-full max-w-5xl items-center overflow-hidden px-4 text-sm text-cocoa-500 md:px-6">
         {tip.href ? (
           <Link href={tip.href} className="min-w-0 flex-1 hover:text-peach-500">{inner}</Link>
@@ -60,10 +56,10 @@ export function TipBar({ tips = DEFAULT_TIPS, urgentTips = [] }: { tips?: Tip[];
           <div className="min-w-0 flex-1">{inner}</div>
         )}
         <div className="ml-2 hidden shrink-0 gap-1 sm:flex">
-          {all.map((tp, i) => (
+          {all.map((_, i) => (
             <span
               key={i}
-              className={'h-1.5 w-1.5 rounded-full ' + (i === idx ? (tp.urgent ? 'bg-red-500' : 'bg-peach-400') : 'bg-cream-200')}
+              className={'h-1.5 w-1.5 rounded-full ' + (i === idx ? 'bg-peach-400' : 'bg-cream-200')}
             />
           ))}
         </div>

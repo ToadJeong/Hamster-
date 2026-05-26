@@ -1,12 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { insertAnonymousCommunity } from '@/lib/anon-community';
 import { MultiImageUploader } from '@/components/MultiImageUploader';
+import { ImageUploader } from '@/components/ImageUploader';
 import { useT } from '@/components/I18nProvider';
+import { isVideoUrl } from '@/lib/media';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
+
+function buildInsert(body: string, ta: HTMLTextAreaElement | null, url: string): string {
+  const snippet = isVideoUrl(url) ? `\n${url}\n` : `\n![](${url})\n`;
+  if (!ta) return body + snippet;
+  const s = ta.selectionStart ?? body.length;
+  const e = ta.selectionEnd ?? body.length;
+  return body.slice(0, s) + snippet + body.slice(e);
+}
 
 export function CommunityEditor({
   allowAnonymous,
@@ -15,6 +25,7 @@ export function CommunityEditor({
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const t = useT();
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -106,12 +117,25 @@ export function CommunityEditor({
       )}
 
       <textarea
+        ref={bodyRef}
         className="input min-h-[280px] text-[15px] leading-7"
         placeholder={t('ce.bodyPh')}
         value={body}
         onChange={(e) => setBody(e.target.value)}
         required
       />
+      {isAuthed && (
+        <div className="rounded-2xl border border-cream-200 bg-cream-50/60 p-2">
+          <ImageUploader
+            bucket="community-images"
+            value={null}
+            allowVideo
+            onChange={(url) => { if (url) setBody((b) => buildInsert(b, bodyRef.current, url)); }}
+            label={t('ce.insertBody')}
+            hint={t('ce.insertHint')}
+          />
+        </div>
+      )}
 
       <div>
         <input
