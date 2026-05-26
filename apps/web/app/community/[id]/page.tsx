@@ -33,6 +33,9 @@ export default async function CommunityDetail({ params }: { params: { id: string
 
   if (error || !data) notFound();
   const p = data as any;
+  // images 는 피드 뷰에 없어 원본 테이블에서 가져온다
+  const { data: imgRow } = await supabase.from('community_posts').select('images').eq('id', params.id).maybeSingle();
+  const gallery: string[] = ((imgRow as any)?.images?.length ? (imgRow as any).images : (p.cover_url ? [p.cover_url] : [])) as string[];
   const display = p.author_username ?? p.anonymous_nickname ?? '익명';
   const meta = COMMUNITY_CATEGORY_LABEL[p.category as CommunityCategory] ?? COMMUNITY_CATEGORY_LABEL.free;
 
@@ -61,8 +64,12 @@ export default async function CommunityDetail({ params }: { params: { id: string
     <article className="mx-auto max-w-3xl space-y-6">
       <Link href="/community" className="text-sm text-cocoa-300 hover:text-peach-500">← 커뮤니티</Link>
 
-      {p.cover_url && (
-        <Media url={p.cover_url} controls className="aspect-[16/9] w-full rounded-cute bg-black object-contain" />
+      {gallery.length > 0 && (
+        <div className={gallery.length === 1 ? '' : 'grid grid-cols-2 gap-2'}>
+          {gallery.map((url, i) => (
+            <Media key={i} url={url} controls className={'w-full rounded-cute bg-black object-contain ' + (gallery.length === 1 ? 'aspect-[16/9]' : 'aspect-square')} />
+          ))}
+        </div>
       )}
 
       <header className="space-y-3">

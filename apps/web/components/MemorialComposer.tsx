@@ -12,20 +12,24 @@ const EMOJIS = ['🐹', '⭐', '🌈', '💫', '🌸', '🕊️', '☁️', '�
 export function MemorialComposer({
   initial,
 }: {
-  initial?: { petId?: string; name?: string; speciesLabel?: string; photoUrl?: string };
+  initial?: {
+    id?: string; petId?: string; emoji?: string; name?: string; speciesLabel?: string;
+    photoUrl?: string; bornAt?: string; passedAt?: string; message?: string;
+  };
 }) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const modal = useModal();
   const t = useT();
+  const isEdit = !!initial?.id;
 
-  const [emoji, setEmoji] = useState('🐹');
+  const [emoji, setEmoji] = useState(initial?.emoji ?? '🐹');
   const [name, setName] = useState(initial?.name ?? '');
   const [speciesLabel, setSpeciesLabel] = useState(initial?.speciesLabel ?? '');
   const [photoUrl, setPhotoUrl] = useState<string | null>(initial?.photoUrl ?? null);
-  const [bornAt, setBornAt] = useState('');
-  const [passedAt, setPassedAt] = useState('');
-  const [message, setMessage] = useState('');
+  const [bornAt, setBornAt] = useState(initial?.bornAt ?? '');
+  const [passedAt, setPassedAt] = useState(initial?.passedAt ?? '');
+  const [message, setMessage] = useState(initial?.message ?? '');
   const [saving, setSaving] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -34,9 +38,7 @@ export function MemorialComposer({
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/login?next=/memorial/new'); return; }
-    const { data, error } = await supabase.from('memorials').insert({
-      owner_id: user.id,
-      pet_id: initial?.petId ?? null,
+    const fields = {
       name: name.trim(),
       species_label: speciesLabel.trim() || null,
       emoji,
@@ -44,7 +46,18 @@ export function MemorialComposer({
       born_at: bornAt || null,
       passed_at: passedAt || null,
       message: message.trim() || null,
-    }).select('id').single();
+    };
+    if (isEdit) {
+      const { error } = await supabase.from('memorials').update(fields).eq('id', initial!.id!);
+      setSaving(false);
+      if (error) { await modal.alert({ title: t('form.saveFailed'), message: error.message, tone: 'error' }); return; }
+      router.push(`/memorial/${initial!.id}`);
+      router.refresh();
+      return;
+    }
+    const { data, error } = await supabase.from('memorials')
+      .insert({ owner_id: user.id, pet_id: initial?.petId ?? null, ...fields })
+      .select('id').single();
     setSaving(false);
     if (error) { await modal.alert({ title: t('form.saveFailed'), message: error.message, tone: 'error' }); return; }
     router.push(`/memorial/${(data as any).id}`);
@@ -102,7 +115,7 @@ export function MemorialComposer({
       <div className="flex justify-end gap-2">
         <button type="button" className="btn-secondary" onClick={() => router.back()}>{t('form.cancel')}</button>
         <button type="submit" className="btn-primary" disabled={saving || !name.trim()}>
-          {saving ? t('mem.submitting') : t('mem.submit')}
+          {saving ? t('mem.submitting') : isEdit ? t('form.editDone') : t('mem.submit')}
         </button>
       </div>
     </form>

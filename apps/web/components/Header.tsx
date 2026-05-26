@@ -25,6 +25,7 @@ const NAV: { href: string; tkey: string; emoji: string }[] = [
   { href: '/products',      tkey: 'nav.products',       emoji: '🛍' },
   { href: '/rescue',        tkey: 'nav.rescue',         emoji: '🆘' },
   { href: '/hospitals',     tkey: 'nav.hospitals',      emoji: '🏥' },
+  { href: '/memorial',      tkey: 'nav.memorial',       emoji: '🌟' },
 ];
 
 export function Header({

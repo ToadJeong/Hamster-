@@ -36,6 +36,8 @@ export default async function GuideDetail({ params }: { params: { id: string } }
 
   if (!guide) notFound();
   const g = guide as GuideWithCounts;
+  const { data: gImg } = await supabase.from('guides').select('images').eq('id', params.id).maybeSingle();
+  const gallery: string[] = ((gImg as any)?.images?.length ? (gImg as any).images : (g.cover_url ? [g.cover_url] : [])) as string[];
 
   // 좋아요 여부
   let liked = false;
@@ -67,13 +69,18 @@ export default async function GuideDetail({ params }: { params: { id: string } }
         ← 가이드 목록
       </Link>
 
-      {g.cover_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={g.cover_url}
-          alt=""
-          className="aspect-[16/9] w-full rounded-cute object-cover shadow-softer"
-        />
+      {gallery.length > 0 && (
+        <div className={gallery.length === 1 ? '' : 'grid grid-cols-2 gap-2'}>
+          {gallery.map((url, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              src={url}
+              alt=""
+              className={'w-full rounded-cute object-cover shadow-softer ' + (gallery.length === 1 ? 'aspect-[16/9]' : 'aspect-square')}
+            />
+          ))}
+        </div>
       )}
 
       <header className="space-y-3">

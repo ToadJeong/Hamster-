@@ -48,9 +48,10 @@ export function PetManager({
   const [birthday, setBirthday] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [bio, setBio] = useState('');
+  const [petStatus, setPetStatus] = useState<'raising' | 'fostering'>('raising');
 
   function reset() {
-    setName(''); setSpeciesId(''); setBirthday(''); setPhotoUrl(null); setBio('');
+    setName(''); setSpeciesId(''); setBirthday(''); setPhotoUrl(null); setBio(''); setPetStatus('raising');
     setAdding(false);
   }
 
@@ -65,6 +66,7 @@ export function PetManager({
       owner_id: user.id,
       carer_id: user.id,
       name: name.trim(),
+      status: petStatus,
       species_id: speciesId || null,
       species_label: sp?.name_ko ?? null,
       birthday: birthday || null,
@@ -179,6 +181,24 @@ export function PetManager({
             <div>
               <label className="text-sm text-cocoa-400">{t('pm.bioLabel')}</label>
               <input className="input mt-1" value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('pm.bioPh')} maxLength={60} />
+            </div>
+          </div>
+          <div>
+            <label className="text-sm text-cocoa-400">{t('pm.statusLabel')}</label>
+            <div className="mt-1 flex gap-2">
+              {(['raising', 'fostering'] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setPetStatus(s)}
+                  className={
+                    'flex-1 rounded-2xl border px-3 py-2 text-sm transition ' +
+                    (petStatus === s ? 'border-peach-300 bg-peach-50 font-bold text-peach-500' : 'border-cream-200 bg-white text-cocoa-400 hover:bg-cream-50')
+                  }
+                >
+                  {s === 'raising' ? t('ft.raising') : t('ft.fostering')}
+                </button>
+              ))}
             </div>
           </div>
           <ImageUploader bucket="community-images" value={photoUrl} onChange={setPhotoUrl} label={t('pm.photoLabel')} hint={t('form.coverHintImg')} />

@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { insertAnonymousGuide, validateAnonPassword } from '@/lib/anon-password';
-import { ImageUploader } from '@/components/ImageUploader';
+import { MultiImageUploader } from '@/components/MultiImageUploader';
 import { useT } from '@/components/I18nProvider';
 import type { Species } from '@hamster/shared';
 
@@ -21,6 +21,7 @@ type Props = {
     body: string;
     species_id: string | null;
     cover_url: string | null;
+    images?: string[];
     isAnonymous?: boolean;
   };
 };
@@ -37,6 +38,7 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
   const [body, setBody] = useState(initial?.body ?? '');
   const [speciesId, setSpeciesId] = useState<string>(preselectId);
   const [coverUrl, setCoverUrl] = useState(initial?.cover_url ?? '');
+  const [images, setImages] = useState<string[]>(initial?.images ?? (initial?.cover_url ? [initial.cover_url] : []));
   const [tab, setTab] = useState<'write' | 'preview'>('write');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -127,7 +129,8 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
         title: title.trim(),
         body: body.trim(),
         species_id: speciesId || null,
-        cover_url: coverUrl.trim() || null,
+        images,
+        cover_url: images[0] ?? null,
         author_id: user.id,
       };
 
@@ -212,12 +215,12 @@ export function GuideEditor({ species, preselectSlug, allowAnonymous, isAuthed, 
         </select>
       </div>
 
-      {/* 회원이면 업로드, 익명이면 URL 입력 */}
+      {/* 회원이면 업로드(여러 장), 익명이면 URL 입력 */}
       {isAuthed ? (
-        <ImageUploader
+        <MultiImageUploader
           bucket="guide-covers"
-          value={coverUrl || null}
-          onChange={(url) => setCoverUrl(url ?? '')}
+          images={images}
+          onChange={setImages}
           label={t('ge.cover')}
           hint={t('ge.coverHint')}
         />
