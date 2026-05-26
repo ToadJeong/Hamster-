@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { TributeButton } from '@/components/TributeButton';
 import { MemorialCommentSection } from '@/components/MemorialCommentSection';
 import { MemorialDeleteButton } from '@/components/MemorialDeleteButton';
+import { MemorialHideButton } from '@/components/MemorialHideButton';
 import { getLocale } from '@/lib/i18n-server';
 import { makeT } from '@/lib/i18n';
 
@@ -72,7 +73,9 @@ export default async function MemorialDetail({ params }: { params: { id: string 
       )}
 
       {(isOwner || isStaff) && (
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-3">
+          <Link href={`/memorial/${m.id}/edit`} className="text-xs text-cocoa-400 hover:text-peach-500">{t('common.edit')}</Link>
+          <MemorialHideButton id={m.id} hidden={!!m.hidden} />
           <MemorialDeleteButton id={m.id} />
         </div>
       )}

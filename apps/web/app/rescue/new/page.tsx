@@ -13,8 +13,10 @@ export default async function NewRescuePost() {
   if (!user) redirect('/login?next=/rescue/new');
   const t = makeT(getLocale());
 
-  const { data: speciesList } = await supabase
-    .from('species').select('id, slug, name_ko').order('name_ko');
+  const [{ data: speciesList }, { data: myPets }] = await Promise.all([
+    supabase.from('species').select('id, slug, name_ko').order('name_ko'),
+    supabase.from('pets').select('id, name, species_id, species_label, photo_url').eq('carer_id', user.id).order('created_at'),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -22,7 +24,10 @@ export default async function NewRescuePost() {
       <p className="text-sm text-cocoa-300">
         {t('re.newSubtitle')}
       </p>
-      <RescueEditor species={(speciesList as Pick<Species,'id'|'slug'|'name_ko'>[]) ?? []} />
+      <RescueEditor
+        species={(speciesList as Pick<Species,'id'|'slug'|'name_ko'>[]) ?? []}
+        pets={(myPets as any[]) ?? []}
+      />
     </div>
   );
 }

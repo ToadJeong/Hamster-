@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { ImageUploader } from '@/components/ImageUploader';
+import { MultiImageUploader } from '@/components/MultiImageUploader';
 import { useT } from '@/components/I18nProvider';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
@@ -15,6 +15,7 @@ type Props = {
     category: CommunityCategory;
     tags: string[];
     cover_url?: string | null;
+    images?: string[];
   };
 };
 
@@ -27,7 +28,7 @@ export function CommunityEditPanel({ initial }: Props) {
   const [body, setBody] = useState(initial.body);
   const [category, setCategory] = useState<CommunityCategory>(initial.category);
   const [tagsInput, setTagsInput] = useState(initial.tags.join(' '));
-  const [coverUrl, setCoverUrl] = useState<string | null>(initial.cover_url ?? null);
+  const [images, setImages] = useState<string[]>(initial.images ?? (initial.cover_url ? [initial.cover_url] : []));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +46,8 @@ export function CommunityEditPanel({ initial }: Props) {
         body: body.trim(),
         category,
         tags: parsedTags,
-        cover_url: coverUrl,
+        images,
+        cover_url: images[0] ?? null,
       })
       .eq('id', initial.id);
     setSaving(false);
@@ -65,10 +67,10 @@ export function CommunityEditPanel({ initial }: Props) {
         </select>
       </div>
 
-      <ImageUploader
+      <MultiImageUploader
         bucket="community-images"
-        value={coverUrl}
-        onChange={setCoverUrl}
+        images={images}
+        onChange={setImages}
         allowVideo
         label={t('ce.cover')}
         hint={t('ce.coverHint')}

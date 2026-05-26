@@ -45,6 +45,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .maybeSingle();
     profile = data;
   }
+
+  // 긴급(타임어택) 구조 글을 TIP 바에 띄운다
+  const { data: urgentRescue } = await supabase
+    .from('rescue_posts')
+    .select('id, title')
+    .eq('urgent', true)
+    .eq('status', 'open')
+    .order('created_at', { ascending: false })
+    .limit(6);
+  const urgentTips = ((urgentRescue as { id: string; title: string }[]) ?? [])
+    .map((r) => ({ text: `🆘 ${r.title}`, href: `/rescue/${r.id}`, urgent: true }));
+
   // 정적 UI 다국어용 로케일(쿠키). 단, <html lang>은 항상 "ko"로 둔다 —
   // 콘텐츠가 한국어이므로, 브라우저 내장 번역이 비한국어 방문자에게
   // 페이지 전체 번역을 안정적으로 제안하도록 하기 위함.
@@ -73,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             avatarUrl={profile?.avatar_url ?? null}
             isAdmin={!!profile?.is_admin}
           />
-          <TipBar />
+          <TipBar urgentTips={urgentTips} />
           <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:px-6">
             {children}
           </main>

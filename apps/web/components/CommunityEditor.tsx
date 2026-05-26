@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { insertAnonymousCommunity } from '@/lib/anon-community';
-import { ImageUploader } from '@/components/ImageUploader';
+import { MultiImageUploader } from '@/components/MultiImageUploader';
 import { useT } from '@/components/I18nProvider';
 import { COMMUNITY_CATEGORY_LABEL, type CommunityCategory } from '@hamster/shared';
 
@@ -20,7 +20,7 @@ export function CommunityEditor({
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<CommunityCategory>('free');
   const [tagsInput, setTagsInput] = useState('');
-  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -59,7 +59,7 @@ export function CommunityEditor({
           .from('community_posts')
           .insert({
             author_id: user.id, title: title.trim(), body: body.trim(),
-            category, tags: parsedTags, cover_url: coverUrl,
+            category, tags: parsedTags, images, cover_url: images[0] ?? null,
           })
           .select('id').single();
         if (error) throw error;
@@ -95,10 +95,10 @@ export function CommunityEditor({
       </div>
 
       {isAuthed && (
-        <ImageUploader
+        <MultiImageUploader
           bucket="community-images"
-          value={coverUrl}
-          onChange={setCoverUrl}
+          images={images}
+          onChange={setImages}
           allowVideo
           label={t('ce.cover')}
           hint={t('ce.coverHint')}

@@ -202,6 +202,10 @@
 .pet-cheek-puff      { animation: pet-cheek 2.5s ease-in-out infinite; transform-origin: center; }
 .pet-cuddle-pop      { animation: pet-cuddle-pop 2s ease-in-out forwards; }
 
+/* 별나라 주민 둥실둥실 */
+@keyframes mem-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.mem-float { animation: mem-float 3.2s ease-in-out infinite; will-change: transform; }
+
 /* 햄스터 그림자 */
 .pet-shadow { filter: drop-shadow(0 2px 3px rgba(140, 106, 75, 0.35)); }
 

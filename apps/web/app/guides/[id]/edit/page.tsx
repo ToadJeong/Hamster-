@@ -15,7 +15,7 @@ export default async function EditGuidePage({ params }: { params: { id: string }
 
   const { data: guide } = await supabase
     .from('guides')
-    .select('id, author_id, title, body, species_id, cover_url')
+    .select('id, author_id, title, body, species_id, cover_url, images')
     .eq('id', params.id)
     .maybeSingle();
 
@@ -48,6 +48,7 @@ export default async function EditGuidePage({ params }: { params: { id: string }
           body: guide.body,
           species_id: guide.species_id,
           cover_url: guide.cover_url,
+          images: (guide as any).images ?? [],
         }}
       />
     </div>

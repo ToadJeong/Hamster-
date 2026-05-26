@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { ImageUploader } from '@/components/ImageUploader';
+import { MultiImageUploader } from '@/components/MultiImageUploader';
 import { useT } from '@/components/I18nProvider';
 import { RESCUE_KIND_LABEL, RESCUE_ROLE_ORDER, type RescueKind, type Species } from '@hamster/shared';
 
+type MyPet = { id: string; name: string; species_id: string | null; species_label: string | null; photo_url: string | null };
+
 type Props = {
   species: Pick<Species, 'id' | 'slug' | 'name_ko'>[];
+  pets?: MyPet[];
   initial?: {
     id: string;
     kind: RescueKind;
@@ -25,10 +28,18 @@ type Props = {
   };
 };
 
-export function RescueEditor({ species, initial }: Props) {
+export function RescueEditor({ species, pets = [], initial }: Props) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const t = useT();
+
+  function loadFromPet(petId: string) {
+    const pet = pets.find((p) => p.id === petId);
+    if (!pet) return;
+    if (pet.species_id) setSpeciesId(pet.species_id);
+    if (pet.photo_url) setImages((prev) => (prev.includes(pet.photo_url!) ? prev : [pet.photo_url!, ...prev]));
+    setTitle((prev) => prev || pet.name);
+  }
 
   const [kind, setKind] = useState<RescueKind>(initial?.kind ?? 'available');
   const [title, setTitle] = useState(initial?.title ?? '');
@@ -87,6 +98,25 @@ export function RescueEditor({ species, initial }: Props) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      {/* 내 햄찌에서 불러오기 */}
+      {pets.length > 0 && (
+        <div className="rounded-2xl border border-mint-200 bg-mint-50/60 p-3">
+          <label className="text-sm font-medium text-cocoa-500">{t('re.fromMyPet')}</label>
+          <select
+            className="input mt-1"
+            defaultValue=""
+            onChange={(e) => { if (e.target.value) loadFromPet(e.target.value); }}
+          >
+            <option value="">{t('re.fromMyPetPh')}</option>
+            {pets.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}{p.species_label ? ` (${p.species_label})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* kind 선택 */}
       <div>
         <p className="mb-2 text-sm text-cocoa-500">{t('re.kindPrompt')}</p>
@@ -132,35 +162,14 @@ export function RescueEditor({ species, initial }: Props) {
         <input className="input" type="number" min={0} max={48} placeholder={t('re.agePh')} value={ageMonths} onChange={(e) => setAgeMonths(e.target.value)} />
       </div>
 
-      {/* 다중 사진 */}
-      <div className="space-y-2">
-        {images.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            {images.map((url, i) => (
-              <div key={i} className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-cream-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt="" className="h-full w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/55 text-xs text-white hover:bg-black/75"
-                  aria-label="삭제"
-                >✕</button>
-                {i === 0 && <span className="absolute left-1 top-1 rounded-full bg-peach-400/90 px-1.5 text-[10px] font-bold text-white">대표</span>}
-              </div>
-            ))}
-          </div>
-        )}
-        {images.length < 10 && (
-          <ImageUploader
-            bucket="rescue-images"
-            value={null}
-            onChange={(url) => { if (url) setImages((prev) => [...prev, url]); }}
-            label={t('re.photos')}
-            hint={t('re.photosHint')}
-          />
-        )}
-      </div>
+      {/* 다중 사진 (순서 변경 가능) */}
+      <MultiImageUploader
+        bucket="rescue-images"
+        images={images}
+        onChange={setImages}
+        label={t('re.photos')}
+        hint={t('re.photosHint')}
+      />
 
       {/* 긴급 / 마감 */}
       <div className="grid gap-2 sm:grid-cols-2">
