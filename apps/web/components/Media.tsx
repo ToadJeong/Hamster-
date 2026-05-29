@@ -7,13 +7,14 @@ import { isVideoUrl } from '@/lib/media';
  *    → 목록/그리드에서 여러 영상이 동시에 재생되는 부담을 피함. (▶ 배지는 호출부에서 표시)
  */
 export function Media({
-  url, className, alt = '', controls = false, poster,
+  url, className, alt = '', controls = false, poster, loading = 'lazy',
 }: {
   url: string;
   className?: string;
   alt?: string;
   controls?: boolean;
   poster?: string;
+  loading?: 'lazy' | 'eager';
 }) {
   if (isVideoUrl(url)) {
     return (
@@ -23,11 +24,11 @@ export function Media({
         poster={poster}
         muted
         playsInline
-        preload="metadata"
+        preload={controls ? 'metadata' : 'none'}
         controls={controls}
       />
     );
   }
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={alt} className={className} />;
+  return <img src={url} alt={alt} className={className} loading={loading} decoding="async" />;
 }
