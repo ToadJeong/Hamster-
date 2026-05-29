@@ -22,6 +22,7 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const sendingRef = useRef(false);
 
   // 실시간 구독 + 진입 시 읽음 처리
   useEffect(() => {
@@ -50,17 +51,39 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
 
   async function send() {
     const body = draft.trim();
-    if (!body || sending) return;
-    setSending(true);
-    const { data, error } = await supabase
-      .from('dm_messages')
-      .insert({ thread_id: threadId, sender_id: meId, body })
-      .select('*')
-      .single();
-    setSending(false);
-    if (error) { await modal.alert({ title: t('dm.sendFail'), message: error.message, tone: 'error' }); return; }
-    setMessages((prev) => [...prev, data as DMMessage]);
+    if (!body) return;
+    if (sendingRef.current) return;
+
+    sendingRef.current = true; setSending(true);
+    const tempId = 'temp-' + (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID() : String(Date.now()));
+    const temp = {
+      id: tempId, thread_id: threadId, sender_id: meId, body,
+      read_at: null, created_at: new Date().toISOString(), pending: true,
+    } as unknown as DMMessage;
+    setMessages((prev) => [...prev, temp]);
     setDraft('');
+
+    try {
+      const { data, error } = await supabase
+        .from('dm_messages')
+        .insert({ thread_id: threadId, sender_id: meId, body })
+        .select('*')
+        .single();
+      if (error || !data) throw error ?? new Error(t('dm.sendFail'));
+      // 실시간 구독으로도 들어올 수 있으니, 같은 id가 들어오면 중복 추가 방지
+      setMessages((prev) => {
+        const real = data as DMMessage;
+        const filtered = prev.filter((m) => m.id !== tempId && m.id !== real.id);
+        return [...filtered, real];
+      });
+    } catch (err: any) {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setDraft(body);
+      await modal.alert({ title: t('dm.sendFail'), message: err?.message, tone: 'error' });
+    } finally {
+      sendingRef.current = false; setSending(false);
+    }
   }
 
   return (
@@ -81,17 +104,19 @@ export function DMConversation({ threadId, meId, other, initialMessages }: Props
         )}
         {messages.map((m) => {
           const mine = m.sender_id === meId;
+          const pending = !!(m as any).pending;
           return (
             <div key={m.id} className={'flex flex-col ' + (mine ? 'items-end' : 'items-start')}>
               <div
                 className={
                   'max-w-[80%] whitespace-pre-wrap break-words rounded-2xl px-3 py-1.5 text-sm ' +
-                  (mine ? 'bg-peach-400 text-white' : 'bg-cream-100 text-cocoa-500')
+                  (mine ? 'bg-peach-400 text-white' : 'bg-cream-100 text-cocoa-500') +
+                  (pending ? ' opacity-70' : '')
                 }
               >
                 {m.body}
               </div>
-              <span className="mt-0.5 text-[10px] text-cocoa-300">{formatDate(m.created_at)}</span>
+              <span className="mt-0.5 text-[10px] text-cocoa-300">{pending ? t('cm.sending') : formatDate(m.created_at)}</span>
             </div>
           );
         })}

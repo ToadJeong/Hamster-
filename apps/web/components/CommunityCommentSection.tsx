@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useModal } from '@/components/Modal';
@@ -37,6 +37,7 @@ export function CommunityCommentSection({
   const [password, setPassword] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const sendingRef = useRef(false);
 
   const canUseAnon = !currentUserId && allowAnonymous;
 
@@ -51,25 +52,27 @@ export function CommunityCommentSection({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!body.trim()) return;
-    setSending(true); setError(null);
-    try {
-      if (!currentUserId) {
-        if (!canUseAnon) { setError(t('form.loginRequired')); return; }
-        if (nickname.trim().length < 1) { setError(t('form.enterNickname')); return; }
-        if (password.length < 4) { setError(t('cm.password4')); return; }
+    const text = body.trim();
+    if (!text) return;
+    if (sendingRef.current) return;
+    setError(null);
 
-        // 평문 비번을 sha256 해시 후 저장 (가이드의 익명 방식과 동일)
+    if (!currentUserId) {
+      if (!canUseAnon) { setError(t('form.loginRequired')); return; }
+      if (nickname.trim().length < 1) { setError(t('form.enterNickname')); return; }
+      if (password.length < 4) { setError(t('cm.password4')); return; }
+
+      sendingRef.current = true; setSending(true);
+      try {
         const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
         const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
-
         const { data, error } = await supabase
           .from('community_comments')
           .insert({
             post_id: postId,
             anonymous_nickname: nickname.trim(),
             anonymous_password_hash: hex,
-            body: body.trim(),
+            body: text,
           })
           .select('id, post_id, author_id, anonymous_nickname, body, created_at')
           .single();
@@ -77,21 +80,47 @@ export function CommunityCommentSection({
         setComments((prev) => [...prev, data as Comment]);
         setBody('');
         try { localStorage.setItem('hamster.chat.nickname', nickname); } catch {}
-      } else {
-        const { data, error } = await supabase
-          .from('community_comments')
-          .insert({ post_id: postId, author_id: currentUserId, body: body.trim() })
-          .select('id, post_id, author_id, anonymous_nickname, body, created_at, author:profiles!community_comments_author_id_fkey(username, avatar_url)')
-          .single();
-        if (error) throw error;
-        setComments((prev) => [...prev, data as unknown as Comment]);
-        setBody('');
+        router.refresh();
+      } catch (err: any) {
+        setError(err?.message ?? t('cm.submitFailed'));
+      } finally {
+        sendingRef.current = false; setSending(false);
       }
+      return;
+    }
+
+    // 로그인 사용자: 옵티미스틱
+    sendingRef.current = true; setSending(true);
+    const tempId = 'temp-' + (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID() : String(Date.now()));
+    const temp: Comment & { pending?: boolean } = {
+      id: tempId,
+      post_id: postId,
+      author_id: currentUserId,
+      anonymous_nickname: null,
+      body: text,
+      created_at: new Date().toISOString(),
+      author: null,
+      pending: true,
+    };
+    setComments((prev) => [...prev, temp]);
+    setBody('');
+
+    try {
+      const { data, error } = await supabase
+        .from('community_comments')
+        .insert({ post_id: postId, author_id: currentUserId, body: text })
+        .select('id, post_id, author_id, anonymous_nickname, body, created_at, author:profiles!community_comments_author_id_fkey(username, avatar_url)')
+        .single();
+      if (error || !data) throw error ?? new Error(t('cm.submitFailed'));
+      setComments((prev) => prev.map((c) => (c.id === tempId ? (data as unknown as Comment) : c)));
       router.refresh();
-    } catch (e: any) {
-      setError(e.message ?? t('cm.submitFailed'));
+    } catch (err: any) {
+      setComments((prev) => prev.filter((c) => c.id !== tempId));
+      setBody(text);
+      setError(err?.message ?? t('cm.submitFailed'));
     } finally {
-      setSending(false);
+      sendingRef.current = false; setSending(false);
     }
   }
 
@@ -132,10 +161,11 @@ export function CommunityCommentSection({
           <li className="card text-center text-cocoa-300">{t('cm.empty')}</li>
         )}
         {comments.map((c) => {
+          const pending = !!(c as any).pending;
           const display = c.author?.username ?? c.anonymous_nickname ?? t('common.anonymous');
           const canRemove = c.author_id && currentUserId === c.author_id;
           return (
-            <li key={c.id} className="card">
+            <li key={c.id} className={'card ' + (pending ? 'opacity-60' : '')}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
                   {c.author?.avatar_url ? (
@@ -147,13 +177,13 @@ export function CommunityCommentSection({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-sm">
                       <span className="font-semibold text-cocoa-500">{display}</span>
-                      {!c.author_id && <span className="badge bg-cocoa-100 text-cocoa-400">{t('common.anonymous')}</span>}
-                      <span className="text-xs text-cocoa-300">{formatDate(c.created_at)}</span>
+                      {!c.author_id && !pending && <span className="badge bg-cocoa-100 text-cocoa-400">{t('common.anonymous')}</span>}
+                      <span className="text-xs text-cocoa-300">{pending ? t('cm.sending') : formatDate(c.created_at)}</span>
                     </div>
                     <p className="mt-1 whitespace-pre-line text-cocoa-500">{c.body}</p>
                   </div>
                 </div>
-                {(canRemove || !c.author_id) && (
+                {!pending && (canRemove || !c.author_id) && (
                   <button onClick={() => remove(c)} className="text-xs text-cocoa-300 hover:text-red-400">
                     {t('cm.delete')}{!c.author_id ? t('cm.deleteAnonSuffix') : ''}
                   </button>

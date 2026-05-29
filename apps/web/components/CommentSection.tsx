@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useModal } from '@/components/Modal';
@@ -21,72 +21,89 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
   const supabase = createSupabaseBrowserClient();
   const modal = useModal();
   const t = useT();
-  const [comments, setComments] = useState(initialComments);
+  const [comments, setComments] = useState<CommentWithAuthor[]>(initialComments);
   const [body, setBody] = useState('');
   const [anonNickname, setAnonNickname] = useState('');
   const [anonPassword, setAnonPassword] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const sendingRef = useRef(false);
 
   const canUseAnon = !currentUserId && allowAnonymous;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!body.trim()) return;
-    setSending(true);
+    const text = body.trim();
+    if (!text) return;
+    if (sendingRef.current) return;
     setError(null);
 
-    try {
-      if (!currentUserId) {
-        if (!canUseAnon) {
-          router.push('/login?next=' + encodeURIComponent(window.location.pathname));
-          return;
-        }
-        const pwErr = validateAnonPassword(anonPassword);
-        if (pwErr) { setError(pwErr); setSending(false); return; }
-        if (anonNickname.trim().length < 1) { setError(t('form.enterNickname')); setSending(false); return; }
+    if (!currentUserId) {
+      if (!canUseAnon) {
+        router.push('/login?next=' + encodeURIComponent(window.location.pathname));
+        return;
+      }
+      const pwErr = validateAnonPassword(anonPassword);
+      if (pwErr) { setError(pwErr); return; }
+      if (anonNickname.trim().length < 1) { setError(t('form.enterNickname')); return; }
 
+      sendingRef.current = true; setSending(true);
+      try {
         const { id, error } = await insertAnonymousComment(supabase, {
           guide_id: guideId,
           nickname: anonNickname.trim(),
           password: anonPassword,
-          body: body.trim(),
+          body: text,
         });
         if (error || !id) throw error ?? new Error(t('cm.registerFailed'));
-
-        // 신규 댓글을 다시 조회하여 author null + anonymous_nickname 표시
         const { data: newRow } = await supabase
           .from('comments')
           .select('id, guide_id, author_id, anonymous_nickname, body, created_at, author:profiles!comments_author_id_fkey(username, avatar_url)')
           .eq('id', id)
           .single();
-        if (newRow) {
-          setComments((prev) => [...prev, newRow as unknown as CommentWithAuthor]);
-        }
-        setBody('');
-        setAnonNickname('');
-        setAnonPassword('');
+        if (newRow) setComments((prev) => [...prev, newRow as unknown as CommentWithAuthor]);
+        setBody(''); setAnonNickname(''); setAnonPassword('');
         router.refresh();
-        return;
+      } catch (err: any) {
+        setError(err?.message ?? t('cm.submitError'));
+      } finally {
+        sendingRef.current = false; setSending(false);
       }
+      return;
+    }
 
-      // 로그인 사용자
+    // 로그인 사용자: 옵티미스틱 — 즉시 목록에 표시, 실패 시 롤백
+    sendingRef.current = true; setSending(true);
+    const tempId = 'temp-' + (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID() : String(Date.now()));
+    const temp = {
+      id: tempId,
+      guide_id: guideId,
+      author_id: currentUserId,
+      anonymous_nickname: null,
+      body: text,
+      created_at: new Date().toISOString(),
+      author: null,
+      pending: true,
+    } as unknown as CommentWithAuthor;
+    setComments((prev) => [...prev, temp]);
+    setBody('');
+
+    try {
       const { data, error } = await supabase
         .from('comments')
-        .insert({ guide_id: guideId, author_id: currentUserId, body: body.trim() })
+        .insert({ guide_id: guideId, author_id: currentUserId, body: text })
         .select('id, guide_id, author_id, anonymous_nickname, body, created_at, author:profiles!comments_author_id_fkey(username, avatar_url)')
         .single();
-
-      if (error) throw error;
-      if (data) {
-        setComments((prev) => [...prev, data as unknown as CommentWithAuthor]);
-        setBody('');
-        router.refresh();
-      }
-    } catch (e: any) {
-      setError(e.message ?? t('cm.submitError'));
+      if (error || !data) throw error ?? new Error(t('cm.submitError'));
+      setComments((prev) => prev.map((c) => (c.id === tempId ? (data as unknown as CommentWithAuthor) : c)));
+      router.refresh();
+    } catch (err: any) {
+      setComments((prev) => prev.filter((c) => c.id !== tempId));
+      setBody(text);
+      setError(err?.message ?? t('cm.submitError'));
     } finally {
-      setSending(false);
+      sendingRef.current = false; setSending(false);
     }
   }
 
@@ -120,8 +137,9 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
     }
   }
 
+  const isPending = (c: CommentWithAuthor) => !!(c as any).pending;
   const canShowDelete = (c: CommentWithAuthor) =>
-    (c.author_id && currentUserId === c.author_id) || (!c.author_id);
+    !isPending(c) && ((c.author_id && currentUserId === c.author_id) || (!c.author_id));
 
   return (
     <section className="space-y-4">
@@ -132,9 +150,10 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
           <li className="card text-center text-cocoa-300">{t('cm.empty')}</li>
         )}
         {comments.map((c) => {
+          const pending = isPending(c);
           const displayName = c.author?.username ?? c.anonymous_nickname ?? t('common.anonymous');
           return (
-            <li key={c.id} className="card">
+            <li key={c.id} className={'card ' + (pending ? 'opacity-60' : '')}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   {c.author?.avatar_url ? (
@@ -146,8 +165,8 @@ export function CommentSection({ guideId, initialComments, currentUserId, allowA
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-sm">
                       <span className="font-semibold text-cocoa-500">{displayName}</span>
-                      {!c.author_id && <span className="badge bg-cocoa-100 text-cocoa-400">{t('common.anonymous')}</span>}
-                      <span className="text-xs text-cocoa-300">{formatDate(c.created_at)}</span>
+                      {!c.author_id && !pending && <span className="badge bg-cocoa-100 text-cocoa-400">{t('common.anonymous')}</span>}
+                      <span className="text-xs text-cocoa-300">{pending ? t('cm.sending') : formatDate(c.created_at)}</span>
                     </div>
                     <p className="mt-1 whitespace-pre-line text-cocoa-500">{c.body}</p>
                   </div>
