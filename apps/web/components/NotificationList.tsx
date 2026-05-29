@@ -32,8 +32,10 @@ export function NotificationList({ initial }: { initial: Notif[] }) {
   const t = useT();
   const [items, setItems] = useState<Notif[]>(initial);
 
-  // 페이지 열면 전체 읽음 처리
+  // 페이지 열면 전체 읽음 처리 — 화면은 즉시 읽음 상태로(옵티미스틱), 서버는 백그라운드에서 동기화
   useEffect(() => {
+    const now = new Date().toISOString();
+    setItems((prev) => prev.map((n) => (n.read_at ? n : { ...n, read_at: now })));
     void supabase.rpc('mark_all_notifications_read').then(() => router.refresh());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

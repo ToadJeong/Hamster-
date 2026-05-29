@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useModal } from '@/components/Modal';
@@ -31,21 +31,40 @@ export function MomentCommentSection({
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
+  const sendingRef = useRef(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!body.trim() || !currentUserId) return;
-    setSending(true);
-    const { data, error } = await supabase
-      .from('moment_comments')
-      .insert({ moment_id: momentId, author_id: currentUserId, body: body.trim() })
-      .select('id, moment_id, author_id, body, created_at, author:profiles!moment_comments_author_id_fkey(username, avatar_url)')
-      .single();
-    setSending(false);
-    if (error) { await modal.alert({ title: t('cm.submitFailed'), message: error.message, tone: 'error' }); return; }
-    setComments((prev) => [...prev, data as unknown as Comment]);
+    const text = body.trim();
+    if (!text || !currentUserId) return;
+    if (sendingRef.current) return;
+
+    sendingRef.current = true; setSending(true);
+    const tempId = 'temp-' + (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID() : String(Date.now()));
+    const temp: Comment & { pending?: boolean } = {
+      id: tempId, author_id: currentUserId, body: text,
+      created_at: new Date().toISOString(), author: null, pending: true,
+    };
+    setComments((prev) => [...prev, temp]);
     setBody('');
-    router.refresh();
+
+    try {
+      const { data, error } = await supabase
+        .from('moment_comments')
+        .insert({ moment_id: momentId, author_id: currentUserId, body: text })
+        .select('id, moment_id, author_id, body, created_at, author:profiles!moment_comments_author_id_fkey(username, avatar_url)')
+        .single();
+      if (error || !data) throw error ?? new Error(t('cm.submitFailed'));
+      setComments((prev) => prev.map((c) => (c.id === tempId ? (data as unknown as Comment) : c)));
+      router.refresh();
+    } catch (err: any) {
+      setComments((prev) => prev.filter((c) => c.id !== tempId));
+      setBody(text);
+      await modal.alert({ title: t('cm.submitFailed'), message: err?.message, tone: 'error' });
+    } finally {
+      sendingRef.current = false; setSending(false);
+    }
   }
 
   async function remove(c: Comment) {
@@ -61,8 +80,10 @@ export function MomentCommentSection({
 
       <ul className="space-y-2.5">
         {comments.length === 0 && <li className="text-center text-sm text-cocoa-300">{t('cm.emptyShort')}</li>}
-        {comments.map((c) => (
-          <li key={c.id} className="flex items-start gap-2.5">
+        {comments.map((c) => {
+          const pending = !!(c as any).pending;
+          return (
+          <li key={c.id} className={'flex items-start gap-2.5 ' + (pending ? 'opacity-60' : '')}>
             {c.author?.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={c.author.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover" />
@@ -71,13 +92,14 @@ export function MomentCommentSection({
             )}
             <div className="min-w-0 flex-1">
               <p className="text-sm text-cocoa-500"><span className="font-bold">{c.author?.username ?? t('cm.defaultName')}</span> {c.body}</p>
-              <p className="text-[11px] text-cocoa-300">{formatDate(c.created_at)}</p>
+              <p className="text-[11px] text-cocoa-300">{pending ? t('cm.sending') : formatDate(c.created_at)}</p>
             </div>
-            {(currentUserId === c.author_id || isStaff) && (
+            {!pending && (currentUserId === c.author_id || isStaff) && (
               <button onClick={() => remove(c)} className="shrink-0 text-[11px] text-cocoa-300 hover:text-red-400">{t('cm.delete')}</button>
             )}
           </li>
-        ))}
+          );
+        })}
       </ul>
 
       {currentUserId ? (
