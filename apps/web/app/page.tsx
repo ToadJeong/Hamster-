@@ -237,7 +237,7 @@ export default async function HomePage() {
                   <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-cream-100 text-2xl">
                     {r.cover_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={r.cover_url} alt="" className="h-full w-full rounded-2xl object-cover" />
+                      <img src={r.cover_url} alt="" className="h-full w-full rounded-2xl object-cover" loading="lazy" decoding="async" />
                     ) : '🐹'}
                   </div>
                   <div className="min-w-0 flex-1">

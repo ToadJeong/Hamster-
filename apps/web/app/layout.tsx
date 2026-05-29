@@ -31,11 +31,20 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = createSupabaseServerClient();
-  // getUser 와 사이트 설정을 병렬로 (설정은 user 와 무관)
-  const [{ data: { user } }, settings] = await Promise.all([
+  // getUser, 사이트 설정, 긴급 구조글을 한 번에 병렬 — 셋 다 서로 의존이 없음
+  const [{ data: { user } }, settings, urgentRescueRes] = await Promise.all([
     supabase.auth.getUser(),
     getSiteSettings(),
+    supabase
+      .from('rescue_posts')
+      .select('id, title')
+      .eq('urgent', true)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(6),
   ]);
+  const urgentItems = ((urgentRescueRes.data as { id: string; title: string }[]) ?? [])
+    .map((r) => ({ text: r.title, href: `/rescue/${r.id}` }));
 
   let profile = null;
   if (user) {
@@ -47,17 +56,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     profile = data;
   }
 
-  // 긴급(타임어택) 구조 글을 TIP 바에 띄운다
-  const { data: urgentRescue } = await supabase
-    .from('rescue_posts')
-    .select('id, title')
-    .eq('urgent', true)
-    .eq('status', 'open')
-    .order('created_at', { ascending: false })
-    .limit(6);
-  const urgentItems = ((urgentRescue as { id: string; title: string }[]) ?? [])
-    .map((r) => ({ text: r.title, href: `/rescue/${r.id}` }));
-
   // 정적 UI 다국어용 로케일(쿠키). 단, <html lang>은 항상 "ko"로 둔다 —
   // 콘텐츠가 한국어이므로, 브라우저 내장 번역이 비한국어 방문자에게
   // 페이지 전체 번역을 안정적으로 제안하도록 하기 위함.
@@ -66,6 +64,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="ko">
       <head>
+        {/* 외부 자원 사전 연결로 첫 페인트 단축 */}
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
+        )}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
